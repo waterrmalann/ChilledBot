@@ -103,8 +103,8 @@ class InformationCog(commands.Cog):
         embed.add_field(
             name = "**❯ Members**",
             value = f"{ctx.guild.member_count} total. ({total_humans} humans, {total_bots} bots)\n" \
-                f"{total_online} online. ({bots_online} bots, {humans_online} humans)\n" \
-                f"{(total_online / total_members * 100):.2f}% of members online.\n" \
+                f"{total_online} online. ({humans_online} humans, {bots_online} bots)\n" \
+                f"{(total_online / total_members * 100):.2f}% of members online. ({(humans_online / total_members * 100):.2f}% humans, {(bots_online / total_members * 100):.2f}% bots)\n" \
                 f"*`{self.bot_prefix}userinfo [@user]` for more info.*",
             inline = False
         )
@@ -146,6 +146,9 @@ class InformationCog(commands.Cog):
         discord_client = f"({' | '.join(platforms)})" if platforms else ''
 
 
+        # Dynamic Embed Colorization / Emoji
+        # We color the embed border based on the user's status.
+        # ie: Green for online, Red for do not disturb, etc...
         status = str(user.status)
         if status == 'online':
             embed_color = 0x43B581
@@ -170,7 +173,10 @@ class InformationCog(commands.Cog):
         else:
             status = status.title()
 
+        # We get all the roles the user has.
         roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
+
+        # We set the top role to "None" if they have no roles, otherwise it would show "@@everyone".
         top_role = user.top_role.mention if user.top_role != ctx.guild.default_role else 'None'
 
         embed = discord.Embed(title = f"{user} (`{user.id}`)", color = embed_color)
@@ -191,6 +197,7 @@ class InformationCog(commands.Cog):
             inline = False
         )
 
+        # If the user has roles, we show that else we show all the permissions they have in the guild.
         if roles: 
             embed.add_field(name = "**❯ Roles**", value = roles, inline = False)
         else:
