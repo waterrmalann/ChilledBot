@@ -1,0 +1,29 @@
+{
+    "bot_name": "ChilledBot",
+    "bot_version": "v0.0.1",
+    "bot_version_tag": "InDev",
+    "bot_prefix": ["."],
+
+    "color_primary": "",
+    "color_secondary": "",
+    "color_changelog": "0x15F153",
+
+    "emoji_tick": "<:green_tick:694527417410125844>",
+    "emoji_cross": "<:red_mark:694527415904370799>",
+    "emoji_neutral": ":neutral",
+
+    "bot_owners": [689349381102632980],
+    "bot_vips": [
+        689349381102632980
+    ],
+
+    "activity_type": "listening",
+    "activity_value": "LoFi",
+    "status_type": "idle",
+
+    "bot_flavor": "cherry",
+    "silent_mode": false,
+
+    "BOT_MAIN_TOKEN": "",
+    "BOT_ALT_TOKEN": ""
+}
