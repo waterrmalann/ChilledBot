@@ -35,9 +35,16 @@ initial_extensions = [
 
 bot = commands.AutoShardedBot(
     command_prefix = get_prefix,
-    description = "A simple, fun, and utility bot that can also do moderation."
+    description = "A simple, fun, and utility bot that can also do moderation.",
+    owner_ids = {
+        689349381102632980,
+        547357951044747264
+    }
 )
+
 bot.remove_command('help')
+config = default.get("config.json")
+emojis = default.get("emojis.json")
 
 # We load the extensions here from the initial_extensions list.
 
@@ -46,6 +53,8 @@ bot.remove_command('help')
 #        name = file[:-3]
 #        bot.load_extension(f"cogs.{name}")
 
+os.system('clear')
+print("ChilledBot by Zeesmic#8023...", '\n')
 for extension in initial_extensions:
     try:
         bot.load_extension(extension)
@@ -89,13 +98,16 @@ async def on_disconnect():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.NoPrivateMessage):
-        await ctx.author.send("<:red_mark:694527415904370799> **This command can't be used in DMs.** `[ex GuildOnly]`")
+        await ctx.author.send(f"{emojis.cross} **This command can't be used in DMs.** `[ex GuildOnly]`")
         return
     if isinstance(error, commands.DisabledCommand):
-        await ctx.send("<:red_mark:694527415904370799> **This command is disabled.** `[ex CmdDisabled]`")
+        await ctx.send(f"{emojis.cross} **This command is disabled.** `[ex CmdDisabled]`")
         return
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f"<:red_mark:694527415904370799> **This command is on cooldown. Try again in {error.retry_after:.2f}s.** `[ex Cooldown]`")
+        await ctx.send(f"{emojis.neutral} **This command is on cooldown. Try again in {error.retry_after:.2f}s.** `[ex Cooldown]`")
+        return
+    if isinstance(error, commands.NotOwner):
+        await ctx.send(f"{emojis.cross} **You are not authorized to use this command.** `[ex AuthError]`")
         return
 
 # Start the bot.

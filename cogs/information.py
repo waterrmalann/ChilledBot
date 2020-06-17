@@ -5,7 +5,7 @@
 
 import discord
 from discord.ext import commands
-from utils import default
+from utils import default, formatting
 from datetime import datetime
 
 class InformationCog(commands.Cog):
@@ -14,6 +14,7 @@ class InformationCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config = default.get("config.json")
+        self.colors = default.get("colors.json")
         self.bot_prefix = '.'
     
     @commands.command()
@@ -24,9 +25,9 @@ class InformationCog(commands.Cog):
         
         embed = discord.Embed(
             title = user.name,
-            color = self.config.bot_color
+            color = self.colors.primary
         )
-        embed.set_image(url=user.avatar_url)
+        embed.set_image(url = user.avatar_url)
 
         await ctx.send(embed = embed)
     
@@ -85,7 +86,7 @@ class InformationCog(commands.Cog):
 
         embed = discord.Embed(
             title = f"{ctx.guild.name} (`{ctx.guild.id}`)",
-            color = self.config.bot_color
+            color = self.colors.primary
         )
 
         embed.add_field(
@@ -169,7 +170,8 @@ class InformationCog(commands.Cog):
         else:
             status = status.title()
 
-        roles = ', '.join(i.mention for i in user.roles if i != ctx.guild.default_role)
+        roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
+        top_role = user.top_role.mention if user.top_role != ctx.guild.default_role else 'None'
 
         embed = discord.Embed(title = f"{user} (`{user.id}`)", color = embed_color)
 
@@ -185,11 +187,14 @@ class InformationCog(commands.Cog):
             name = "**❯ Server**",
             value = f"**Nickname:** {user.display_name}\n" \
                 f"**Joined At:** {user.joined_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}\n" \
-                f"**Top Role:** {user.top_role.mention}",
+                f"**Top Role:** {top_role}",
             inline = False
         )
 
-        embed.add_field(name = "**❯ Roles**", value = roles, inline = False)
+        if roles: 
+            embed.add_field(name = "**❯ Roles**", value = roles, inline = False)
+        else:
+            embed.add_field(name = "**❯ Permissions**", value = ', '.join(formatting.casify(i[0]) for i in user.guild_permissions), inline = False)
 
         embed.set_thumbnail(url = user.avatar_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)

@@ -1,6 +1,7 @@
+#0x15F153 Changelog Color
 import discord
 from discord.ext import commands
-from utility import default
+from utils import default
 import time
 
 class UtilityCog(commands.Cog):
@@ -9,6 +10,7 @@ class UtilityCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config = default.get("config.json")
+        self.emojis = default.get("emojis.json")
         self.bot_prefix = '.'
 
     @commands.command(name = 'ping')
@@ -21,7 +23,7 @@ class UtilityCog(commands.Cog):
         msg = await ctx.send('Ping?')
         end = time.perf_counter()
         duration = (end - start) * 1000
-        await msg.edit(content=f':ping_pong: Pong! Latency is {duration:.2f}ms. API Latency is {(client.latency * 1000):.2f}ms.')
+        await msg.edit(content=f':ping_pong: Pong! Latency is {duration:.2f}ms. API Latency is {(self.bot.latency * 1000):.2f}ms.')
 
     @commands.command(aliases = ['updates', 'changes', 'whats_new', 'whatsnew'])
     async def changelog(self, ctx):
@@ -37,18 +39,34 @@ class UtilityCog(commands.Cog):
         await ctx.send(changel)
     
     @commands.command()
-    async def reverse(self, ctx, *, text = None):
+    async def color(self, ctx, col = None):
+        """Displays a color"""
 
-def setup(bot):
-    bot.add_cog(UtilityCog(bot))
-    
-    
+        col = col.strip()
+
+        if len(col) == 7 and col.startswith('0x'):
+            col = int(col, 16)
+        elif len(col) == 6 or col.startswith('#'):
+            col = int(col[1:], 16)
+        elif col.isdigit():
+            col = int(col)
+        else:
+            await ctx.send("Invalid Color.")
+            return
         
+        embed = discord.Embed(
+            title = str(col),
+            color = col,
+            description = "A preview of the color."
+        )
 
-
-
-
+        await ctx.send(embed=embed)
+        
+    
+    #@commands.command()
+    #async def reverse(self, ctx, *, text = None):
+    #    if not text:
+    #        help_message = get_help_message(reverse)
 
 def setup(bot):
-    """Sets up the cog."""
     bot.add_cog(UtilityCog(bot))

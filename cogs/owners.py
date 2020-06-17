@@ -3,15 +3,18 @@ from discord.ext import commands
 import time
 import inspect
 from datetime import datetime
+from utils import default
 
 class OwnerCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.emojis = default.get("emojis.json")
+        self.colors = default.get("colors.json")
     
     @commands.command(name = 'load', hidden = True)
     @commands.is_owner()
-    async def cog_load(self, ctx, *, cog: str):
+    async def cogs_load(self, ctx, *, cog: str):
         """Command to load cogs in real-time."""
 
         if not cog.startswith('cog.'):
@@ -20,13 +23,13 @@ class OwnerCog(commands.Cog):
         try:
             self.bot.load_extension(cog)
         except Exception as ex:
-            await ctx.send(f"<:red_mark:694527415904370799> **Error loading {cog}** `[ex {type(ex).__name__} - {ex}]`")
+            await ctx.send(f"{self.emojis.cross} **Error loading {cog}** `[ex {type(ex).__name__} - {ex}]`")
         else:
-            await ctx.send(f"<:green_tick:694527417410125844> **Successfully loaded {cog}**")
+            await ctx.send(f"{self.emojis.tick} **Successfully loaded {cog}**")
     
     @commands.command(name = 'unload', hidden = True)
     @commands.is_owner()
-    async def cog_unload(self, ctx, *, cog: str):
+    async def cogs_unload(self, ctx, *, cog: str):
         """Command to unload cogs in real-time."""
 
         if not cog.startswith('cog.'):
@@ -35,13 +38,13 @@ class OwnerCog(commands.Cog):
         try:
             self.bot.unload_extension(cog)
         except Exception as ex:
-            await ctx.send(f"<:red_mark:694527415904370799> **Error unloading {cog}** `[ex {type(ex).__name__} - {ex}]`")
+            await ctx.send(f"{self.emojis.cross} **Error unloading {cog}** `[ex {type(ex).__name__} - {ex}]`")
         else:
-            await ctx.send(f"<:green_tick:694527417410125844> **Successfully unloaded {cog}**")
+            await ctx.send(f"{self.emojis.tick} **Successfully unloaded {cog}**")
         
     @commands.command(name = 'reload', hidden = True)
     @commands.is_owner()
-    async def cog_reload(self, ctx, *, cog: str):
+    async def cogs_reload(self, ctx, *, cog: str):
         """Command to reload cogs in real-time."""
 
         if not cog.startswith('cog.'):
@@ -50,9 +53,9 @@ class OwnerCog(commands.Cog):
         try:
             self.bot.reload_extension(cog)
         except Exception as ex:
-            await ctx.send(f"<:red_mark:694527415904370799> **Error reloading {cog}** `[ex {type(ex).__name__} - {ex}]`")
+            await ctx.send(f"{self.emojis.cross} **Error reloading {cog}** `[ex {type(ex).__name__} - {ex}]`")
         else:
-            await ctx.send(f"<:green_tick:694527417410125844> **Successfully reloaded {cog}**")
+            await ctx.send(f"{self.emojis.tick} **Successfully reloaded {cog}**")
     
     @commands.command(aliases = ['eval'], hidden = True)
     @commands.is_owner()
@@ -67,7 +70,7 @@ class OwnerCog(commands.Cog):
         duration = (end - start) * 1000
 
         if inspect.isawaitable(res):
-            embed = discord.Embed(title=f"<:green_tick:694527417410125844> Evaluated in {duration:.2f}ms")
+            embed = discord.Embed(title=f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
             embed.add_field(name="Code", value=f"```py\n{code}```", inline=False)
             
             if res: embed.add_field(name="Return", value=f"```py\n{await res}```", inline=False)
@@ -75,7 +78,7 @@ class OwnerCog(commands.Cog):
 
             await ctx.send(embed=embed)
         else:		
-            embed = discord.Embed(title=f"<:green_tick:694527417410125844> Evaluated in {duration:.2f}ms")
+            embed = discord.Embed(title=f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
             embed.add_field(name="Code", value=f"```py\n{code}```", inline=False)
             if res: embed.add_field(name="Return", value=f"```py\n{res}```", inline=False)
             embed.timestamp = datetime.utcnow()
