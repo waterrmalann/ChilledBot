@@ -4,6 +4,7 @@ import time
 import inspect
 from datetime import datetime
 from utils import default
+import os
 
 class OwnerCog(commands.Cog):
 
@@ -70,8 +71,8 @@ class OwnerCog(commands.Cog):
         duration = (end - start) * 1000
 
         if inspect.isawaitable(res):
-            embed = discord.Embed(title=f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
-            embed.add_field(name="Code", value=f"```py\n{code}```", inline=False)
+            embed = discord.Embed(title = f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
+            embed.add_field(name = "Code", value=f"```py\n{code}```", inline = False)
             
             if res: embed.add_field(name="Return", value=f"```py\n{await res}```", inline=False)
             embed.timestamp = datetime.utcnow()
@@ -80,9 +81,29 @@ class OwnerCog(commands.Cog):
         else:		
             embed = discord.Embed(title=f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
             embed.add_field(name="Code", value=f"```py\n{code}```", inline=False)
+
             if res: embed.add_field(name="Return", value=f"```py\n{res}```", inline=False)
             embed.timestamp = datetime.utcnow()
             await ctx.send(embed=embed)
+    
+    @commands.command(aliases = ['shell', 'system'])
+    @commands.is_owner()
+    async def sh(self, ctx, *, command):
+        """Evaluates shell commands."""
+
+        code = command.strip()
+
+        start = time.perf_counter()
+        res = os.system(code)
+        end = time.perf_counter()
+        duration = (end - start) * 1000
+
+        embed = discord.Embed(title=f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
+        embed.add_field(name="Code", value=f"```py\n{code}```", inline=False)
+        if res: embed.add_field(name="Return", value=f"```py\n{res}```", inline=False)
+        embed.timestamp = datetime.utcnow()
+
+        await ctx.send(embed=embed)
 
 def setup(bot):
     """Sets up the cog."""

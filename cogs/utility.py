@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 from utils import default
 import time
+import aiohttp
 
 class UtilityCog(commands.Cog):
     """Utility Commands."""
@@ -11,6 +12,7 @@ class UtilityCog(commands.Cog):
         self.bot = bot
         self.config = default.get("config.json")
         self.emojis = default.get("emojis.json")
+        self.colors = default.get("colors.json")
         self.bot_prefix = '.'
 
     @commands.command(name = 'ping')
@@ -44,7 +46,7 @@ class UtilityCog(commands.Cog):
 
         col = col.strip()
 
-        if len(col) == 7 and col.startswith('0x'):
+        if len(col) == 8 and col.startswith('0x'):
             col = int(col, 16)
         elif len(col) == 6 or col.startswith('#'):
             col = int(col[1:], 16)
@@ -60,6 +62,22 @@ class UtilityCog(commands.Cog):
             description = "A preview of the color."
         )
 
+        await ctx.send(embed=embed)
+    
+    @commands.command()
+    async def request(self, ctx, url = None):
+        """Sends a request and returns data from an url."""
+
+        url = url or "http://shibe.online/api/cats"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                data = await r.json()
+
+        embed = discord.Embed(
+            title = url,
+            color = self.colors.secondary,
+            description = f"```{data}```"
+        )
         await ctx.send(embed=embed)
         
     

@@ -15,6 +15,7 @@ class InformationCog(commands.Cog):
         self.bot = bot
         self.config = default.get("config.json")
         self.colors = default.get("colors.json")
+        self.emojis = default.get("emojis.json")
         self.bot_prefix = '.'
     
     @commands.command()
@@ -139,41 +140,47 @@ class InformationCog(commands.Cog):
 
         user = user or ctx.author
 
+        # Platforms the user is currently using.
         platforms = []
         if user.desktop_status != discord.Status.offline: platforms.append("Desktop")
         if user.mobile_status != discord.Status.offline: platforms.append("Mobile")
         if user.web_status != discord.Status.offline: platforms.append("Web Client")
         discord_client = f"({' | '.join(platforms)})" if platforms else ''
 
-
         # Dynamic Embed Colorization / Emoji
         # We color the embed border based on the user's status.
         # ie: Green for online, Red for do not disturb, etc...
         status = str(user.status)
         if status == 'online':
-            embed_color = 0x43B581
-            status_emoji = '<:online:701003408483680326>'
+            embed_color = self.colors.online
+            status_emoji = self.emojis.online
         elif status == 'offline':
-            embed_color = 0x747F8D
-            status_emoji = '<:offline:701003364380573706>'
+            embed_color = self.colors.offline
+            status_emoji = self.emojis.offline
         elif status == 'dnd' or status == 'do_not_disturb':
-            embed_color = 0xF04747
-            status_emoji = '<:dnd:701003368579203122>'
+            embed_color = self.colors.dnd
+            status_emoji = self.emojis.dnd
         elif status == 'idle':
-            embed_color = 0xFAA61A
-            status_emoji = '<:idle:701003480005083196>'
+            embed_color = self.colors.idle
+            status_emoji = self.emojis.idle
         else:
             embed_color = 0xFFFFFF
-            status_emoji = '<:offline:701003364380573706>'
+            status_emoji = '⚪'
 
         if status == 'dnd' or status == 'do_not_disturb':
+            # Properly title the do not disturb text.
             status = "Do Not Disturb"
         elif status == 'offline' and user == ctx.author:
+            # If the user who uses this command is shown as offline.
+            # Are they actually offline? They could very well be invisible.
+            # So we show them as invisible, instead of offline.
             status = "Invisible"
         else:
+            # Else we titlecase the status and return it.
             status = status.title()
 
-        # We get all the roles the user has.
+        # Put all the roles the user has in a list. 
+        # (We loop through the list in reverse order so that it's displayed as in the hierarchy.)
         roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
 
         # We set the top role to "None" if they have no roles, otherwise it would show "@@everyone".

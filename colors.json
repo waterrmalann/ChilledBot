@@ -1,4 +1,9 @@
 {
     "primary": 16756290,
-    "secondary": 2160535
+    "secondary": 2160535,
+
+    "online": 4437377,
+    "dnd": 15746887,
+    "idle": 16426522,
+    "offline": 7634829 
 }

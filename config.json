@@ -1,12 +1,24 @@
 {
     "bot_name": "ChilledBot",
-    "bot_version": "v0.0.1",
+    "bot_version": "v0.0.2",
     "bot_version_tag": "InDev",
     "bot_prefix": ["."],
 
-    "bot_owners": [689349381102632980],
+    "bot_owners": [
+        689349381102632980, 
+        547357951044747264
+    ],
     "bot_vips": [
         689349381102632980
+    ],
+
+    "cogs": [
+        "cogs.owners",
+        "cogs.utility",
+        "cogs.information",
+        "cogs.fun",
+        "cogs.moderation",
+        "cogs.config"
     ],
 
     "activity_type": "listening",
@@ -15,6 +27,11 @@
 
     "bot_flavor": "cherry",
     "silent_mode": false,
+
+    "guild_main": 694775062204514414,
+    "channel_logs": 723019169515438090,
+    "channel_errors": 723019211559141479,
+    "channel_guilds": 723019271286030437,
 
     "BOT_MAIN_TOKEN": "",
     "BOT_ALT_TOKEN": ""
