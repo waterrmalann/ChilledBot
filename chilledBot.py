@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 from utils import default
+from utils import logger
+from datetime import datetime
 
 import sys, traceback, os
 
@@ -33,18 +35,17 @@ initial_extensions = [
     'cogs.config'
 ]
 
+config = default.get("config.json")
+emojis = default.get("emojis.json")
+
 bot = commands.AutoShardedBot(
     command_prefix = get_prefix,
     description = "A simple, fun, and utility bot that can also do moderation.",
-    owner_ids = {
-        689349381102632980,
-        547357951044747264
-    }
+    owner_ids = set(config.bot_owners)
 )
 
 bot.remove_command('help')
-config = default.get("config.json")
-emojis = default.get("emojis.json")
+
 
 # We load the extensions here from the initial_extensions list.
 
@@ -66,10 +67,7 @@ for extension in initial_extensions:
 async def on_connect():
     """"http://discordpy.readthedocs.io/en/rewrite/api.html#discord.on_connect"""
 
-    os.system('clear')
-    print("ChilledBot by Zeesmic#8023...", '\n')
-
-    print("[Connection] Connecting to Discord...")
+    print("\n", "[Connection] Connecting to Discord...")
     print("[Connected] Established connection with Discord.")
 
 @bot.event
@@ -88,6 +86,10 @@ async def on_ready():
         status = discord.Status.idle,
         afk = True
     )
+
+    logger.log("**[Ready] ChilledBot has started.**")
+    logger.log(f"**[Login] Logged in as {bot.user.name} ({bot.user.id}).**")
+    logger.log(f"**[On] {datetime.now().strftime('%A, %B %d %Y @ %H:%M:%S %p')}**")
 
 @bot.event
 async def on_disconnect():
