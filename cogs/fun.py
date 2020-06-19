@@ -39,7 +39,7 @@ class FunCog(commands.Cog):
             url = "https://some-random-api.ml/img/cat"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    image = await r.json()
+                    data = await r.json()
                     image = data["link"]
 
         embed = discord.Embed(title = choice, color = self.colors.primary)
@@ -97,8 +97,8 @@ class FunCog(commands.Cog):
             url = "https://some-random-api.ml/facts/dog"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
-                    fact = data["fact"]
+                    data = await r.json()
+                    fact = data['fact']
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(name = "bird", aliases = ["birb", "ave", "birdie"])
@@ -114,13 +114,13 @@ class FunCog(commands.Cog):
             url = "http://shibe.online/api/birds"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
+                    data = await r.json()
                     image = data[0]
         else:
             url = "https://some-random-api.ml/img/birb"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
+                    data = await r.json()
                     image = data["link"]
 
         embed = discord.Embed(title = choice, color = self.colors.primary)
@@ -132,7 +132,7 @@ class FunCog(commands.Cog):
             url = "https://some-random-api.ml/facts/bird"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
+                    data = await r.json()
                     fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
     
@@ -150,13 +150,13 @@ class FunCog(commands.Cog):
             url = "https://randomfox.ca/floof/"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
+                    data = await r.json()
                     image = data["image"]
         else:
             url = "https://some-random-api.ml/img/fox"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
+                    data = await r.json()
                     image = data["link"]
 
         embed = discord.Embed(title = choice, color = self.colors.primary)
@@ -168,7 +168,7 @@ class FunCog(commands.Cog):
             url = "https://some-random-api.ml/facts/fox"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
+                    data = await r.json()
                     fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
             # Random Fox Fact: Did You Know? 
@@ -183,7 +183,7 @@ class FunCog(commands.Cog):
         url = "https://some-random-api.ml/img/panda"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
-                data = r.json()
+                data = await r.json()
                 image = data["link"]
         
         embed = discord.Embed(title = choice, color = self.colors.primary)
@@ -195,7 +195,7 @@ class FunCog(commands.Cog):
             url = "https://some-random-api.ml/facts/panda"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
+                    data = await r.json()
                     fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
     
@@ -209,7 +209,7 @@ class FunCog(commands.Cog):
         url = "https://some-random-api.ml/img/koala"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
-                data = r.json()
+                data = await r.json()
                 image = data["link"]
 
         embed = discord.Embed(title = choice, color = self.colors.primary)
@@ -221,7 +221,7 @@ class FunCog(commands.Cog):
             url = "https://some-random-api.ml/facts/koala"
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    data = r.json()
+                    data = await r.json()
                     fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
 
