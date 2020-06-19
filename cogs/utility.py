@@ -1,9 +1,14 @@
 #0x15F153 Changelog Color
+# Discord.
 import discord
+# Commnd Handler.
 from discord.ext import commands
-from utils import default
+# Time Value Manipulation.
 import time
+# Asynchronous Requests.
 import aiohttp
+# JSON Parser.
+from utils import default
 
 class UtilityCog(commands.Cog):
     """Utility Commands."""
@@ -45,6 +50,7 @@ class UtilityCog(commands.Cog):
         """Displays a color"""
 
         col = col.strip()
+        original = col
 
         if len(col) == 8 and col.startswith('0x'):
             col = int(col, 16)
@@ -57,9 +63,9 @@ class UtilityCog(commands.Cog):
             return
         
         embed = discord.Embed(
-            title = str(col),
+            title = f"{original} | {col}",
             color = col,
-            description = "A preview of the color."
+            description = f"A preview of the color **#{hex(col)[2:]}**."
         )
 
         await ctx.send(embed=embed)

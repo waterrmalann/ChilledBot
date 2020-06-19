@@ -3,9 +3,13 @@
 # >> Role Info
 # >> Channel Info
 
+# Discord.
 import discord
+# Command Handler.
 from discord.ext import commands
+# JSON Parser & Text Formatter.
 from utils import default, formatting
+# DateTime Parser.
 from datetime import datetime
 
 class InformationCog(commands.Cog):

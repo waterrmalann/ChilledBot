@@ -1,9 +1,15 @@
+# Discord.
 import discord
+# Command Handler.
 from discord.ext import commands
+# JSON Parser.
 from utils import default
+# Randomly picked integers and choices.
 import random
+# Asynchronous Requests.
 import aiohttp
-import asyncio
+# Optional Command Parameters.
+import typing
 
 
 class FunCog(commands.Cog):
@@ -16,7 +22,7 @@ class FunCog(commands.Cog):
         self.bot_prefix = '.'
     
     @commands.command(aliases=["feline", "tom", "mouser", "pussy", "meow"])
-    async def cat(self, ctx, num : int = 0, fact : bool = False):
+    async def cat(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Fetches a random cat picture from the internet."""
         choices = ("Meow... :cat:", "Meow :heart_eyes_cat:", "Here's a feline for you. :cat2:")
         choice = random.choice(choices)
@@ -57,7 +63,7 @@ class FunCog(commands.Cog):
             await ctx.send(f"**Did you know?** {cat_fact}")
 
     @commands.command(aliases=["pupper", "woof", "doggo", "bork", "canine"])
-    async def dog(self, ctx, num : int = 0, fact : bool = False):
+    async def dog(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Fetches a random dog picture from the internet."""
 
         choices = ("Woof :dog:", "Bork Bork :service_dog:", "Here's a canine for you. :dog2:", "Arf! :dog:")
@@ -102,7 +108,7 @@ class FunCog(commands.Cog):
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(name = "bird", aliases = ["birb", "ave", "birdie"])
-    async def bird(self, ctx, num : int = 0, fact : bool = False):
+    async def bird(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Fetches a random birb picture from the internet."""
 
         choices = ("🐦 Here's your birb.", "Here's a birdie for you. 🐦", "🐦 Here's a birdie.")
@@ -137,7 +143,7 @@ class FunCog(commands.Cog):
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(name = "fox", aliases = ["foxie", "arf"])
-    async def fox(self, ctx, num : int = 0, fact : bool = False):
+    async def fox(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Fetches a random fox picture from the internet."""
 
         choices = ("🦊 Here's a fox.", "Here's a fox for you. 🦊", "🦊 Here's your fox.")
@@ -224,11 +230,6 @@ class FunCog(commands.Cog):
                     data = await r.json()
                     fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
-
-
-
-
-    
 
 def setup(bot):
     bot.add_cog(FunCog(bot))
