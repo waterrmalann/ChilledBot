@@ -83,7 +83,7 @@ async def on_ready():
 
     # Changing the bot presence to "Listening to LoFi"
     await bot.change_presence(
-        activity = discord.Activity (
+        activity = discord.Activity(
             name = "LoFi",
             type = discord.ActivityType.listening
         ),
@@ -91,9 +91,9 @@ async def on_ready():
         afk = True
     )
 
-    #logger.log("**[Ready] ChilledBot has started.**")
-    #logger.log(f"**[Login] Logged in as {bot.user.name} ({bot.user.id}).**")
-    #logger.log(f"**[On] {datetime.now().strftime('%A, %B %d %Y @ %H:%M:%S %p')}**")
+    #await logger.log(bot, "**[Ready] ChilledBot has started.**")
+    #await logger.log(bot, f"**[Login] Logged in as {bot.user.name} ({bot.user.id}).**")
+    #await logger.log(bot, f"**[On] {datetime.now().strftime('%A, %B %d %Y @ %H:%M:%S %p')}**")
 
 @bot.event
 async def on_disconnect():

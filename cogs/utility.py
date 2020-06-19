@@ -9,6 +9,8 @@ import time
 import aiohttp
 # JSON Parser.
 from utils import default
+# DateTime Parser.
+from datetime import datetime
 
 class UtilityCog(commands.Cog):
     """Utility Commands."""
@@ -50,7 +52,6 @@ class UtilityCog(commands.Cog):
         """Displays a color"""
 
         col = col.strip()
-        original = col
 
         if len(col) == 8 and col.startswith('0x'):
             col = int(col, 16)
@@ -62,10 +63,11 @@ class UtilityCog(commands.Cog):
             await ctx.send("Invalid Color.")
             return
         
+        hex_color_code = f"#{hex(col)[2:].upper()}"
         embed = discord.Embed(
-            title = f"{original} | {col}",
+            title = f"{hex_color_code} | {col}",
             color = col,
-            description = f"A preview of the color **#{hex(col)[2:]}**."
+            description = f"A preview of the color **{hex_color_code}**."
         )
 
         await ctx.send(embed=embed)
@@ -75,16 +77,24 @@ class UtilityCog(commands.Cog):
         """Sends a request and returns data from an url."""
 
         url = url or "http://shibe.online/api/cats"
+        start = time.perf_counter()
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 data = await r.json()
+        end = time.perf_counter()
+        duration = (end - start) * 1000
 
         embed = discord.Embed(
             title = url,
             color = self.colors.secondary,
-            description = f"```{data}```"
+            description = f"{self.emojis.tick} Evaluated in {duration:.2f}ms."
         )
-        await ctx.send(embed=embed)
+
+        embed.add_field(name = "Retrieved Data", value = f"```py\n{data}```", inline = False)
+        if isinstance(data, dict):
+            embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
+        embed.timestamp = datetime.utcnow()
+        await ctx.send(embed = embed)
         
     
     #@commands.command()
