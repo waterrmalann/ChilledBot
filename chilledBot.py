@@ -1,9 +1,12 @@
+# Discord.
 import discord
+# Command / Event Handler.
 from discord.ext import commands
-from utils import default
-from utils import logger
+# JSON Parser / Logging Functions.
+from utils import default, logger
+# DateTime Parser.
 from datetime import datetime
-
+# Operating System Functions.
 import sys, traceback, os
 
 """

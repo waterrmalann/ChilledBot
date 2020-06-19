@@ -1,5 +1,8 @@
+# Discord
 import discord
+# Command Handler
 from discord.ext import commands
+# JSON Parser
 from utils import default
 
 

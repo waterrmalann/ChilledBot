@@ -1,9 +1,16 @@
+# Discord.
 import discord
+# Command Handler.
 from discord.ext import commands
+# Time Value Manipulation.
 import time
+# Object Inspector.
 import inspect
+# DateTime Parser.
 from datetime import datetime
+# JSON Parser.
 from utils import default
+# Operating System Functions.
 import os
 
 class OwnerCog(commands.Cog):
