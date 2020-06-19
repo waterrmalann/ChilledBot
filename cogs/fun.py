@@ -20,10 +20,27 @@ class FunCog(commands.Cog):
         self.config = default.get("config.json")
         self.colors = default.get("colors.json")
         self.bot_prefix = '.'
+
+    @commands.command()
+    async def notice(self, ctx, user : discord.Member = None):
+        """Notice me senpai."""
+
+        user = user or ctx.author
+
+        hugs = [
+            "`＼(^o^)／`",
+            "`d=(´▽｀)=b`",
+            "`⊂((・▽・))⊃`",
+            "`⊂( ◜◒◝ )⊃`",
+            "`⊂（♡⌂♡）⊃`",
+        ]
+
+        await ctx.send(f"{user.mention}, `{random.choice(hugs)}`")
     
     @commands.command(aliases=["feline", "tom", "mouser", "pussy", "meow"])
     async def cat(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Fetches a random cat picture from the internet."""
+
         choices = ("Meow... :cat:", "Meow :heart_eyes_cat:", "Here's a feline for you. :cat2:")
         choice = random.choice(choices)
 

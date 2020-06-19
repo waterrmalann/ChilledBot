@@ -4,10 +4,10 @@ from utils import default
 
 config = default.get("config.json")
 
-async def log(ctx, message):
-    channel = ctx.bot.get_channel(config.channel_logs)
+async def log(bot, message):
+    channel = bot.get_channel(config.channel_logs)
     await channel.send(f"[LOG] {message.strip()}")
 
-async def error(ctx, message):
-    channel = ctx.bot.get_channel(config.channel_errors)
+async def error(bot, message):
+    channel = bot.get_channel(config.channel_errors)
     await channel.send(f"[ERROR LOG] {message.strip()}")

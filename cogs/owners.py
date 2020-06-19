@@ -25,8 +25,8 @@ class OwnerCog(commands.Cog):
     async def cogs_load(self, ctx, *, cog: str):
         """Command to load cogs in real-time."""
 
-        if not cog.startswith('cog.'):
-            cog = 'cog.' + cog
+        if not cog.startswith('cogs.'):
+            cog = 'cogs.' + cog
 
         try:
             self.bot.load_extension(cog)
@@ -40,8 +40,8 @@ class OwnerCog(commands.Cog):
     async def cogs_unload(self, ctx, *, cog: str):
         """Command to unload cogs in real-time."""
 
-        if not cog.startswith('cog.'):
-            cog = 'cog.' + cog
+        if not cog.startswith('cogs.'):
+            cog = 'cogs.' + cog
 
         try:
             self.bot.unload_extension(cog)
@@ -55,8 +55,8 @@ class OwnerCog(commands.Cog):
     async def cogs_reload(self, ctx, *, cog: str):
         """Command to reload cogs in real-time."""
 
-        if not cog.startswith('cog.'):
-            cog = 'cog.' + cog
+        if not cog.startswith('cogs.'):
+            cog = 'cogs.' + cog
 
         try:
             self.bot.reload_extension(cog)
@@ -77,40 +77,40 @@ class OwnerCog(commands.Cog):
         end = time.perf_counter()
         duration = (end - start) * 1000
 
+        # To-Do: DRY
         if inspect.isawaitable(res):
-            embed = discord.Embed(title = f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
+            embed = discord.Embed(title = f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.secondary)
             embed.add_field(name = "Code", value=f"```py\n{code}```", inline = False)
-            
-            if res: embed.add_field(name="Return", value=f"```py\n{await res}```", inline=False)
+            embed.add_field(name = "Return", value=f"```py\n{await res}```", inline = False)
+            embed.set_footer(text = "Awaited")
             embed.timestamp = datetime.utcnow()
-
-            await ctx.send(embed=embed)
+            await ctx.send(embed = embed)
         else:		
             embed = discord.Embed(title=f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
-            embed.add_field(name="Code", value=f"```py\n{code}```", inline=False)
-
-            if res: embed.add_field(name="Return", value=f"```py\n{res}```", inline=False)
+            embed.add_field(name = "Code", value = f"```py\n{code}```", inline = False)
+            embed.add_field(name = "Return", value = f"```py\n{res}```", inline = False)
+            embed.set_footer(text = "url")
             embed.timestamp = datetime.utcnow()
-            await ctx.send(embed=embed)
+            await ctx.send(embed = embed)
     
     @commands.command(aliases = ['shell', 'system'])
     @commands.is_owner()
     async def sh(self, ctx, *, command):
         """Evaluates shell commands."""
 
-        code = command.strip()
+        code = command.strip("`")
 
         start = time.perf_counter()
         res = os.system(code)
         end = time.perf_counter()
         duration = (end - start) * 1000
 
-        embed = discord.Embed(title=f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
-        embed.add_field(name="Code", value=f"```py\n{code}```", inline=False)
-        if res: embed.add_field(name="Return", value=f"```py\n{res}```", inline=False)
+        embed = discord.Embed(title = f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
+        embed.add_field(name = "Code", value = f"```py\n{code}```", inline = False)
+        embed.add_field(name = "Return", value = f"```py\n{res}```", inline = False)
         embed.timestamp = datetime.utcnow()
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed = embed)
 
 def setup(bot):
     """Sets up the cog."""
