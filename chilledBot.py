@@ -62,12 +62,13 @@ for extension in initial_extensions:
         print(f"[Cogs] Successfully loaded {extension}.")
     except Exception as ex:
         print(f"[Cogs] Failed to load {extension} due to exception {ex}")
+print()
 
 @bot.event
 async def on_connect():
     """"http://discordpy.readthedocs.io/en/rewrite/api.html#discord.on_connect"""
 
-    print("\n", "[Connection] Connecting to Discord...")
+    print("[Connection] Connecting to Discord...")
     print("[Connected] Established connection with Discord.")
 
 @bot.event
@@ -87,9 +88,9 @@ async def on_ready():
         afk = True
     )
 
-    logger.log("**[Ready] ChilledBot has started.**")
-    logger.log(f"**[Login] Logged in as {bot.user.name} ({bot.user.id}).**")
-    logger.log(f"**[On] {datetime.now().strftime('%A, %B %d %Y @ %H:%M:%S %p')}**")
+    #logger.log("**[Ready] ChilledBot has started.**")
+    #logger.log(f"**[Login] Logged in as {bot.user.name} ({bot.user.id}).**")
+    #logger.log(f"**[On] {datetime.now().strftime('%A, %B %d %Y @ %H:%M:%S %p')}**")
 
 @bot.event
 async def on_disconnect():
@@ -113,4 +114,4 @@ async def on_command_error(ctx, error):
         return
 
 # Start the bot.
-bot.run(TOKEN, bot = True, reconnect = True)
+bot.run(os.environ.get("BOT_TOKEN"), bot = True, reconnect = True)
