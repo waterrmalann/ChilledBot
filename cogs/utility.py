@@ -73,17 +73,19 @@ class UtilityCog(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command()
-    async def request(self, ctx, url = None):
+    async def request(self, ctx, url = None, debug : bool = False):
         """Sends a request and returns data from an url."""
 
+        raw = ""
         url = url or "http://shibe.online/api/cats"
         start = time.perf_counter()
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
+                if debug: await ctx.send(embed = discord.Embed(description=f"**Debug:**\n```py\n{r}```"))
                 data = await r.json()
         end = time.perf_counter()
         duration = (end - start) * 1000
-
+        
         embed = discord.Embed(
             title = url,
             color = self.colors.secondary,
@@ -94,6 +96,14 @@ class UtilityCog(commands.Cog):
         if isinstance(data, dict):
             embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
         embed.timestamp = datetime.utcnow()
+        await ctx.send(embed = embed)
+    
+    @commands.command()
+    async def invite(self, ctx):
+        """Gives you a link to invite me!"""
+
+        invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot"
+        embed = discord.Embed(color = self.colors.secondary, description = f"🔗  You can invite me using __**[this link!]({invite_url})**__")
         await ctx.send(embed = embed)
         
     

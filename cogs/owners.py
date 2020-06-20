@@ -89,7 +89,6 @@ class OwnerCog(commands.Cog):
             embed = discord.Embed(title=f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
             embed.add_field(name = "Code", value = f"```py\n{code}```", inline = False)
             embed.add_field(name = "Return", value = f"```py\n{res}```", inline = False)
-            embed.set_footer(text = "url")
             embed.timestamp = datetime.utcnow()
             await ctx.send(embed = embed)
     
@@ -107,7 +106,7 @@ class OwnerCog(commands.Cog):
 
         embed = discord.Embed(title = f"{self.emojis.tick} Evaluated in {duration:.2f}ms", color = self.colors.primary)
         embed.add_field(name = "Code", value = f"```py\n{code}```", inline = False)
-        embed.add_field(name = "Return", value = f"```py\n{res}```", inline = False)
+        if res is not None: embed.add_field(name = "Return", value = f"```py\n{res}```", inline = False)
         embed.timestamp = datetime.utcnow()
 
         await ctx.send(embed = embed)
