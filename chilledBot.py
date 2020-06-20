@@ -40,6 +40,7 @@ initial_extensions = [
 
 config = default.get("config.json")
 emojis = default.get("emojis.json")
+colors = default.get("colors.json")
 
 bot = commands.AutoShardedBot(
     command_prefix = get_prefix,
@@ -48,7 +49,7 @@ bot = commands.AutoShardedBot(
 )
 
 bot.remove_command('help')
-
+prefix = '.'
 
 # We load the extensions here from the initial_extensions list.
 
@@ -66,6 +67,114 @@ for extension in initial_extensions:
     except Exception as ex:
         print(f"[Cogs] Failed to load {extension} due to exception {ex}")
 print()
+
+"""@bot.command()
+async def help(ctx):
+    commands = []
+    for cog in bot.cogs:
+        for cmd in bot.get_cog(cog).get_commands():
+            commands.append(cmd.name)
+    await ctx.send(', '.join(commands))"""
+
+@bot.command(aliases = ['cmds', 'commands', 'helpme'])
+async def help(ctx, param = 'help'):
+    """Gives a list of bot commands"""
+
+    request = param.strip().lower()
+
+    if request == 'help':
+        
+        embed = discord.Embed(
+            title = f'Bot Help [Prefix: {prefix}]',
+            color = colors.primary
+        )
+
+        embed.add_field(
+            name = '» Utility :wrench:',
+            value = f"`{prefix}help utility`",
+            inline = True
+        )
+        embed.add_field(
+            name = '» Moderation :hammer:',
+            value = f"`{prefix}help mod`",
+            inline = True
+        )
+        embed.add_field(
+            name = '» Information :book:', 
+            value = f"`{prefix}help info`",
+            inline = True
+        )
+        embed.add_field(
+            name = '» Fun :game_die:',
+            value = f"`{prefix}help fun`",
+            inline = True
+        )
+        embed.add_field(
+            name = '» Music :musical_note:',
+            value = f"`{prefix}help music`",
+            inline = True
+        )
+        embed.add_field(
+            name = '» Config :gear:',
+            value = f"`{prefix}help config`", 
+            inline = True
+        )
+
+        embed.add_field(
+            name = '» Support Server :link:',
+            value = '**[https://discord.gg/nG86J2U](https://www.youtube.com/watch?v=dQw4w9WgXcQ)**'
+        )
+
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+    elif request == 'utility':
+        embed = discord.Embed(title = f"{config.bot_name} Utility Commands.", color = colors.primary)
+
+        embed.add_field(name="Math :triangular_ruler:", value="math, add, subtract, multiply, divide")
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+    elif request == 'mod':
+        embed = discord.Embed(title = f"{config.bot_name} Moderation Commands.", color = colors.primary)
+
+        embed.add_field(name="String", value="x, y, z")
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+
+    elif request == 'music':
+        embed = discord.Embed(title = f"{config.bot_name} Music Commands.", color = colors.primary)
+
+        embed.add_field(name="String", value="x, y, z")
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+
+    elif request == 'fun':
+        embed = discord.Embed(title = f"{config.bot_name} Fun Commands.", color = colors.primary)
+
+        embed.add_field(name="String", value="roastme")
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+
+    elif request == 'info':
+        embed = discord.Embed(title = f"{config.bot_name} Information Commands.", color = colors.primary)
+
+        embed.add_field(name="String", value="x, y, z")
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+
+    elif request == 'config':
+        embed = discord.Embed(title = f"{config.bot_name} Configuration Commands.", color = colors.primary)
+
+        embed.add_field(
+        name = "Bot Account Configuration",
+        value = f"""
+        **{prefix}setprefix** : Set the bot's prefix.
+        **{prefix}
+        """
+        )
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+
+    else:
+        embed = discord.Embed(description = f'**Usage:** {prefix}help <help/utility/music/fun/info/config/mod>',color = colors.primary)
+        embed.set_footer(text='Shows the command list.')
+
+        await ctx.send(embed=embed)
+
 
 @bot.event
 async def on_connect():

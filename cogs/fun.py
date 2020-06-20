@@ -123,6 +123,7 @@ class FunCog(commands.Cog):
                     data = await r.json()
                     fact = data['fact']
             await ctx.send(f"**Did you know?** {fact}")
+            #https://dog-api.kinduff.com/api/facts  data["facts"][0]
     
     @commands.command(name = "bird", aliases = ["birb", "ave", "birdie"])
     async def bird(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
@@ -247,6 +248,51 @@ class FunCog(commands.Cog):
                     data = await r.json()
                     fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
+    
+    @commands.command(name = "anime")
+    async def uwu(self, ctx):
+        """Fetches a random anime picture from the internet."""
+
+        url = "http://api.cutegirls.moe/json"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                data = await r.json()
+                image = data["data"]["image"]
+                title = data["data"]["title"]
+                link = data["data"]["link"]
+                author = data["data"]["author"]
+                sub = data["data"]["sub"]
+        url = "http://api.cutegirls.moe"
+
+        embed = discord.Embed(title = title, color = self.colors.primary, url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"{url} • r/{sub} • {author}")
+        await ctx.send(embed = embed)
+    
+    @commands.command(name = "quote")
+    async def quote(self, ctx):
+        """Fetches a random quote from the internet."""
+
+        url = "http://api.forismatic.com/api/1.0/?method=getQuote&key=457653&format=json&lang=en"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                data = await r.json()
+                quote_text = data['quoteText']
+                quote_author = data['quoteAuthor']
+                quote_link = data['quoteLink']
+        url = "http://api.forismatic.com/"
+
+        embed = discord.Embed(
+            color = self.colors.primary,
+            description = f'*"{quote_text}"*\n**~ {quote_author}**'
+        )
+        embed.set_author(
+            name = "Here's a quote...",
+            url = quote_link,
+            icon_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Cquote2_black.svg/1200px-Cquote2_black.svg.png"
+        )
+        embed.set_footer(text = url)
+        await ctx.send(embed = embed)
 
 def setup(bot):
     bot.add_cog(FunCog(bot))
