@@ -132,7 +132,7 @@ class InformationCog(commands.Cog):
         )
 
         embed.set_thumbnail(url = ctx.guild.icon_url)
-        embed.set_footer(text = f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
         embed.timestamp = datetime.utcnow()
 
         await ctx.send(embed=embed)
@@ -151,68 +151,48 @@ class InformationCog(commands.Cog):
         if user.web_status != discord.Status.offline: platforms.append("Web Client")
         discord_client = f"({' | '.join(platforms)})" if platforms else ''
 
-        # Dynamic Embed Colorization / Emoji
-        # We color the embed border based on the user's status.
-        # ie: Green for online, Red for do not disturb, etc...
-        status = str(user.status)
-        if status == 'online':
-            embed_color = self.colors.online
-            status_emoji = self.emojis.online
-        elif status == 'offline':
-            embed_color = self.colors.offline
-            status_emoji = self.emojis.offline
-        elif status == 'dnd' or status == 'do_not_disturb':
-            embed_color = self.colors.dnd
-            status_emoji = self.emojis.dnd
-        elif status == 'idle':
-            embed_color = self.colors.idle
-            status_emoji = self.emojis.idle
-        else:
-            embed_color = 0xFFFFFF
-            status_emoji = '⚪'
+        statuses = {
+            'online': ("Online", self.colors.online, self.emojis.online),
+            'offline': ("Invisible" if user == ctx.author else "Offline", self.colors.offline, self.emojis.offline),
+            'dnd': ("Do Not Disturb", self.colors.dnd, self.emojis.dnd),
+            'idle': ("Idle", self.colors.idle, self.emojis.idle)
+        }
+        status = statuses.get(str(user.status), statuses['offline'])
 
-        if status == 'dnd' or status == 'do_not_disturb':
-            # Properly title the do not disturb text.
-            status = "Do Not Disturb"
-        elif status == 'offline' and user == ctx.author:
-            # If the user who uses this command is shown as offline.
-            # Are they actually offline? They could very well be invisible.
-            # So we show them as invisible, instead of offline.
-            status = "Invisible"
-        else:
-            # Else we titlecase the status and return it.
-            status = status.title()
-
-        # Put all the roles the user has in a list. 
-        # (We loop through the list in reverse order so that it's displayed as in the hierarchy.)
+        # (We loop through the user roles in reverse order so that it's displayed as in the hierarchy.)
         roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
 
-        # We set the top role to "None" if they have no roles, otherwise it would show "@@everyone".
-        top_role = user.top_role.mention if user.top_role != ctx.guild.default_role else 'None'
+        user_values = []
+        user_values.append(f"**Mention:** {user.mention}")
+        user_values.append(f"**Status:** {status[2]} {status[0]} {discord_client}")
+        if user.activity: user_values.append(f"**Activity:** {user.activity.type.name.capitalize()} {user.activity.name}")
+        user_values.append(f"**Registered at:** {user.created_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
 
-        embed = discord.Embed(title = f"{user} (`{user.id}`)", color = embed_color)
+        server_values = []
+        server_values.append(f"**Nickname:** {user.display_name}")
+        server_values.append(f"**Joined At:** {user.joined_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
+        if user.top_role != ctx.guild.default_role: server_values.append(f"**Top Role:** {user.top_role.mention}")
+
+        embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1])
 
         embed.add_field(
             name = "**❯ User**" if not user.bot else "**❯ Bot**",
-            value = f"**Mention:** {user.mention}\n" \
-                f"**Status:** {status_emoji} {status} {discord_client}\n" \
-                f"**Registered at:** {user.created_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}",
+            value = '\n'.join(user_values),
             inline = False
         )
 
         embed.add_field(
             name = "**❯ Server**",
-            value = f"**Nickname:** {user.display_name}\n" \
-                f"**Joined At:** {user.joined_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}\n" \
-                f"**Top Role:** {top_role}",
+            value = '\n'.join(server_values),
             inline = False
         )
 
         # If the user has roles, we show that else we show all the permissions they have in the guild.
         if roles: 
-            embed.add_field(name = "**❯ Roles**", value = roles, inline = False)
+            embed.add_field(name = f"**❯ Roles ({len(user.roles) - 1})**", value = roles, inline = False)
         else:
-            embed.add_field(name = "**❯ Permissions**", value = ', '.join(formatting.casify(i[0]) for i in user.guild_permissions), inline = False)
+            permissions = list(user.guild_permissions)
+            embed.add_field(name = f"**❯ Permissions ({len(permissions)})**", value = ', '.join(formatting.casify(i[0]) for i in permissions), inline = False)
 
         embed.set_thumbnail(url = user.avatar_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
