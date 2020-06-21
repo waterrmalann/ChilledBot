@@ -90,33 +90,36 @@ async def help(ctx, param = 'help'):
             color = colors.primary
         )
 
+        # Management 🛠️ 
+        #Developer ⌨️
+
         embed.add_field(
-            name = '» Utility :wrench:',
+            name = '» Utility 🔧',
             value = f"`{prefix}help utility`",
             inline = True
         )
         embed.add_field(
-            name = '» Moderation :hammer:',
+            name = '» Moderation 🛡️',
             value = f"`{prefix}help mod`",
             inline = True
         )
         embed.add_field(
-            name = '» Information :book:', 
+            name = '» Information 📖', 
             value = f"`{prefix}help info`",
             inline = True
         )
         embed.add_field(
-            name = '» Fun :game_die:',
+            name = '» Fun/Misc 🎲',
             value = f"`{prefix}help fun`",
             inline = True
         )
         embed.add_field(
-            name = '» Music :musical_note:',
+            name = '» Music 🎵',
             value = f"`{prefix}help music`",
             inline = True
         )
         embed.add_field(
-            name = '» Config :gear:',
+            name = '» Config ⚙️',
             value = f"`{prefix}help config`", 
             inline = True
         )
@@ -219,11 +222,11 @@ async def help(ctx, param = 'help'):
 
         command = bot.all_commands.get(request)
 
-        text = f"**Usage:** .{command.name} {command.usage}" if command.usage else f"**Usage:** .{command.name}"
-        if command.aliases: text += f"\n**Aliases:** {', '.join(command.aliases)}"
+        text = f"**Usage:** `.{command.name} {command.usage}`" if command.usage else f"**Usage:** `.{command.name}`"
+        if command.aliases: text += f"\n**Aliases:** `{', '.join(command.aliases)}`"
 
         embed = discord.Embed(
-            title = f"Command: .{command.name}",
+            title = f"Command: `.{command.name}`",
             description = text,
             color = colors.primary
         )
@@ -237,7 +240,6 @@ async def help(ctx, param = 'help'):
         embed.set_footer(text='Shows the command list.')
 
         await ctx.send(embed=embed)
-
 
 @bot.event
 async def on_connect():
