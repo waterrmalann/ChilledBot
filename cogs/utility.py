@@ -47,7 +47,7 @@ class UtilityCog(commands.Cog):
         
         await ctx.send(changel)
     
-    @commands.command()
+    @commands.command(usage = "<color (hex/int)>")
     async def color(self, ctx, col = None):
         """Displays a color"""
 
@@ -72,11 +72,10 @@ class UtilityCog(commands.Cog):
 
         await ctx.send(embed=embed)
     
-    @commands.command()
+    @commands.command(usage = "<url>")
     async def request(self, ctx, url = None, debug : bool = False):
         """Sends a request and returns data from an url."""
 
-        raw = ""
         url = url or "http://shibe.online/api/cats"
         start = time.perf_counter()
         async with aiohttp.ClientSession() as cs:

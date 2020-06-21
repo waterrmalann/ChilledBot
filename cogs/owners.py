@@ -20,7 +20,7 @@ class OwnerCog(commands.Cog):
         self.emojis = default.get("emojis.json")
         self.colors = default.get("colors.json")
     
-    @commands.command(name = 'load', hidden = True)
+    @commands.command(name = 'load', hidden = True, usage = "<cogs.name>")
     @commands.is_owner()
     async def cogs_load(self, ctx, *, cog: str):
         """Command to load cogs in real-time."""
@@ -35,7 +35,7 @@ class OwnerCog(commands.Cog):
         else:
             await ctx.send(f"{self.emojis.tick} **Successfully loaded {cog}**")
     
-    @commands.command(name = 'unload', hidden = True)
+    @commands.command(name = 'unload', hidden = True, usage = "<cogs.name>")
     @commands.is_owner()
     async def cogs_unload(self, ctx, *, cog: str):
         """Command to unload cogs in real-time."""
@@ -50,7 +50,7 @@ class OwnerCog(commands.Cog):
         else:
             await ctx.send(f"{self.emojis.tick} **Successfully unloaded {cog}**")
         
-    @commands.command(name = 'reload', hidden = True)
+    @commands.command(name = 'reload', hidden = True, usage = "<cogs.name>")
     @commands.is_owner()
     async def cogs_reload(self, ctx, *, cog: str):
         """Command to reload cogs in real-time."""
@@ -65,7 +65,7 @@ class OwnerCog(commands.Cog):
         else:
             await ctx.send(f"{self.emojis.tick} **Successfully reloaded {cog}**")
     
-    @commands.command(aliases = ['eval'], hidden = True)
+    @commands.command(aliases = ['eval'], hidden = True, usage = "<code>")
     @commands.is_owner()
     async def ev(self, ctx, *, command):
         """Evaluates Python Code"""
@@ -92,7 +92,7 @@ class OwnerCog(commands.Cog):
             embed.timestamp = datetime.utcnow()
             await ctx.send(embed = embed)
     
-    @commands.command(aliases = ['shell', 'system'])
+    @commands.command(aliases = ['shell', 'system'], hidden = True, usage = "<code>")
     @commands.is_owner()
     async def sh(self, ctx, *, command):
         """Evaluates shell commands."""

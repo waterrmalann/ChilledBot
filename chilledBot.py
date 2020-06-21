@@ -68,6 +68,7 @@ for extension in initial_extensions:
         print(f"[Cogs] Failed to load {extension} due to exception {ex}")
 print()
 
+
 """@bot.command()
 async def help(ctx):
     commands = []
@@ -127,50 +128,112 @@ async def help(ctx, param = 'help'):
 
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
-    elif request == 'utility':
-        embed = discord.Embed(title = f"{config.bot_name} Utility Commands.", color = colors.primary)
+        await ctx.send(embed = embed)
 
-        embed.add_field(name="Math :triangular_ruler:", value="math, add, subtract, multiply, divide")
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+    elif request == 'utility':
+        
+        cmds = bot.get_cog("UtilityCog").get_commands()
+        # {"help": "Gives help", ["helpme", "commands"]}
+        #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
+
+        commands = '\n'.join(f"**{cmd.name}**: {cmd.help}" for cmd in cmds if not cmd.hidden)
+        
+        embed = discord.Embed(title = f"Utility Commands List.", color = colors.primary)
+        embed.add_field(
+            name = "Commands | The prefix is '.'",
+            value = commands
+        )
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+        await ctx.send(embed = embed)
 
     elif request == 'mod':
-        embed = discord.Embed(title = f"{config.bot_name} Moderation Commands.", color = colors.primary)
 
-        embed.add_field(name="String", value="x, y, z")
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+        cmds = bot.get_cog("ModerationCog").get_commands()
+        # {"help": "Gives help", ["helpme", "commands"]}
+        #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
 
+        commands = '\n'.join(f"**{cmd.name}**: {cmd.help}" for cmd in cmds if not cmd.hidden)
+        
+        embed = discord.Embed(title = f"Moderation Commands List.", color = colors.primary)
+        embed.add_field(
+            name = "Commands | The prefix is '.'",
+            value = commands
+        )
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+        await ctx.send(embed = embed)
+        
     elif request == 'music':
-        embed = discord.Embed(title = f"{config.bot_name} Music Commands.", color = colors.primary)
+        embed = discord.Embed(title = f"Music Commands List.", color = colors.primary)
 
-        embed.add_field(name="String", value="x, y, z")
+        embed.add_field(name="👩🏻‍🏭 Work-In-Progress", value="This module is a work in progress.")
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+        await ctx.send(embed = embed)
 
     elif request == 'fun':
-        embed = discord.Embed(title = f"{config.bot_name} Fun Commands.", color = colors.primary)
+        cmds = bot.get_cog("FunCog").get_commands()
+        # {"help": "Gives help", ["helpme", "commands"]}
+        #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
 
-        embed.add_field(name="String", value="roastme")
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+        commands = '\n'.join(f"**{cmd.name}**: {cmd.help}" for cmd in cmds if not cmd.hidden)
+        
+        embed = discord.Embed(title = f"Fun Commands List.", color = colors.primary)
+        embed.add_field(
+            name = "Commands | The prefix is '.'",
+            value = commands
+        )
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+        await ctx.send(embed = embed)
 
     elif request == 'info':
-        embed = discord.Embed(title = f"{config.bot_name} Information Commands.", color = colors.primary)
+        cmds = bot.get_cog("InformationCog").get_commands()
+        # {"help": "Gives help", ["helpme", "commands"]}
+        #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
 
-        embed.add_field(name="String", value="x, y, z")
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+        commands = '\n'.join(f"**{cmd.name}**: {cmd.help}" for cmd in cmds if not cmd.hidden)
+        
+        embed = discord.Embed(title = f"Information Commands List.", color = colors.primary)
+        embed.add_field(
+            name = "Commands | The prefix is '.'",
+            value = commands
+        )
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+        await ctx.send(embed = embed)
 
     elif request == 'config':
-        embed = discord.Embed(title = f"{config.bot_name} Configuration Commands.", color = colors.primary)
+        cmds = bot.get_cog("ConfigCog").get_commands()
+        # {"help": "Gives help", ["helpme", "commands"]}
+        #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
 
+        commands = '\n'.join(f"**{cmd.name}**: {cmd.help}" for cmd in cmds if not cmd.hidden)
+        
+        embed = discord.Embed(title = f"Config Commands List.", color = colors.primary)
         embed.add_field(
-        name = "Bot Account Configuration",
-        value = f"""
-        **{prefix}setprefix** : Set the bot's prefix.
-        **{prefix}
-        """
+            name = "Commands | The prefix is '.'",
+            value = commands
         )
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+        await ctx.send(embed = embed)
+
+    # Commands
+    elif request in bot.all_commands:
+
+        command = bot.all_commands.get(request)
+
+        text = f"**Usage:** .{command.name} {command.usage}" if command.usage else f"**Usage:** .{command.name}"
+        if command.aliases: text += f"\n**Aliases:** {', '.join(command.aliases)}"
+
+        embed = discord.Embed(
+            title = f"Command: .{command.name}",
+            description = text,
+            color = colors.primary
+        )
+        embed.set_footer(text = command.help)
+
+        await ctx.send(embed = embed)
+
 
     else:
-        embed = discord.Embed(description = f'**Usage:** {prefix}help <help/utility/music/fun/info/config/mod>',color = colors.primary)
+        embed = discord.Embed(description = f'**Usage:** {prefix}help <module/command>',color = colors.primary)
         embed.set_footer(text='Shows the command list.')
 
         await ctx.send(embed=embed)
