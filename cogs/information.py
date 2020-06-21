@@ -175,8 +175,15 @@ class InformationCog(commands.Cog):
 
         embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1])
 
+        user_name = "**❯ User**" if not user.bot else "**❯ Bot**"
+
+        # Tags
+        if user == ctx.guild.owner: user_name += (" **(👑 Server Owner)**")
+        if user.id in self.config.bot_owners: user_name += (" **[Bot Owner]**")
+        if user.id in self.config.bot_vips: user_name += (" **[Bot Premium]**")
+
         embed.add_field(
-            name = "**❯ User**" if not user.bot else "**❯ Bot**",
+            name = user_name,
             value = '\n'.join(user_values),
             inline = False
         )
