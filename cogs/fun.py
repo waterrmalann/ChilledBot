@@ -4,6 +4,8 @@ import discord
 from discord.ext import commands
 # JSON Parser.
 from utils import default
+# Parsing HTML Special Characters (for Trivia)
+import html
 # Randomly picked integers and choices.
 import random
 # Asynchronous Requests.
@@ -21,7 +23,11 @@ class FunCog(commands.Cog):
         self.colors = default.get("colors.json")
         self.bot_prefix = '.'
 
-    @commands.command()
+    #Usage: .{command.name} {command.usage}
+    #embed.set_footer(text = command.help)
+
+
+    @commands.command(usage = "[@user/id]")
     async def notice(self, ctx, user : discord.Member = None):
         """Notice me senpai."""
 
@@ -278,7 +284,7 @@ class FunCog(commands.Cog):
             async with cs.get(url) as r:
                 data = await r.json()
                 quote_text = data['quoteText']
-                quote_author = data['quoteAuthor']
+                quote_author = data['quoteAuthor'] or "Anonymous"
                 quote_link = data['quoteLink']
         url = "http://api.forismatic.com/"
 
@@ -292,6 +298,48 @@ class FunCog(commands.Cog):
             icon_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Cquote2_black.svg/1200px-Cquote2_black.svg.png"
         )
         embed.set_footer(text = url)
+        await ctx.send(embed = embed)
+    
+    @commands.command(name = "trivia")
+    async def trivia(self, ctx, category : str = None):
+        """Fetches a random question from the internet for you to answer."""
+
+        url = "https://opentdb.com/api.php?amount=1"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                data = await r.json()
+                category = data["results"][0]["category"]
+                question = data["results"][0]["question"]
+                answer = data["results"][0]["correct_answer"]
+                choices = data["results"][0]["incorrect_answers"]
+                choices.append(answer)
+                random.shuffle(choices)
+                difficulty = data["results"][0]["difficulty"].capitalize()
+        url = "https://opentdb.com"
+
+        options, number = [], 1
+        for choice in choices:
+            options.append(f"{number}] {choice}")
+            number += 1
+
+        question = html.unescape(question)
+
+        embed = discord.Embed(
+            title = f"Trivia - Difficulty: {difficulty}",
+            color = self.colors.primary
+        )
+        embed.set_author(
+            name = f"Question for {ctx.author}",
+            icon_url = ctx.author.avatar_url
+        )
+        embed.add_field(name = "Category", value = category, inline = True)
+        embed.add_field(name = "Difficulty", value = difficulty, inline = True)
+        
+        embed.add_field(name = "Question", value = question, inline = False)
+        embed.add_field(name = "Options", value = '\n'.join(options), inline = False)
+
+        embed.set_footer(text = f"Use the number of the correct answer. • {url}")
+
         await ctx.send(embed = embed)
 
 def setup(bot):
