@@ -22,9 +22,9 @@ class InformationCog(commands.Cog):
         self.emojis = default.get("emojis.json")
         self.bot_prefix = '.'
     
-    @commands.command()
+    @commands.command(aliases = ['pfp', 'pic'], usage = "[@user/id]")
     async def avatar(self, ctx, user: discord.Member = None):
-        """Return the avatar of the specified user or the author if not."""
+        """Return the avatar of an user (if specified) or the author."""
 
         user = user or ctx.author
         
@@ -137,7 +137,7 @@ class InformationCog(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases = ['whois'])
+    @commands.command(aliases = ['whois'], usage = "[@user/id]")
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         """Returns information about an user (if specified) or the author."""
