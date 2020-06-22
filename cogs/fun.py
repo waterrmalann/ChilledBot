@@ -29,10 +29,11 @@ class FunCog(commands.Cog):
     #embed.set_footer(text = command.help)
 
 
-    @commands.command(usage = "[@user/id]")
+    @commands.command(aliases = ['hug'], usage = "[@user/id]")
     async def notice(self, ctx, user : discord.Member = None):
         """Notice me senpai!"""
 
+        # Return the author if an user is not specified.
         user = user or ctx.author
 
         hugs = [
@@ -272,7 +273,7 @@ class FunCog(commands.Cog):
                 image = data["data"]["image"]
                 title = data["data"]["title"]
                 link = data["data"]["link"]
-                author = data["data"]["author"]
+                #author = data["data"]["author"]
                 sub = data["data"]["sub"]
         url = "http://api.cutegirls.moe"
 
