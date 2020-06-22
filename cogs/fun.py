@@ -430,7 +430,7 @@ class FunCog(commands.Cog):
         try:
             user_answer = await self.bot.wait_for('message', check = checkk, timeout = timer)
         except asyncio.TimeoutError:
-            await ctx.send(f"You didn't answer within {timer} seconds. {ctx.author.mention}.")
+            await ctx.send(f"You didn't answer within {timer} seconds, {ctx.author.mention}. It was {answer}.")
         else:
             user_answer = user_answer.content
             if (user_answer.strip().lower() == answer.lower()) or (user_answer.strip() == str(answer_number)):
