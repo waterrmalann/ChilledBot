@@ -125,7 +125,7 @@ class InformationCog(commands.Cog):
 
         embed.add_field(
             name = "**❯ Roles**",
-            value = f"{len(ctx.guild.roles)} roles.\n" \
+            value = f"{len(ctx.guild.roles) - 1} roles.\n" \
                 f"{ctx.guild.roles[-1].mention} (Top Role)\n" \
                 f"*`{self.bot_prefix}roleinfo [role]` for more info.*",
             inline = False
