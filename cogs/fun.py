@@ -31,16 +31,20 @@ class FunCog(commands.Cog):
 
     @commands.command(usage = "[@user/id]")
     async def notice(self, ctx, user : discord.Member = None):
-        """Notice me senpai."""
+        """Notice me senpai!"""
 
         user = user or ctx.author
 
         hugs = [
-            "`＼(^o^)／`",
-            "`d=(´▽｀)=b`",
-            "`⊂((・▽・))⊃`",
-            "`⊂( ◜◒◝ )⊃`",
-            "`⊂（♡⌂♡）⊃`",
+            "`＼(^o^)／`", "`d=(´▽｀)=b`", "`⊂((・▽・))⊃`"
+            "`⊂( ◜◒◝ )⊃`", "`⊂（♡⌂♡）⊃`", "`\(･◡･)/`",
+            "`(づ｡◕‿‿◕｡)づ`", "`༼ つ ◕‿◕ ༽つ`", "`(づ￣ ³￣)づ`",
+            "`(⊃｡•́‿•̀｡)⊃`",  "`ʕっ•ᴥ•ʔっ`", "`(o´･_･)っ`",
+            "`(⊃ • ʖ̫ • )⊃`", "`(つ≧▽≦)つ`", "`(つ✧ω✧)つ`",
+            "`(っ.❛ ᴗ ❛.)っ`", "`～(つˆДˆ)つ｡☆`", "`⊂(•‿•⊂ )*.✧`",
+            "`⊂(´･◡･⊂ )∘˚˳°`", "`⊂(･ω･*⊂)`", "`⊂(・﹏・⊂)`",
+            "`⊂(・▽・⊂)`", "`⊂(◉‿◉)つ`", "`o((*^▽^*))o`",
+            "`╰(*´︶`*)╯`", "`╰(＾3＾)╯`", "`╰(⸝⸝⸝´꒳`⸝⸝⸝)╯`"
         ]
 
         await ctx.send(f"{user.mention}, `{random.choice(hugs)}`")
@@ -49,7 +53,7 @@ class FunCog(commands.Cog):
     async def cat(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Fetches a random cat picture from the internet."""
 
-        choices = ("Meow... :cat:", "Meow :heart_eyes_cat:", "Here's a feline for you. :cat2:")
+        choices = ("Meow... 🐱", "Meow 😻", "Here's a feline for you. 🐈")
         choice = random.choice(choices)
 
         if num > 3 or num < 1: num = random.randint(1, 3)  # 33%/33%/33% Chance
@@ -91,7 +95,7 @@ class FunCog(commands.Cog):
     async def dog(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Fetches a random dog picture from the internet."""
 
-        choices = ("Woof :dog:", "Bork Bork :service_dog:", "Here's a canine for you. :dog2:", "Arf! :dog:")
+        choices = ("Woof 🐶", "Bork Bork :service_dog:", "Here's a canine for you. 🐕", "Arf! 🐶")
         choice = random.choice(choices)
 
         if num > 3 or num < 1: num = random.randint(1, 3)  # 33%/33%/33% Chance
@@ -274,7 +278,7 @@ class FunCog(commands.Cog):
 
         embed = discord.Embed(title = title, color = self.colors.primary, url = link)
         embed.set_image(url = image)
-        embed.set_footer(text = f"{url} • r/{sub} • {author}")
+        embed.set_footer(text = f"{url} • r/{sub}")
         await ctx.send(embed = embed)
     
     @commands.command(name = "quote")
@@ -304,7 +308,7 @@ class FunCog(commands.Cog):
     
     @commands.command(name = "trivia", usage = "[category] [difficulty] [type]")
     async def trivia(self, ctx, triviacategory : typing.Union[str, int] = 'any', triviadifficulty : str = 'any', triviatype : str = 'any'):
-        """Gives you a trivia question to answer."""
+        """Gives you a trivia question to answer. `trivia help`"""
 
         url = "https://opentdb.com/api.php?amount=1"
 
@@ -424,13 +428,12 @@ class FunCog(commands.Cog):
         await ctx.send(embed = embed)
         # Let's give 15 seconds.
 
-        def checkk(m):
-            return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id
+        def check(m): return m.author == ctx.author and m.channel == ctx.channel
 
         try:
-            user_answer = await self.bot.wait_for('message', check = checkk, timeout = timer)
+            user_answer = await self.bot.wait_for('message', check = check, timeout = timer)
         except asyncio.TimeoutError:
-            await ctx.send(f"You didn't answer within {timer} seconds, {ctx.author.mention}. It was {answer}.")
+            await ctx.send(f"{self.emojis.cross} You didn't answer the question within {timer} seconds, {ctx.author.mention}. It was {answer}.")
         else:
             user_answer = user_answer.content
             if (user_answer.strip().lower() == answer.lower()) or (user_answer.strip() == str(answer_number)):
