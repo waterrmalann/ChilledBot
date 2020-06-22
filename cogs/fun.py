@@ -10,6 +10,7 @@ import html
 import random
 # Asynchronous Requests.
 import aiohttp
+import asyncio
 # Optional Command Parameters.
 import typing
 
@@ -21,6 +22,7 @@ class FunCog(commands.Cog):
         self.bot = bot
         self.config = default.get("config.json")
         self.colors = default.get("colors.json")
+        self.emojis = default.get("emojis.json")
         self.bot_prefix = '.'
 
     #Usage: .{command.name} {command.usage}
@@ -300,14 +302,92 @@ class FunCog(commands.Cog):
         embed.set_footer(text = url)
         await ctx.send(embed = embed)
     
-    @commands.command(name = "trivia")
-    async def trivia(self, ctx, category : str = None):
-        """Fetches a random question from the internet for you to answer."""
+    @commands.command(name = "trivia", usage = "[category] [difficulty] [type]")
+    async def trivia(self, ctx, triviacategory : typing.Union[str, int] = 'any', triviadifficulty : str = 'any', triviatype : str = 'any'):
+        """Gives you a trivia question to answer."""
 
         url = "https://opentdb.com/api.php?amount=1"
+
+        if isinstance(triviacategory, str): triviacategory = triviacategory.strip().lower()
+        triviadifficulty = triviadifficulty.strip().lower()
+        triviatype = triviatype.strip().lower()
+
+        if triviacategory == 'categories':
+
+            trivia_categories = {
+                9: "GK", 10: "Entertainment: Books",
+                11: "Entertainment: Film", 12: "Entertainment: Music",
+                13: "Entertainment: Musicals & Theatres", 14: "Entertainment: Television",
+                15: "Entertainment: Video-Games", 16: "Entertainment: Board Games",
+                17: "Science & Nature", 18: "Science: Computers",
+                19: "Science: Mathematics", 20: "Mythology",
+                21: "Sports", 22: "Geography",
+                23: "History", 24: "Politics",
+                25: "Art", 26: "Celebrities",
+                27: "Animals", 28: "Vehicles",
+                29: "Entertainment: Comics", 30: "Science: Gadgets",
+                31: "Entertainment: Japanese Anime & Manga", 32: "Entertainment: Cartoon & Animations"
+            }
+
+            embed = discord.Embed(
+                title = "Trivia Categories",
+                description = '\n'.join(f"{k}. {v}" for k, v in trivia_categories.items()),
+                color = self.colors.primary
+            )
+            await ctx.send(embed = embed)
+            return
+        if triviacategory == 'difficulties':
+
+            embed = discord.Embed(
+                title = "Trivia Difficulties",
+                description = "Easy\nMedium\nHard",
+                color = self.colors.primary
+            )
+            await ctx.send(embed = embed)
+            return
+        if triviacategory == 'types':
+
+            embed = discord.Embed(
+                title = "Trivia Types",
+                description = "Multiple\nBoolean",
+                color = self.colors.primary
+            )
+            await ctx.send(embed = embed)
+            return
+        if triviacategory == 'help':
+
+            embed = discord.Embed(
+                title = "Trivia Help",
+                description = "The trivia command supports extra parameters if you do wish to control what questions you get.\n\n" \
+                    "**Command Parameters:** `.trivia [category id] [difficulty] [type]`\n" \
+                    "**Command Example:** `.trivia 9 easy multiple` (9 = GK, Easy = Difficulty, Multiple = Multiple Choice Question)\n\n" \
+                    "**Trivia Categories and IDs:** `.trivia categories`\n" \
+                    "**Trivia Difficulties:** `.trivia difficulties`\n" \
+                    "**Trivia Types:** `.trivia types`\n\n" \
+                    "*By default, these parameters are set to 'any'. You can also set it manually, " \
+                    "for example if you want to only control the difficulty and not the category, " \
+                    "`.trivia any easy` will work, it gives an easy question from 'any' randomly picked category.*",
+                color = self.colors.primary
+            )
+            await ctx.send(embed = embed)
+            return
+
+        # Manual Category Modifiers
+        if triviacategory.isdigit():
+            if int(triviacategory) > 8 and int(triviacategory) < 33:
+                url += f'&category={triviacategory}'
+        # Manual Difficulty Modifiers
+        if triviadifficulty == 'easy': url += '&difficulty=easy'
+        if triviadifficulty == 'medium': url += '&difficulty=medium'
+        if triviadifficulty == 'hard': url += '&difficulty=hard'
+        # Manual Type Modifiers
+        if triviatype in {'multiple', 'mcq', 'choices'}: url += '&type=multiple'
+        if triviatype in {'boolean', 'bool', 'true or false'}: url += '&type=boolean'
+
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 data = await r.json()
+                question_type = data["results"][0]["type"]
                 category = data["results"][0]["category"]
                 question = data["results"][0]["question"]
                 answer = data["results"][0]["correct_answer"]
@@ -317,19 +397,20 @@ class FunCog(commands.Cog):
                 difficulty = data["results"][0]["difficulty"].capitalize()
         url = "https://opentdb.com"
 
+        answer_number = 0
         options, number = [], 1
         for choice in choices:
-            options.append(f"{number}] {choice}")
+            options.append(f"{number}] {html.unescape(choice)}")
+            if choice == answer: answer_number = number
             number += 1
+        
+        question, answer = html.unescape(question), html.unescape(answer)
 
-        question = html.unescape(question)
+        timer = random.randint(6, 8) if question_type == 'boolean' else random.randint(9, 13)
 
-        embed = discord.Embed(
-            title = f"Trivia - Difficulty: {difficulty}",
-            color = self.colors.primary
-        )
+        embed = discord.Embed(title = f"You have {timer} seconds to answer.", color = self.colors.primary)
         embed.set_author(
-            name = f"Question for {ctx.author}",
+            name = f"Trivia Question for {ctx.author}",
             icon_url = ctx.author.avatar_url
         )
         embed.add_field(name = "Category", value = category, inline = True)
@@ -341,6 +422,21 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"Use the number of the correct answer. • {url}")
 
         await ctx.send(embed = embed)
+        # Let's give 15 seconds.
+
+        def checkk(m):
+            return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id
+
+        try:
+            user_answer = await self.bot.wait_for('message', check = checkk, timeout = timer)
+        except asyncio.TimeoutError:
+            await ctx.send(f"You didn't answer within {timer} seconds. {ctx.author.mention}.")
+        else:
+            user_answer = user_answer.content
+            if (user_answer.strip().lower() == answer.lower()) or (user_answer.strip() == str(answer_number)):
+                await ctx.send(f"{self.emojis.tick} Your answer was correct! It's {answer}.")
+            else:
+                await ctx.send(f"{self.emojis.cross} Your answer was incorrect. The correct answer was {answer}.")
 
 def setup(bot):
     bot.add_cog(FunCog(bot))
