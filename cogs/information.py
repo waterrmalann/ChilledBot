@@ -131,6 +131,15 @@ class InformationCog(commands.Cog):
             inline = False
         )
 
+        if ctx.guild.features:
+            features = ', '.join(formatting.casify(i) for i in ctx.guild.features)
+            embed.add_field(
+                name = "**❯ Features**",
+                value = features,
+                inline = False
+            )
+
+
         embed.set_thumbnail(url = ctx.guild.icon_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
         embed.timestamp = datetime.utcnow()
@@ -163,22 +172,27 @@ class InformationCog(commands.Cog):
         roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
 
         user_values = []
+        if user.system: user_values.append("**🔧 Discord Staff**")
         user_values.append(f"**Mention:** {user.mention}")
         user_values.append(f"**Status:** {status[2]} {status[0]} {discord_client}")
         if user.activity: user_values.append(f"**Activity:** {user.activity.type.name.capitalize()} {user.activity.name}")
         user_values.append(f"**Registered at:** {user.created_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
 
         server_values = []
+        if user == ctx.guild.owner: server_values.append(f"**👑 Server Owner**")
+        #elif user.guild_permissions.administrator: server_values.append(f"**Server Administrator**")
+        #elif user.guild_permissions.ban_members: server_values.append("**Server Staff**")
+        #else: server_values.append("**Member**")
         server_values.append(f"**Nickname:** {user.display_name}")
         server_values.append(f"**Joined At:** {user.joined_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
         if user.top_role != ctx.guild.default_role: server_values.append(f"**Top Role:** {user.top_role.mention}")
 
         embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1])
 
-        user_name = "**❯ User**" if not user.bot else "**❯ Bot**"
+        user_name = "**❯ Bot**" if user.bot else "**❯ Discord Staff**" if user.system else "**❯ User**"
+
 
         # Tags
-        if user == ctx.guild.owner: user_name += (" **(👑 Server Owner)**")
         if user.id in self.config.bot_owners: user_name += (" **[Bot Owner]**")
         if user.id in self.config.bot_vips: user_name += (" **[Bot Premium]**")
 
@@ -206,6 +220,8 @@ class InformationCog(commands.Cog):
         embed.timestamp = datetime.utcnow()
 
         await ctx.send(embed = embed)
+
+#role = discord.utils.get(ctx.guild.roles, name="DJ") if role in ctx.author.roles:
 
 
 def setup(bot):
