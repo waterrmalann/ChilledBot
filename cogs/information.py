@@ -26,13 +26,13 @@ class InformationCog(commands.Cog):
     async def avatar(self, ctx, user: discord.Member = None):
         """Return the avatar of an user (if specified) or the author."""
 
+        # Return the author if an user is not specified.
         user = user or ctx.author
-        
-        embed = discord.Embed(
-            title = user.name,
-            color = self.colors.primary
-        )
-        embed.set_image(url = user.avatar_url)
+
+        # Get the link to the user's avatar.
+        avatar_url = user.avatar_url
+        embed = discord.Embed(title = user.name, url = avatar_url, color = self.colors.primary)
+        embed.set_image(url = avatar_url)
 
         await ctx.send(embed = embed)
     
@@ -41,6 +41,7 @@ class InformationCog(commands.Cog):
     async def serverinfo(self, ctx):
         """Detailed information about the current guild the bot is in."""
 
+        # The user verification level of the server.
         verification = str(ctx.guild.verification_level)
         if verification == 'none': verification = "[0] None"
         elif verification == 'low': verification = "[1] Low"
@@ -48,15 +49,17 @@ class InformationCog(commands.Cog):
         elif verification == 'high': verification = "[3] (╯°□°）╯︵ ┻━┻ (High)"
         else: verification = "[4] ┻━┻ ﾐヽ(ಠ益ಠ)ノ彡┻━┻ (Extreme)"
 
-        notification = ctx.guild.default_notifications
-        if notification == 'all_messages': notification = "All Messages"
-        else: notification = "Only Mentions"
+        # The guild's default notification level. We format the text properly.
+        notification = formatting.casify(ctx.guild.default_notifications)
 
+        # The guild's content filter status.
+        # (Content filtering algorithms employed by Discord to identify and delete explicit content.)
         contentfilter = ctx.guild.explicit_content_filter
         if contentfilter == 'disabled': contentfilter = "Disabled"
         elif contentfilter == 'no_role': contentfilter = "Enabled for members with no role"
         else: contentfilter = "Enabled for all members"
 
+        # The server's (voice/host?) region with their respective country flags.
         region = str(ctx.guild.region)
         if region in ('us-central', 'us-east', 'us-south', 'us-west'):region =  f"US {region[3:].capitalize()} :flag_us:"
         elif region == 'europe': region = "Europe :flag_eu:"
@@ -89,6 +92,30 @@ class InformationCog(commands.Cog):
         total_online = bots_online + humans_online
         total_offline = bots_offline + humans_offline
 
+        
+        server_values = []  # ❯ Server
+        server_values.append(f"**Owner:** {ctx.guild.owner.mention} (`{ctx.guild.owner.id}`)")
+        server_values.append(f"**Creation:** {ctx.guild.created_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
+        server_values.append(f"**Region:** {region}\n")
+        server_values.append(f"**Verification Level:** {verification}")
+        server_values.append(f"**Notification Level:** {notification}")
+        server_values.append(f"**Content Filter:** {contentfilter}")
+
+        member_values = []  # ❯ Members
+        member_values.append(f"{ctx.guild.member_count} total. ({total_humans} humans, {total_bots} bots)")
+        member_values.append(f"{(total_online / total_members * 100):.2f}% of members online. ({(humans_online / total_members * 100):.2f}% humans, {(bots_online / total_members * 100):.2f}% bots)")
+        member_values.append(f"*`{self.bot_prefix}userinfo [@user]` for more info.*")
+
+        channel_values = []  # ❯ Channels
+        channel_values.append(f"{categories} categories.")
+        channel_values.append(f"{total_channels} channels. ({text_channels} text channels, {voice_channels} voice channels)")
+        channel_values.append(f"*`{self.bot_prefix}channelinfo [#channel]` for more info.*")
+
+        role_values = []  # ❯ Roles
+        role_values.append(f"{len(ctx.guild.roles) - 1} roles.")
+        role_values.append(f"{ctx.guild.roles[-1].mention} (Top Role)")
+        role_values.append(f"*`{self.bot_prefix}roleinfo [role]` for more info.*")
+
         embed = discord.Embed(
             title = f"{ctx.guild.name} (`{ctx.guild.id}`)",
             color = self.colors.primary
@@ -96,38 +123,25 @@ class InformationCog(commands.Cog):
 
         embed.add_field(
             name = "**❯ Server**",
-            value = f"**Owner:** {ctx.guild.owner.mention} (`{ctx.guild.owner.id}`)\n" \
-                f"**Creation:** {ctx.guild.created_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}\n" \
-                f"**Region:** {region}\n\n" \
-                f"**Verification Level:** {verification}\n" \
-                f"**Notification Level:** {notification}\n" \
-                f"**Content Filter:** {contentfilter}",
+            value = '\n'.join(server_values),
             inline = False
         )
-
+        
         embed.add_field(
             name = "**❯ Members**",
-            value = f"{ctx.guild.member_count} total. ({total_humans} humans, {total_bots} bots)\n" \
-                f"{total_online} online. ({humans_online} humans, {bots_online} bots)\n" \
-                f"{(total_online / total_members * 100):.2f}% of members online. ({(humans_online / total_members * 100):.2f}% humans, {(bots_online / total_members * 100):.2f}% bots)\n" \
-                f"*`{self.bot_prefix}userinfo [@user]` for more info.*",
+            value = '\n'.join(member_values),
             inline = False
         )
 
         embed.add_field(
             name = "**❯ Channels**",
-            value = f"{categories} categories.\n" \
-                f"{total_channels} channels. ({text_channels} text channels, {voice_channels} voice channels)\n" \
-                f"*`{self.bot_prefix}channelinfo [#channel]` for more info.*",
+            value = '\n'.join(channel_values),
             inline = False
         )
 
-
         embed.add_field(
             name = "**❯ Roles**",
-            value = f"{len(ctx.guild.roles) - 1} roles.\n" \
-                f"{ctx.guild.roles[-1].mention} (Top Role)\n" \
-                f"*`{self.bot_prefix}roleinfo [role]` for more info.*",
+            value = '\n'.join(role_values),
             inline = False
         )
 
@@ -139,46 +153,53 @@ class InformationCog(commands.Cog):
                 inline = False
             )
 
-
         embed.set_thumbnail(url = ctx.guild.icon_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
         embed.timestamp = datetime.utcnow()
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed = embed)
 
     @commands.command(aliases = ['whois'], usage = "[@user/id]")
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         """Returns information about an user (if specified) or the author."""
 
+        # Return the author if an user is not specified.
         user = user or ctx.author
 
-        # Platforms the user is currently using.
-        platforms = []
+        platforms = [] # Platforms the user is currently online on.
         if user.desktop_status != discord.Status.offline: platforms.append("Desktop")
         if user.mobile_status != discord.Status.offline: platforms.append("Mobile")
         if user.web_status != discord.Status.offline: platforms.append("Web Client")
         discord_client = f"({' | '.join(platforms)})" if platforms else ''
 
         statuses = {
+            # Status: (Name, Color, Emoji)
+            # The name is to show the name of the status.
+            # The color is to color the embed line based on their status.
+            # The emoji is to show alongside the name.
             'online': ("Online", self.colors.online, self.emojis.online),
             'offline': ("Invisible" if user == ctx.author else "Offline", self.colors.offline, self.emojis.offline),
             'dnd': ("Do Not Disturb", self.colors.dnd, self.emojis.dnd),
             'idle': ("Idle", self.colors.idle, self.emojis.idle)
         }
+
+        # Get the user's current status alongside it's color and emoji.
+        # If not found (ehrm?!) then it will return the offline status.
         status = statuses.get(str(user.status), statuses['offline'])
 
         # (We loop through the user roles in reverse order so that it's displayed as in the hierarchy.)
         roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
 
-        user_values = []
-        if user.system: user_values.append("**🔧 Discord Staff**")
+        user_values = []  # ❯ Bot / ❯ User / ❯ Discord Staff
+        if user.id in self.config.bot_owners: user_values.append(f"**I created this bot **")
+        if user.id in self.config.bot_vips: user_values.append(f"**I support this bot.**")
         user_values.append(f"**Mention:** {user.mention}")
         user_values.append(f"**Status:** {status[2]} {status[0]} {discord_client}")
         if user.activity: user_values.append(f"**Activity:** {user.activity.type.name.capitalize()} {user.activity.name}")
         user_values.append(f"**Registered at:** {user.created_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
 
-        server_values = []
+        server_values = []  # ❯ Server
         if user == ctx.guild.owner: server_values.append(f"**👑 Server Owner**")
         #elif user.guild_permissions.administrator: server_values.append(f"**Server Administrator**")
         #elif user.guild_permissions.ban_members: server_values.append("**Server Staff**")
@@ -189,15 +210,8 @@ class InformationCog(commands.Cog):
 
         embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1])
 
-        user_name = "**❯ Bot**" if user.bot else "**❯ Discord Staff**" if user.system else "**❯ User**"
-
-
-        # Tags
-        if user.id in self.config.bot_owners: user_name += (" **[Bot Owner]**")
-        if user.id in self.config.bot_vips: user_name += (" **[Bot Premium]**")
-
         embed.add_field(
-            name = user_name,
+            name = "**❯ Bot**" if user.bot else "**❯ Discord Staff**" if user.system else "**❯ User**",
             value = '\n'.join(user_values),
             inline = False
         )
@@ -208,10 +222,12 @@ class InformationCog(commands.Cog):
             inline = False
         )
 
-        # If the user has roles, we show that else we show all the permissions they have in the guild.
-        if roles: 
+        
+        if roles:
+            # If the user has roles, we show that.
             embed.add_field(name = f"**❯ Roles ({len(user.roles) - 1})**", value = roles, inline = False)
         else:
+            # else we show all the permissions they have in the guild.
             permissions = list(user.guild_permissions)
             embed.add_field(name = f"**❯ Permissions ({len(permissions)})**", value = ', '.join(formatting.casify(i[0]) for i in permissions), inline = False)
 
@@ -221,7 +237,7 @@ class InformationCog(commands.Cog):
 
         await ctx.send(embed = embed)
 
-#role = discord.utils.get(ctx.guild.roles, name="DJ") if role in ctx.author.roles:
+    #role = discord.utils.get(ctx.guild.roles, name="Role") if role in ctx.author.roles:
 
 
 def setup(bot):
