@@ -17,6 +17,7 @@ class OwnerCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.config = default.get("config.json")
         self.emojis = default.get("emojis.json")
         self.colors = default.get("colors.json")
     
@@ -55,15 +56,44 @@ class OwnerCog(commands.Cog):
     async def cogs_reload(self, ctx, *, cog: str):
         """Command to reload cogs in real-time."""
 
-        if not cog.startswith('cogs.'):
-            cog = 'cogs.' + cog
+        if cog.lower() == 'all':
+            
+            progress = []
+            start = time.perf_counter()
+            cog_count = len(self.config.cogs)
+            cog_counter = 0
+            for cog in self.config.cogs:
+                try:
+                    self.bot.reload_extension(cog)
+                except Exception as ex:
+                    progress.append(f"{self.emojis.cross} {cog}")
+                else:
+                    cog_counter += 1
+                    progress.append(f"{self.emojis.tick} {cog}")
+            end = time.perf_counter()
+            duration = (end - start) * 1000
 
-        try:
-            self.bot.reload_extension(cog)
-        except Exception as ex:
-            await ctx.send(f"{self.emojis.cross} **Error reloading {cog}** `[ex {type(ex).__name__} - {ex}]`")
+            embed = discord.Embed(
+                title = f"{self.emojis.tick if cog_count == cog_counter else self.emojis.neutral} Reloaded cogs.",
+                description = '\n'.join(progress),
+                color = self.colors.primary
+            )
+            embed.set_footer(text = f"Took {duration:.2f}ms")
+            embed.timestamp = datetime.utcnow()
+            await ctx.send(embed = embed)
+            
+        
         else:
-            await ctx.send(f"{self.emojis.tick} **Successfully reloaded {cog}**")
+
+            if not cog.startswith('cogs.'):
+                cog = 'cogs.' + cog
+
+            try:
+                self.bot.reload_extension(cog)
+            except Exception as ex:
+                await ctx.send(f"{self.emojis.cross} **Error reloading {cog}** `[ex {type(ex).__name__} - {ex}]`")
+            else:
+                await ctx.send(f"{self.emojis.tick} **Successfully reloaded {cog}**")
     
     @commands.command(aliases = ['eval'], hidden = True, usage = "<code>")
     @commands.is_owner()
