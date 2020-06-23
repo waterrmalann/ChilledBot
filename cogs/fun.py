@@ -16,7 +16,7 @@ import typing
 
 
 class FunCog(commands.Cog):
-    """Entertainment / Fun Commands."""
+    """Entertainment & Miscellaneous Commands."""
 
     def __init__(self, bot):
         self.bot = bot
@@ -30,7 +30,7 @@ class FunCog(commands.Cog):
 
 
     @commands.command(aliases = ['hug'], usage = "[@user/id]")
-    async def notice(self, ctx, user : discord.Member = None):
+    async def notice(self, ctx, user: discord.Member = None):
         """Notice me senpai!"""
 
         # Return the author if an user is not specified.
@@ -38,7 +38,7 @@ class FunCog(commands.Cog):
 
         hugs = [
             "`＼(^o^)／`", "`d=(´▽｀)=b`", "`⊂((・▽・))⊃`"
-            "`⊂( ◜◒◝ )⊃`", "`⊂（♡⌂♡）⊃`", "`\(･◡･)/`",
+            "`⊂( ◜◒◝ )⊃`", "`⊂（♡⌂♡）⊃`", r"`\(･◡･)/`",
             "`(づ｡◕‿‿◕｡)づ`", "`༼ つ ◕‿◕ ༽つ`", "`(づ￣ ³￣)づ`",
             "`(⊃｡•́‿•̀｡)⊃`",  "`ʕっ•ᴥ•ʔっ`", "`(o´･_･)っ`",
             "`(⊃ • ʖ̫ • )⊃`", "`(つ≧▽≦)つ`", "`(つ✧ω✧)つ`",
@@ -50,8 +50,8 @@ class FunCog(commands.Cog):
 
         await ctx.send(f"{user.mention}, `{random.choice(hugs)}`")
     
-    @commands.command(aliases=["feline", "tom", "mouser", "pussy", "meow"])
-    async def cat(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
+    @commands.command(aliases = ["feline", "tom", "mouser", "pussy", "meow"])
+    async def cat(self, ctx, num: typing.Optional[int] = 0, fact : bool = False):
         """Fetches a random cat picture from the internet."""
 
         choices = ("Meow... 🐱", "Meow 😻", "Here's a feline for you. 🐈")
@@ -499,23 +499,23 @@ class FunCog(commands.Cog):
         await ctx.send(embed = embed)
     
     @commands.command(name = 'reddit', usage = '[r/subreddit]')
-    async def reddit(self, ctx, subreddit: str = 'r/all'):
+    async def reddit(self, ctx, subreddit: str = 'r/all', sort_by: str = 'hot'):
         """Fetches content from a specified subreddit."""
 
         subreddit = subreddit.strip()
         if not subreddit.startswith('r/'):
             subreddit = 'r/' + subreddit
         
-        url = f"https://www.reddit.com/{subreddit}/new.json?sort=hot"
+        url = f"https://www.reddit.com/{subreddit}/new.json?sort={sort_by}"
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 post = await r.json()
                 rand = random.randint(0, len(post['data']['children']))
                 post = post["data"]["children"][rand]["data"]
-
                 title = post["title"]
                 image = post["url"]
+                content = post["selftext"]
                 link = "https://www.reddit.com" + post["permalink"]
                 nsfw = post["over_18"]
         
@@ -523,7 +523,7 @@ class FunCog(commands.Cog):
             await ctx.send("⚠️ This post contains NSFW content! It cannot be previewed here.")
             return
 
-        embed = discord.Embed(title = title, url = link, color = self.colors.primary)
+        embed = discord.Embed(title = title, url = link, description = content, color = self.colors.primary)
         embed.set_image(url = image)
         embed.set_footer(text = subreddit)
         await ctx.send(embed = embed)
@@ -648,7 +648,6 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"Use the number of the correct answer. • {url}")
 
         await ctx.send(embed = embed)
-        # Let's give 15 seconds.
 
         def check(m): return m.author == ctx.author and m.channel == ctx.channel
 
