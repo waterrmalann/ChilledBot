@@ -51,7 +51,7 @@ class OwnerCog(commands.Cog):
         else:
             await ctx.send(f"{self.emojis.tick} **Successfully unloaded {cog}**")
         
-    @commands.command(name = 'reload', hidden = True, usage = "<cogs.name>")
+    @commands.command(name = 'reload', hidden = True, usage = "<cogs.name/all>")
     @commands.is_owner()
     async def cogs_reload(self, ctx, *, cog: str):
         """Command to reload cogs in real-time."""
@@ -66,19 +66,19 @@ class OwnerCog(commands.Cog):
                 try:
                     self.bot.reload_extension(cog)
                 except Exception as ex:
-                    progress.append(f"{self.emojis.cross} {cog}")
+                    progress.append(f"{self.emojis.cross} | **`Couldn't Reload {cog}`**")
                 else:
                     cog_counter += 1
-                    progress.append(f"{self.emojis.tick} {cog}")
+                    progress.append(f"{self.emojis.tick} **`Reloaded {cog}`**`")
             end = time.perf_counter()
             duration = (end - start) * 1000
 
             embed = discord.Embed(
-                title = f"{self.emojis.tick if cog_count == cog_counter else self.emojis.neutral} Reloaded cogs.",
+                title = f"{self.emojis.tick if cog_count == cog_counter else self.emojis.neutral} Reloaded {cog_counter}/{cog_count} cogs.",
                 description = '\n'.join(progress),
                 color = self.colors.primary
             )
-            embed.set_footer(text = f"Took {duration:.2f}ms")
+            embed.set_footer(text = f"Reloaded in {duration:.2f}ms")
             embed.timestamp = datetime.utcnow()
             await ctx.send(embed = embed)
             
