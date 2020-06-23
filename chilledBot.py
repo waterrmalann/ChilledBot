@@ -7,7 +7,9 @@ from utils import default, logger
 # DateTime Parser.
 from datetime import datetime
 # Operating System Functions.
-import sys, traceback, os
+import sys, traceback, os, psutil, platform
+import time
+from line_counter import count_lines
 
 """
     A simple discord bot made using Python, utilizing the cogs functionality.
@@ -240,6 +242,91 @@ async def help(ctx, param = 'help'):
         embed.set_footer(text='Shows the command list.')
 
         await ctx.send(embed=embed)
+
+
+@bot.command()
+async def botstats(ctx):
+    """Detailed statistics of the bot"""
+
+    mem = psutil.virtual_memory()
+
+    embed = discord.Embed(
+        title = f"[Statistics] {bot.user.name} (`{str(bot.user.id)}``)",
+        color = colors.secondary
+    )
+    file_data = count_lines()
+    
+    embed.add_field(
+        name='Discord.py',
+        value = f'[{discord.__version__}](https://discordpy.readthedocs.io/en/latest/)',
+        inline=True
+    )
+    embed.add_field(
+        name='Python',
+        value = f'[{platform.python_version()}](https://www.python.org/)',
+        inline=True
+    )
+    embed.add_field(
+        name='OS',
+        value = f'{platform.system()}, {platform.machine()}',
+        inline=True
+    )
+    embed.add_field(
+        name='Memory Usage',
+        value = f'{round(mem.used / 1024 / 1024 / 1024, 2)}MB',
+        inline=True
+    )
+    embed.add_field(
+        name='Guilds',
+        value = len(bot.guilds),
+        inline=True
+    )
+    embed.add_field(
+        name='Users',
+        value = len(bot.users),
+        inline=True
+    )
+
+    embed.add_field(
+        name='Uptime',
+        value = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(psutil.boot_time())),
+        inline=True
+    )
+    embed.add_field(
+        name='Loaded Cogs',
+        value = len(bot.cogs),
+        inline=True
+    )
+    embed.add_field(
+        name = "Loaded Commands",
+        value = len(bot.commands)
+    )
+    embed.add_field(
+        name='Developed by',
+        value = 'Zeesmic#8023',
+        inline=False
+    )
+    embed.add_field(
+        name='Created on',
+        value = f'{bot.user.created_at.strftime("%A, %B %d %Y @ %H:%M:%S %p")}',
+        inline=False
+    )
+    embed.add_field(
+        name='File size',
+        value = '44.0 KB (45,056 bytes)\n7.0 KB (7,221 bytes)',
+        inline=False
+    )
+    embed.add_field(
+        name='Silent Mode',
+        value = False,
+        inline=False
+    )
+
+    #embed.set_footer(text='Requested by ' + str(ctx.message.author), icon_url=ctx.message.author.avatar_url)
+    embed.set_footer(text=f"Made with ❤ in Python {platform.python_version()}", icon_url='http://i.imgur.com/5BFecvA.png')
+
+
+    await ctx.send(embed=embed)
 
 @bot.event
 async def on_connect():
