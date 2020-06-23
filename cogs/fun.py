@@ -307,6 +307,59 @@ class FunCog(commands.Cog):
         embed.set_footer(text = url)
         await ctx.send(embed = embed)
     
+    @commands.command(name = 'meme', aliases = ['dankmeme', 'memes'], usage = '[memes/dankmemes/me_irl]')
+    async def meme(self, ctx, subreddit: str = 'any'):
+        """Fetches a hot meme from r/memes, r/dankmemes, or r/me_irl picked randomly."""
+
+        meme_subreddits = (
+            ('r/memes', "https://www.reddit.com/r/memes/new.json?sort=hot"),
+            ('r/dankmemes', "https://www.reddit.com/r/dankmemes/new.json?sort=hot"),
+            ('r/me_irl', "https://www.reddit.com/r/me_irl/new.json?sort=hot")
+        )
+        url = random.choice(meme_subreddits)
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url[1]) as r:
+                res = await r.json()
+                rand = random.randint(0, 25)  # len(res['data']['children'])
+                title = res["data"]["children"][rand]["data"]["title"]
+                image = res["data"]["children"][rand]["data"]["url"]
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        embed.set_image(url = image)
+        embed.set_footer(text = url[0])
+        await ctx.send(embed = embed)
+    
+    @commands.command(name = 'reddit', usage = '[r/subreddit]')
+    async def reddit(self, ctx, subreddit: str = 'r/all'):
+        """Fetches content from a specified subreddit."""
+
+        subreddit = subreddit.strip()
+        if not subreddit.startswith('r/'):
+            subreddit = 'r/' + subreddit
+        
+        url = f"https://www.reddit.com/{subreddit}/new.json?sort=hot"
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                post = await r.json()
+                rand = random.randint(0, 25)  # len(res['data']['children'])
+                post = post["data"]["children"][rand]["data"]
+
+                title = post["title"]
+                image = post["url"]
+                link = "https://www.reddit.com" + post["permalink"]
+                nsfw = post["over_18"]
+        
+        if nsfw and not ctx.channel.nsfw:
+            await ctx.send("⚠️ This post contains NSFW content! It cannot be previewed here.")
+            return
+
+        embed = discord.Embed(title = title, url = link, color = self.colors.primary)
+        embed.set_image(url = image)
+        embed.set_footer(text = subreddit)
+        await ctx.send(embed = embed)
+        
     @commands.command(name = "trivia", usage = "[category] [difficulty] [type]")
     async def trivia(self, ctx, triviacategory : typing.Union[str, int] = 'any', triviadifficulty : str = 'any', triviatype : str = 'any'):
         """Gives you a trivia question to answer. `trivia help`"""
