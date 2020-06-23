@@ -3,10 +3,16 @@
     "cross": "<:red_mark:722774582490169414>",
     "neutral": "<:neutral:722774581814755399>",
 
-    "online": "<:online:701003408483680326>",
-    "dnd": "<:dnd:701003368579203122>",
-    "idle": "<:idle:701003480005083196>",
-    "offline": "<:offline:701003364380573706>",
+    "roundtick": "<:round_red_mark:724831986623053864>",
+    "roundcross": "<:round_green_tick:724831986015010838>",
+
+    "bordertick": "<:border_green_tick:724833555037028433>",
+    "bordercross": "<:border_red_mark:724833556404371478>",
+
+    "online": "<:online:724829563443609721>",
+    "dnd": "<:dnd:724829556342652998>",
+    "idle": "<:idle:724829563623833670>",
+    "offline": "<:offline:724829567453233163>",
 
     "pingsock": "<:ping_sock:695626767817506870>"
 }
