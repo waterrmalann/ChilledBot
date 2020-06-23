@@ -309,25 +309,193 @@ class FunCog(commands.Cog):
     
     @commands.command(name = 'meme', aliases = ['dankmeme', 'memes'], usage = '[memes/dankmemes/me_irl]')
     async def meme(self, ctx, subreddit: str = 'any'):
-        """Fetches a hot meme from r/memes, r/dankmemes, or r/me_irl picked randomly."""
+        """Fetches a meme for you."""
 
-        meme_subreddits = (
-            ('r/memes', "https://www.reddit.com/r/memes/new.json?sort=hot"),
-            ('r/dankmemes', "https://www.reddit.com/r/dankmemes/new.json?sort=hot"),
-            ('r/me_irl', "https://www.reddit.com/r/me_irl/new.json?sort=hot")
-        )
-        url = random.choice(meme_subreddits)
+        meme_subreddits = ('r/memes', 'r/dankmemes', 'r/me_irl')
+
+        if not subreddit.startswith('r/'): subreddit = f"r/{subreddit}"
+
+        if subreddit not in meme_subreddits: subreddit = random.choice(meme_subreddits)
+
+        subreddit = random.choice(meme_subreddits)
+        url = f"https://www.reddit.com/{subreddit}/new.json?sort=hot"
 
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url[1]) as r:
+            async with cs.get(url) as r:
                 res = await r.json()
-                rand = random.randint(0, 25)  # len(res['data']['children'])
+                rand = random.randint(0, len(res['data']['children']))
                 title = res["data"]["children"][rand]["data"]["title"]
                 image = res["data"]["children"][rand]["data"]["url"]
+                upvotes = res["data"]["children"][rand]["data"]["score"]
+                comments = res["data"]["children"][rand]["data"]["num_comments"]
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
         embed.set_image(url = image)
-        embed.set_footer(text = url[0])
+        embed.set_footer(text = f"{subreddit} • 👍 {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+
+    @commands.command(aliases = ['wholesomememes', 'wholesome_meme', 'wholesomememe', 'wmeme'])
+    async def wholesome(self, ctx):
+        """Fetches a wholesome meme for you."""
+
+        url = f"https://www.reddit.com/r/wholesomememes/new.json?sort=hot"
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+                rand = random.randint(0, len(res['data']['children']))
+                title = res["data"]["children"][rand]["data"]["title"]
+                image = res["data"]["children"][rand]["data"]["url"]
+                upvotes = res["data"]["children"][rand]["data"]["score"]
+                comments = res["data"]["children"][rand]["data"]["num_comments"]
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/wholesomememes • 👍 {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+
+    @commands.command(name = 'discordmeme', aliases = ['discordmemes', 'discordirl', 'discord_irl'])
+    async def discordmeme(self, ctx):
+        """Fetches a discord meme for you."""
+
+        url = f"https://www.reddit.com/r/discord_irl/new.json?sort=hot"
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+                rand = random.randint(0, len(res['data']['children']))
+                title = res["data"]["children"][rand]["data"]["title"]
+                image = res["data"]["children"][rand]["data"]["url"]
+                upvotes = res["data"]["children"][rand]["data"]["score"]
+                comments = res["data"]["children"][rand]["data"]["num_comments"]
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/discord_irl • 👍 {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+
+    @commands.command(name = 'surrealmeme', aliases = ['surreal', 'surrealmemes'])
+    async def surrealmeme(self, ctx):
+        """Fetches a surreal meme for you."""
+
+        url = f"https://www.reddit.com/r/surrealmemes/new.json?sort=hot"
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+                rand = random.randint(0, len(res['data']['children']))
+                title = res["data"]["children"][rand]["data"]["title"]
+                image = res["data"]["children"][rand]["data"]["url"]
+                upvotes = res["data"]["children"][rand]["data"]["score"]
+                comments = res["data"]["children"][rand]["data"]["num_comments"]
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/surrealmemes • 👍 {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+
+    @commands.command(aliases = ['todayilearned'])
+    async def til(self, ctx):
+        """You learn something new everyday!"""
+
+        url = "https://www.reddit.com/r/todayilearned/new.json?sort=hot"
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                post = await r.json()
+                rand = random.randint(0, len(post['data']['children']))
+                post = post["data"]["children"][rand]["data"]
+                title = post["title"]
+                content = html.unescape(post["selftext"])
+                upvotes = post["score"]
+                comments = post["num_comments"]
+                link = f'https://www.reddit.com{post["permalink"]}'
+
+        embed = discord.Embed(
+            title = title,
+            url = link,
+            description = content,
+            color = self.colors.primary
+        )
+        embed.set_footer(text = f"r/todayilearned • 👍 {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+
+    @commands.command(aliases = ['jokes'])
+    async def joke(self, ctx):
+        """Gives you an joke."""
+
+        url = "https://www.reddit.com/r/Jokes/new.json?sort=hot"
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                post = await r.json()
+                rand = random.randint(0, len(post['data']['children']))
+                post = post["data"]["children"][rand]["data"]
+                title = post["title"]
+                content = html.unescape(post["selftext"])
+                upvotes = post["score"]
+                comments = post["num_comments"]
+                link = f'https://www.reddit.com{post["permalink"]}'
+
+        embed = discord.Embed(
+            title = title,
+            url = link,
+            description = content,
+            color = self.colors.primary
+        )
+        embed.set_footer(text = f"r/Jokes • 👍 {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
+    @commands.command(aliases = ['antijokes'])
+    async def antijoke(self, ctx):
+        """Gives you an anti-joke."""
+
+        url = "https://www.reddit.com/r/AntiJokes/new.json?sort=hot"
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                post = await r.json()
+                rand = random.randint(0, len(post['data']['children']))
+                post = post["data"]["children"][rand]["data"]
+                title = post["title"]
+                content = html.unescape(post["selftext"])
+                upvotes = post["score"]
+                comments = post["num_comments"]
+                link = f'https://www.reddit.com{post["permalink"]}'
+
+        embed = discord.Embed(
+            title = title,
+            url = link,
+            description = content,
+            color = self.colors.primary
+        )
+        embed.set_footer(text = f"r/AntiJokes • 👍 {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
+    @commands.command(aliases = ['antiantijokes'])
+    async def antiantijoke(self, ctx):
+        """Gives you an anti-anti-joke."""
+
+        url = "https://www.reddit.com/r/AntiAntiJokes/new.json?sort=hot"
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                post = await r.json()
+                rand = random.randint(0, len(post['data']['children']))
+                post = post["data"]["children"][rand]["data"]
+                title = post["title"]
+                content = html.unescape(post["selftext"])
+                upvotes = post["score"]
+                comments = post["num_comments"]
+                link = f'https://www.reddit.com{post["permalink"]}'
+
+        embed = discord.Embed(
+            title = title,
+            url = link,
+            description = content,
+            color = self.colors.primary
+        )
+        embed.set_footer(text = f"r/AntiAntiJokes • 👍 {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
     @commands.command(name = 'reddit', usage = '[r/subreddit]')
@@ -343,7 +511,7 @@ class FunCog(commands.Cog):
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 post = await r.json()
-                rand = random.randint(0, 25)  # len(res['data']['children'])
+                rand = random.randint(0, len(post['data']['children']))
                 post = post["data"]["children"][rand]["data"]
 
                 title = post["title"]
