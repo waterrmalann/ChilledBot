@@ -2,16 +2,18 @@
 import discord
 # Command Handler.
 from discord.ext import commands
-# Time Value Manipulation.
-import time
+# Operating System Functions.
+import os
 # Object Inspector.
 import inspect
+# Asynchronous Package.
+import asyncio
+# Time Value Manipulation.
+import time
 # DateTime Parser.
 from datetime import datetime
 # JSON Parser.
 from utils import default
-# Operating System Functions.
-import os
 
 class OwnerCog(commands.Cog):
 
@@ -140,6 +142,17 @@ class OwnerCog(commands.Cog):
         embed.timestamp = datetime.utcnow()
 
         await ctx.send(embed = embed)
+
+    @commands.command(aliases = ['kill', 'exit'])
+    @commands.is_owner()
+    async def shutdown(self, ctx):
+        """Shuts down the bot"""
+
+        print("[Disconnect] Bot Terminated")
+        msg = await ctx.send(':skull: **Terminating...**')
+        await asyncio.sleep(1.5)
+        await msg.edit(content = ":skull_crossbones: **Terminated**")
+        await self.bot.logout()
 
 def setup(bot):
     """Sets up the cog."""

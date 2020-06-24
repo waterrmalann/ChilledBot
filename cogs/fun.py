@@ -2,18 +2,19 @@
 import discord
 # Command Handler.
 from discord.ext import commands
-# JSON Parser.
-from utils import default
-# Parsing HTML Special Characters (for Trivia)
-import html
-# Randomly picked integers and choices.
-import random
-# Asynchronous Requests.
-import aiohttp
+# Asynchronous Package & Requests.
 import asyncio
+import aiohttp
 # Optional Command Parameters.
 import typing
+# Randomization.
+import random
+# Parsing HTML Special Characters (for Trivia)
+import html
+# DateTime Parser.
 from datetime import datetime
+# JSON Parser.
+from utils import default
 
 
 class FunCog(commands.Cog):

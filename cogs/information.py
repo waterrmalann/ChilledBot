@@ -7,10 +7,10 @@
 import discord
 # Command Handler.
 from discord.ext import commands
-# JSON Parser & Text Formatter.
-from utils import default, formatting
 # DateTime Parser.
 from datetime import datetime
+# JSON Parser & Text Formatter.
+from utils import default, formatting
 
 class InformationCog(commands.Cog):
     """Information-Related Commands."""
