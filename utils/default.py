@@ -11,3 +11,6 @@ def get(file):
         raise AttributeError("Unknown Argument")
     except FileNotFoundError:
         raise FileNotFoundError("JSON File wasn't found.")
+
+def datefr(date, clock = True):
+    return date.strftime("%A, %B %d %Y @ %H:%M:%S %p") if clock else date.strftime("%A, %B %d %Y")
