@@ -13,6 +13,7 @@ import aiohttp
 import asyncio
 # Optional Command Parameters.
 import typing
+from datetime import datetime
 
 
 class FunCog(commands.Cog):
@@ -29,6 +30,118 @@ class FunCog(commands.Cog):
     #Usage: .{command.name} {command.usage}
     #embed.set_footer(text = command.help)
 
+
+    @commands.command(name = '8ball', aliases = ['eightball', 'eight-ball', '8-ball'], usage = '<question>')
+    async def eightball(self, ctx, *, question: str = None):
+        """Ask the magic 8-ball your doubts."""
+
+        if not question: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
+
+        fortunes = (
+            # Positive Responses
+            "It is certain",
+            "It is decidedly so",
+            "Without a doubt",
+            "Yes, definitely",
+            "You may rely on it",
+            "As I see it, yes",
+            "Most likely",
+            "Outlook good",
+            "Yes",
+            "Signs point to yes",
+            # Neutral Responses
+            "Reply hazy try again",
+            "Ask again later",
+            "Better not tell you now",
+            "Cannot predict now",
+            "Concentrate and ask again",
+            # Negative Responses
+            "Don't count on it",
+            "My reply is no",
+            "My sources say no",
+            "Outlook not so good",
+            "Very doubtful"
+        )
+
+        embed = discord.Embed(color = self.colors.primary)
+        embed.set_author(name='8ball', icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/8-Ball_Pool.svg/240px-8-Ball_Pool.svg.png')
+        embed.set_footer(text = f"Asked by {ctx.author}", icon_url = ctx.author.avatar_url)
+        embed.add_field(name = question, value = f"**Answer:** {random.choice(fortunes)}")
+        embed.timestamp = datetime.utcnow()
+        await ctx.send(embed = embed)
+
+    @commands.command(aliases = ['flipcoin', 'tosscoin', 'coinflip'])
+    async def coin(self, ctx):
+        """Flip a coin"""
+
+        choices = ('heads', 'tails')
+
+        embed = discord.Embed(
+            description = f"You flipped a coin and its **{random.choice(choices)}**",
+            color = self.colors.primary
+        )
+        embed.set_footer(text=f"Tossed by {ctx.author}", icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=embed)
+    
+    @commands.command(aliases = ['dice'], usage = '[number]')
+    async def roll(self, ctx, number: typing.Optional[int] = 6):
+        """Roll a dice or a specified number"""
+
+        if number < 2: number = 6
+
+        if number == 6:
+            embed = discord.Embed(
+                description = f"🎲 You rolled a dice and got **{random.randint(1, 6)}**",
+                color = self.colors.primary
+            )
+            embed.set_footer(text = f"Rolled by {ctx.author}", icon_url = ctx.author.avatar_url)
+            await ctx.send(embed = embed)
+        else:
+            embed = discord.Embed(
+                description = f"🎲 You rolled a number and got **{random.randint(1, number)}**",
+                color = self.colors.primary
+            )
+            embed.set_footer(text = f"Rolled by {ctx.author}", icon_url = ctx.author.avatar_url)
+            await ctx.send(embed = embed)
+    
+    @commands.command(aliases = ['sps', 'stonepaperscissors', 'rockpaperscissors'])
+    async def rps(self, ctx, choice = None):
+        """Rock, paper, scissors with the bot"""
+
+        choices = ('rock', 'paper', 'scissors')
+
+        if not choice or choice.lower() not in choices:
+            return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
+
+        choose = random.choice(choices)
+
+        if choose == choice: await ctx.send(f"I chose {choose}, It's a tie")
+        elif choose == "rock" and choice == "scissors": await ctx.send(f"I chose {choose}, You lose!")
+        elif choose == "paper" and choice == "rock": await ctx.send(f"I chose {choose}, You lose!")
+        elif choose == "scissors" and choice == "paper": await ctx.send(f"I chose {choose}, You lose!")
+        else: await ctx.send(f"I chose {choose}, You win!")
+
+
+    @commands.command(aliases = ['choice', 'choose'], usage = '<item> <item> [items...]')
+    async def choices(self, ctx, *options):
+        """Randomly pick from a list of items."""
+
+        if not options: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
+        await ctx.send(f"I pick {random.choice(options)}")
+
+    @commands.command(usage = '<text>')
+    async def clap(self, ctx, *, text = None):
+        """Clappify 👏 Text"""
+
+        if not text: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
+        await ctx.send(f"{'👏'.join(text.split(' '))}")
+
+    @commands.command(usage = '<text>')
+    async def reverse(self, ctx, *, text = None):
+        """Reverse given text."""
+
+        if not text: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
+        await ctx.send(text[::-1])
 
     @commands.command(aliases = ['hug'], usage = "[@user/id]")
     async def notice(self, ctx, user: discord.Member = None):
