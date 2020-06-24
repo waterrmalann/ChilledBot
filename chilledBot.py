@@ -15,17 +15,24 @@ from utils import default
 from line_counter import count_lines
 
 """
-    A simple discord bot made using Python, utilizing the cogs functionality.
+   A simple utility-first discord bot written in Python using the Discord.py library.
 
-    The bot is meant to be a utility first, moderation, and music bot.
-    It is specifically tailored for study, chill, and LoFi servers.
+   ChilledBot was designed to assist productivity with it's focus on utility features.
+
+   The bot is multi-purpose, so there's more useful features available such as server management and entertainment commands.
+
+    Written by Alan Biju Varghese (alanthekiwi)
 """
+
+config = default.get("config.json")
+emojis = default.get("emojis.json")
+colors = default.get("colors.json")
 
 def get_prefix(bot, message):
     """A callable prefix for the bot."""
 
     # We support multiple prefixes.
-    prefixes = ['.', 'c.']
+    prefixes = config.bot_prefix
 
     # Only allow '?' as a prefix in DMs.
     if not message.guild: return '?'
@@ -43,9 +50,7 @@ initial_extensions = [
     'cogs.config'
 ]
 
-config = default.get("config.json")
-emojis = default.get("emojis.json")
-colors = default.get("colors.json")
+
 
 bot = commands.AutoShardedBot(
     command_prefix = get_prefix,
@@ -65,7 +70,7 @@ prefix = '.'
 
 os.system('clear')
 print("ChilledBot by Zeesmic#8023...", '\n')
-for extension in initial_extensions:
+for extension in config.cogs:
     try:
         bot.load_extension(extension)
         print(f"[Cogs] Successfully loaded {extension}.")
@@ -257,37 +262,36 @@ async def botstats(ctx):
         title = f"[Statistics] {bot.user.name} (`{str(bot.user.id)}``)",
         color = colors.secondary
     )
-    file_data = count_lines()
     
     embed.add_field(
-        name='Discord.py',
+        name = 'Discord.py',
         value = f'[{discord.__version__}](https://discordpy.readthedocs.io/en/latest/)',
-        inline=True
+        inline = True
     )
     embed.add_field(
-        name='Python',
+        name = 'Python',
         value = f'[{platform.python_version()}](https://www.python.org/)',
         inline=True
     )
     embed.add_field(
-        name='OS',
+        name = 'OS',
         value = f'{platform.system()}, {platform.machine()}',
-        inline=True
+        inline = True
     )
     embed.add_field(
-        name='Memory Usage',
+        name = 'Memory Usage',
         value = f'{round(mem.used / 1024 / 1024 / 1024, 2)}MB',
-        inline=True
+        inline = True
     )
     embed.add_field(
-        name='Guilds',
+        name = 'Guilds',
         value = len(bot.guilds),
-        inline=True
+        inline = True
     )
     embed.add_field(
-        name='Users',
+        name = 'Users',
         value = len(bot.users),
-        inline=True
+        inline = True
     )
 
     embed.add_field(
@@ -296,40 +300,33 @@ async def botstats(ctx):
         inline=True
     )
     embed.add_field(
-        name='Loaded Cogs',
+        name = 'Loaded Cogs',
         value = len(bot.cogs),
-        inline=True
+        inline = True
     )
     embed.add_field(
         name = "Loaded Commands",
-        value = len(bot.commands)
+        value = len(bot.commands),
+        inline = True
     )
     embed.add_field(
-        name='Developed by',
-        value = 'Zeesmic#8023',
-        inline=False
-    )
-    embed.add_field(
-        name='Created on',
+        name = 'Created on',
         value = f'{bot.user.created_at.strftime("%A, %B %d %Y @ %H:%M:%S %p")}',
-        inline=False
+        inline = False
     )
     embed.add_field(
-        name='File size',
+        name = 'File size',
         value = '44.0 KB (45,056 bytes)\n7.0 KB (7,221 bytes)',
-        inline=False
+        inline = False
     )
     embed.add_field(
-        name='Silent Mode',
+        name = 'Silent Mode',
         value = False,
-        inline=False
+        inline = False
     )
 
-    #embed.set_footer(text='Requested by ' + str(ctx.message.author), icon_url=ctx.message.author.avatar_url)
-    embed.set_footer(text=f"Made with ❤ in Python {platform.python_version()}", icon_url='http://i.imgur.com/5BFecvA.png')
-
-
-    await ctx.send(embed=embed)
+    embed.set_footer(text = f"Made with ❤ in Python {platform.python_version()} by Zeesmic#8023", icon_url = 'http://i.imgur.com/5BFecvA.png')
+    await ctx.send(embed = embed)
 
 @bot.event
 async def on_connect():
