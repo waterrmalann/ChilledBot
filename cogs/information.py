@@ -95,7 +95,7 @@ class InformationCog(commands.Cog):
         
         server_values = []  # ❯ Server
         server_values.append(f"**Owner:** {ctx.guild.owner.mention} (`{ctx.guild.owner.id}`)")
-        server_values.append(f"**Creation:** {ctx.guild.created_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
+        server_values.append(f"**Creation:** {default.datefr(ctx.guild.created_at)}")
         server_values.append(f"**Region:** {region}\n")
         server_values.append(f"**Verification Level:** {verification}")
         server_values.append(f"**Notification Level:** {notification}")
@@ -197,7 +197,7 @@ class InformationCog(commands.Cog):
         user_values.append(f"**Mention:** {user.mention}")
         user_values.append(f"**Status:** {status[2]} {status[0]} {discord_client}")
         if user.activity: user_values.append(f"**Activity:** {user.activity.type.name.capitalize()} {user.activity.name}")
-        user_values.append(f"**Registered at:** {user.created_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
+        user_values.append(f"**Registered at:** {default.datefr(user.created_at)}")
 
         server_values = []  # ❯ Server
         if user == ctx.guild.owner: server_values.append(f"**👑 Server Owner**")
@@ -205,7 +205,7 @@ class InformationCog(commands.Cog):
         #elif user.guild_permissions.ban_members: server_values.append("**Server Staff**")
         #else: server_values.append("**Member**")
         server_values.append(f"**Nickname:** {user.display_name}")
-        server_values.append(f"**Joined At:** {user.joined_at.strftime('%A, %B %d %Y @ %H:%M:%S %p')}")
+        server_values.append(f"**Joined At:** {default.datefr(user.joined_at)}")
         if user.top_role != ctx.guild.default_role: server_values.append(f"**Top Role:** {user.top_role.mention}")
 
         embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1])
