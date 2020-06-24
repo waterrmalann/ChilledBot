@@ -20,6 +20,7 @@ class FunCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.session = aiohttp.ClientSession()
         self.config = default.get("config.json")
         self.colors = default.get("colors.json")
         self.emojis = default.get("emojis.json")
@@ -57,26 +58,18 @@ class FunCog(commands.Cog):
         choices = ("Meow... 🐱", "Meow 😻", "Here's a feline for you. 🐈")
         choice = random.choice(choices)
 
-        if num > 3 or num < 1: num = random.randint(1, 3)  # 33%/33%/33% Chance
+        if num > 2 or num < 1: num = random.randint(1, 2)  # 50%/50%
 
         if num == 1:
-            url = "http://thecatapi.com/api/images/get?format=src&type=png"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    image = r.url
-            url = "http://thecatapi.com"
-        elif num == 2:
             url = "http://shibe.online/api/cats"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data[0]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data[0]
         else:
             url = "https://some-random-api.ml/img/cat"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data["link"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data["link"]
 
         embed = discord.Embed(title = choice, color = self.colors.primary)
         embed.set_image(url = image)
@@ -86,10 +79,9 @@ class FunCog(commands.Cog):
 
         if fact or random.randint(1, 10) < 4:  # We'll do 30% chance to get a cat fact.
             url = "https://catfact.ninja/fact"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    cat_fact = data['fact']
+            async with self.session.get(url) as r:
+                data = await r.json()
+                cat_fact = data['fact']
             await ctx.send(f"**Did you know?** {cat_fact}")
 
     @commands.command(aliases=["pupper", "woof", "doggo", "bork", "canine"])
@@ -103,22 +95,19 @@ class FunCog(commands.Cog):
 
         if num == 1:
             url = "https://dog.ceo/api/breeds/image/random"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data["message"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data["message"]
         elif num == 2:
             url = "https://some-random-api.ml/img/dog"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data["link"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data["link"]
         else:
             url = "https://random.dog/woof.json"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data["url"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data["url"]
         
         if image.endswith(('.webm', '.mp4')):
             # Sending videos as a raw message because apparently discord embeds don't support videos.
@@ -131,10 +120,9 @@ class FunCog(commands.Cog):
 
         if fact or random.randint(1, 10) < 4:
             url = "https://some-random-api.ml/facts/dog"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    fact = data['fact']
+            async with self.session.get(url) as r:
+                data = await r.json()
+                fact = data['fact']
             await ctx.send(f"**Did you know?** {fact}")
             #https://dog-api.kinduff.com/api/facts  data["facts"][0]
     
@@ -149,16 +137,14 @@ class FunCog(commands.Cog):
 
         if num == 1:
             url = "http://shibe.online/api/birds"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data[0]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data[0]
         else:
             url = "https://some-random-api.ml/img/birb"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data["link"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data["link"]
 
         embed = discord.Embed(title = choice, color = self.colors.primary)
         embed.set_image(url = image)
@@ -167,10 +153,9 @@ class FunCog(commands.Cog):
 
         if fact or random.randint(1, 10) < 4:
             url = "https://some-random-api.ml/facts/bird"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    fact = data["fact"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(name = "fox", aliases = ["foxie", "arf"])
@@ -185,16 +170,14 @@ class FunCog(commands.Cog):
 
         if num == 1:
             url = "https://randomfox.ca/floof/"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data["image"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data["image"]
         else:
             url = "https://some-random-api.ml/img/fox"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    image = data["link"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                image = data["link"]
 
         embed = discord.Embed(title = choice, color = self.colors.primary)
         embed.set_image(url = image)
@@ -203,10 +186,9 @@ class FunCog(commands.Cog):
 
         if fact or random.randint(1, 10) < 4:
             url = "https://some-random-api.ml/facts/fox"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    fact = data["fact"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
             # Random Fox Fact: Did You Know? 
     
@@ -218,10 +200,9 @@ class FunCog(commands.Cog):
         choice = random.choice(choices)
 
         url = "https://some-random-api.ml/img/panda"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                data = await r.json()
-                image = data["link"]
+        async with self.session.get(url) as r:
+            data = await r.json()
+            image = data["link"]
         
         embed = discord.Embed(title = choice, color = self.colors.primary)
         embed.set_image(url = image)
@@ -230,10 +211,9 @@ class FunCog(commands.Cog):
 
         if fact or random.randint(1, 10) < 4:
             url = "https://some-random-api.ml/facts/panda"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    fact = data["fact"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(name = "koala")
@@ -244,10 +224,9 @@ class FunCog(commands.Cog):
         choice = random.choice(choices)
 
         url = "https://some-random-api.ml/img/koala"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                data = await r.json()
-                image = data["link"]
+        async with self.session.get(url) as r:
+            data = await r.json()
+            image = data["link"]
 
         embed = discord.Embed(title = choice, color = self.colors.primary)
         embed.set_image(url = image)
@@ -256,10 +235,9 @@ class FunCog(commands.Cog):
 
         if fact or random.randint(1, 10) < 4:
             url = "https://some-random-api.ml/facts/koala"
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-                    fact = data["fact"]
+            async with self.session.get(url) as r:
+                data = await r.json()
+                fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(name = "anime")
@@ -267,14 +245,13 @@ class FunCog(commands.Cog):
         """Fetches a random anime picture from the internet."""
 
         url = "http://api.cutegirls.moe/json"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                data = await r.json()
-                image = data["data"]["image"]
-                title = data["data"]["title"]
-                link = data["data"]["link"]
-                #author = data["data"]["author"]
-                sub = data["data"]["sub"]
+        async with self.session.get(url) as r:
+            data = await r.json()
+            image = data["data"]["image"]
+            title = data["data"]["title"]
+            link = data["data"]["link"]
+            #author = data["data"]["author"]
+            sub = data["data"]["sub"]
         url = "http://api.cutegirls.moe"
 
         embed = discord.Embed(title = title, color = self.colors.primary, url = link)
@@ -287,12 +264,11 @@ class FunCog(commands.Cog):
         """Fetches a random quote from the internet."""
 
         url = "http://api.forismatic.com/api/1.0/?method=getQuote&key=457653&format=json&lang=en"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                data = await r.json()
-                quote_text = data['quoteText']
-                quote_author = data['quoteAuthor'] or "Anonymous"
-                quote_link = data['quoteLink']
+        async with self.session.get(url) as r:
+            data = await r.json()
+            quote_text = data['quoteText']
+            quote_author = data['quoteAuthor'] or "Anonymous"
+            quote_link = data['quoteLink']
         url = "http://api.forismatic.com/"
 
         embed = discord.Embed(
@@ -320,14 +296,13 @@ class FunCog(commands.Cog):
         subreddit = random.choice(meme_subreddits)
         url = f"https://www.reddit.com/{subreddit}/new.json?sort=hot"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-                rand = random.randint(0, len(res['data']['children']))
-                title = res["data"]["children"][rand]["data"]["title"]
-                image = res["data"]["children"][rand]["data"]["url"]
-                upvotes = res["data"]["children"][rand]["data"]["score"]
-                comments = res["data"]["children"][rand]["data"]["num_comments"]
+        async with self.session.get(url) as r:
+            res = await r.json()
+            rand = random.randint(0, len(res['data']['children']))
+            title = res["data"]["children"][rand]["data"]["title"]
+            image = res["data"]["children"][rand]["data"]["url"]
+            upvotes = res["data"]["children"][rand]["data"]["score"]
+            comments = res["data"]["children"][rand]["data"]["num_comments"]
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
         embed.set_image(url = image)
@@ -340,14 +315,13 @@ class FunCog(commands.Cog):
 
         url = f"https://www.reddit.com/r/wholesomememes/new.json?sort=hot"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-                rand = random.randint(0, len(res['data']['children']))
-                title = res["data"]["children"][rand]["data"]["title"]
-                image = res["data"]["children"][rand]["data"]["url"]
-                upvotes = res["data"]["children"][rand]["data"]["score"]
-                comments = res["data"]["children"][rand]["data"]["num_comments"]
+        async with self.session.get(url) as r:
+            res = await r.json()
+            rand = random.randint(0, len(res['data']['children']))
+            title = res["data"]["children"][rand]["data"]["title"]
+            image = res["data"]["children"][rand]["data"]["url"]
+            upvotes = res["data"]["children"][rand]["data"]["score"]
+            comments = res["data"]["children"][rand]["data"]["num_comments"]
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
         embed.set_image(url = image)
@@ -360,14 +334,13 @@ class FunCog(commands.Cog):
 
         url = f"https://www.reddit.com/r/discord_irl/new.json?sort=hot"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-                rand = random.randint(0, len(res['data']['children']))
-                title = res["data"]["children"][rand]["data"]["title"]
-                image = res["data"]["children"][rand]["data"]["url"]
-                upvotes = res["data"]["children"][rand]["data"]["score"]
-                comments = res["data"]["children"][rand]["data"]["num_comments"]
+        async with self.session.get(url) as r:
+            res = await r.json()
+            rand = random.randint(0, len(res['data']['children']))
+            title = res["data"]["children"][rand]["data"]["title"]
+            image = res["data"]["children"][rand]["data"]["url"]
+            upvotes = res["data"]["children"][rand]["data"]["score"]
+            comments = res["data"]["children"][rand]["data"]["num_comments"]
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
         embed.set_image(url = image)
@@ -380,14 +353,13 @@ class FunCog(commands.Cog):
 
         url = f"https://www.reddit.com/r/surrealmemes/new.json?sort=hot"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-                rand = random.randint(0, len(res['data']['children']))
-                title = res["data"]["children"][rand]["data"]["title"]
-                image = res["data"]["children"][rand]["data"]["url"]
-                upvotes = res["data"]["children"][rand]["data"]["score"]
-                comments = res["data"]["children"][rand]["data"]["num_comments"]
+        async with self.session.get(url) as r:
+            res = await r.json()
+            rand = random.randint(0, len(res['data']['children']))
+            title = res["data"]["children"][rand]["data"]["title"]
+            image = res["data"]["children"][rand]["data"]["url"]
+            upvotes = res["data"]["children"][rand]["data"]["score"]
+            comments = res["data"]["children"][rand]["data"]["num_comments"]
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
         embed.set_image(url = image)
@@ -400,16 +372,15 @@ class FunCog(commands.Cog):
 
         url = "https://www.reddit.com/r/todayilearned/new.json?sort=hot"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                post = await r.json()
-                rand = random.randint(0, len(post['data']['children']))
-                post = post["data"]["children"][rand]["data"]
-                title = post["title"]
-                content = html.unescape(post["selftext"])
-                upvotes = post["score"]
-                comments = post["num_comments"]
-                link = f'https://www.reddit.com{post["permalink"]}'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            rand = random.randint(0, len(post['data']['children']))
+            post = post["data"]["children"][rand]["data"]
+            title = post["title"]
+            content = html.unescape(post["selftext"])
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            link = f'https://www.reddit.com{post["permalink"]}'
 
         embed = discord.Embed(
             title = title,
@@ -426,16 +397,15 @@ class FunCog(commands.Cog):
 
         url = "https://www.reddit.com/r/Jokes/new.json?sort=hot"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                post = await r.json()
-                rand = random.randint(0, len(post['data']['children']))
-                post = post["data"]["children"][rand]["data"]
-                title = post["title"]
-                content = html.unescape(post["selftext"])
-                upvotes = post["score"]
-                comments = post["num_comments"]
-                link = f'https://www.reddit.com{post["permalink"]}'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            rand = random.randint(0, len(post['data']['children']))
+            post = post["data"]["children"][rand]["data"]
+            title = post["title"]
+            content = html.unescape(post["selftext"])
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            link = f'https://www.reddit.com{post["permalink"]}'
 
         embed = discord.Embed(
             title = title,
@@ -452,16 +422,15 @@ class FunCog(commands.Cog):
 
         url = "https://www.reddit.com/r/AntiJokes/new.json?sort=hot"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                post = await r.json()
-                rand = random.randint(0, len(post['data']['children']))
-                post = post["data"]["children"][rand]["data"]
-                title = post["title"]
-                content = html.unescape(post["selftext"])
-                upvotes = post["score"]
-                comments = post["num_comments"]
-                link = f'https://www.reddit.com{post["permalink"]}'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            rand = random.randint(0, len(post['data']['children']))
+            post = post["data"]["children"][rand]["data"]
+            title = post["title"]
+            content = html.unescape(post["selftext"])
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            link = f'https://www.reddit.com{post["permalink"]}'
 
         embed = discord.Embed(
             title = title,
@@ -478,16 +447,15 @@ class FunCog(commands.Cog):
 
         url = "https://www.reddit.com/r/AntiAntiJokes/new.json?sort=hot"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                post = await r.json()
-                rand = random.randint(0, len(post['data']['children']))
-                post = post["data"]["children"][rand]["data"]
-                title = post["title"]
-                content = html.unescape(post["selftext"])
-                upvotes = post["score"]
-                comments = post["num_comments"]
-                link = f'https://www.reddit.com{post["permalink"]}'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            rand = random.randint(0, len(post['data']['children']))
+            post = post["data"]["children"][rand]["data"]
+            title = post["title"]
+            content = html.unescape(post["selftext"])
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            link = f'https://www.reddit.com{post["permalink"]}'
 
         embed = discord.Embed(
             title = title,
@@ -508,16 +476,15 @@ class FunCog(commands.Cog):
         
         url = f"https://www.reddit.com/{subreddit}/new.json?sort={sort_by}"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                post = await r.json()
-                rand = random.randint(0, len(post['data']['children']))
-                post = post["data"]["children"][rand]["data"]
-                title = post["title"]
-                image = post["url"]
-                content = post["selftext"]
-                link = "https://www.reddit.com" + post["permalink"]
-                nsfw = post["over_18"]
+        async with self.session.get(url) as r:
+            post = await r.json()
+            rand = random.randint(0, len(post['data']['children']))
+            post = post["data"]["children"][rand]["data"]
+            title = post["title"]
+            image = post["url"]
+            content = post["selftext"]
+            link = "https://www.reddit.com" + post["permalink"]
+            nsfw = post["over_18"]
         
         if nsfw and not ctx.channel.nsfw:
             await ctx.send("⚠️ This post contains NSFW content! It cannot be previewed here.")
@@ -610,17 +577,16 @@ class FunCog(commands.Cog):
         if triviatype in {'multiple', 'mcq', 'choices'}: url += '&type=multiple'
         if triviatype in {'boolean', 'bool', 'true or false'}: url += '&type=boolean'
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                data = await r.json()
-                question_type = data["results"][0]["type"]
-                category = data["results"][0]["category"]
-                question = data["results"][0]["question"]
-                answer = data["results"][0]["correct_answer"]
-                choices = data["results"][0]["incorrect_answers"]
-                choices.append(answer)
-                random.shuffle(choices)
-                difficulty = data["results"][0]["difficulty"].capitalize()
+        async with self.session.get(url) as r:
+            data = await r.json()
+            question_type = data["results"][0]["type"]
+            category = data["results"][0]["category"]
+            question = data["results"][0]["question"]
+            answer = data["results"][0]["correct_answer"]
+            choices = data["results"][0]["incorrect_answers"]
+            choices.append(answer)
+            random.shuffle(choices)
+            difficulty = data["results"][0]["difficulty"].capitalize()
         url = "https://opentdb.com"
 
         answer_number = 0
