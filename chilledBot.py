@@ -111,7 +111,7 @@ async def on_disconnect():
     """http://discordpy.readthedocs.io/en/rewrite/api.html#discord.on_disconnect"""
 
     print("[Disconnected] Lost connection with Discord.")
-
+"""
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.NoPrivateMessage):
@@ -126,6 +126,47 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.NotOwner):
         await ctx.send(f"{emojis.cross} **You are not authorized to use this command.** `[ex AuthError]`")
         return
+"""
+
+@bot.event
+async def on_command_error(ctx, error):
+
+    if hasattr(ctx.command, 'on_error'): return
+    
+    ignored = (commands.CommandNotFound)
+    input_errors = (commands.MissingRequiredArgument, commands.BadArgument)
+    error = getattr(error, 'original', error)
+    
+    if isinstance(error, ignored):
+        return
+
+    elif isinstance(error, commands.CommandOnCooldown):
+        return await ctx.send(f"{emojis.neutral} **This command is on cooldown. Try again in {error.retry_after:.2f}s.** `[ex Cooldown]`")
+    
+    elif isinstance(error, input_errors):
+        embed = discord.Embed(description = f"**Syntax:** {ctx.command.qualified_name} {ctx.command.usage}", color = colors.primary)
+        embed.set_footer(text = ctx.command.help)
+        return await ctx.send(embed = embed)
+
+    elif isinstance(error, commands.DisabledCommand):
+        return await ctx.send(f"{emojis.cross} **This command is disabled.** `[ex CmdDisabled]`")
+
+    elif isinstance(error, commands.NoPrivateMessage):
+        try: return await ctx.author.send(f"{emojis.cross} **This command can't be used in DMs.** `[ex GuildOnly]`")
+        except: pass
+    
+    elif isinstance(error, commands.NotOwner):
+        return await ctx.send(f"{emojis.cross} **You are not authorized to use this command.** `[ex AuthError]`")
+
+    elif isinstance(error, commands.BadArgument):
+        if ctx.command.qualified_name == 'tag list':
+            return await ctx.send('I could not find that member. Please try again.')
+        
+    print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
+    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+
+
+
 
 # Start the bot.
 bot.run(os.environ.get("BOT_TOKEN"), bot = True, reconnect = True)
