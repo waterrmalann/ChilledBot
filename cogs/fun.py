@@ -27,12 +27,13 @@ class FunCog(commands.Cog):
         self.colors = default.get("colors.json")
         self.emojis = default.get("emojis.json")
         self.bot_prefix = '.'
+        self.categories = ['random', 'animals', 'reddit', 'text', 'misc']
 
     #Usage: .{command.name} {command.usage}
     #embed.set_footer(text = command.help)
 
 
-    @commands.command(name = '8ball', aliases = ['eightball', 'eight-ball', '8-ball'], usage = '<question>')
+    @commands.command(name = '8ball', brief = 'random', aliases = ['eightball', 'eight-ball', '8-ball'], usage = '<question>')
     async def eightball(self, ctx, *, question: str):
         """Ask the magic 8-ball your doubts."""
 
@@ -69,7 +70,7 @@ class FunCog(commands.Cog):
         embed.timestamp = datetime.utcnow()
         await ctx.send(embed = embed)
 
-    @commands.command(aliases = ['flipcoin', 'tosscoin', 'coinflip'])
+    @commands.command(brief = 'random', aliases = ['flipcoin', 'tosscoin', 'coinflip'])
     async def coin(self, ctx):
         """Toss a coin."""
 
@@ -82,7 +83,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text=f"Tossed by {ctx.author}", icon_url=ctx.author.avatar_url)
         await ctx.send(embed=embed)
     
-    @commands.command(aliases = ['dice'], usage = '[number]')
+    @commands.command(brief = 'random', aliases = ['dice'], usage = '[number]')
     async def roll(self, ctx, number: typing.Optional[int] = 6):
         """Roll a dice or a number."""
 
@@ -103,7 +104,7 @@ class FunCog(commands.Cog):
             embed.set_footer(text = f"Rolled by {ctx.author}", icon_url = ctx.author.avatar_url)
             await ctx.send(embed = embed)
     
-    @commands.command(aliases = ['sps', 'stonepaperscissors', 'rockpaperscissors'], usage = '<rock/paper/scissors>')
+    @commands.command(brief = 'random', aliases = ['sps', 'stonepaperscissors', 'rockpaperscissors'], usage = '<rock/paper/scissors>')
     async def rps(self, ctx, choice: str):
         """Play rock, paper, scissors."""
 
@@ -122,26 +123,26 @@ class FunCog(commands.Cog):
         else: await ctx.send(f"I chose {choose}, You win!")
 
 
-    @commands.command(aliases = ['choice', 'choose'], usage = '<item> <item> [items...]')
+    @commands.command(brief = 'random', aliases = ['choice', 'choose'], usage = '<item> <item> [items...]')
     async def choices(self, ctx, *options):
         """Randomly pick an item from a list of items."""
 
         if not options: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
         await ctx.send(f"I pick {random.choice(options)}")
 
-    @commands.command(usage = '<text>')
+    @commands.command(brief = 'text', usage = '<text>')
     async def clap(self, ctx, *, text: str):
         """Clappify text."""
 
         await ctx.send(text.replace(' ', '👏'))
 
-    @commands.command(usage = '<text>')
+    @commands.command(brief = 'text', usage = '<text>')
     async def reverse(self, ctx, *, text: str):
         """Reverse given text."""
 
         await ctx.send(text[::-1])
 
-    @commands.command(usage = '<word>')
+    @commands.command(brief = 'text', usage = '<word>')
     async def scramble(self, ctx, *, word: str):
         """Scramble given word."""
 
@@ -149,7 +150,7 @@ class FunCog(commands.Cog):
         random.shuffle(letters)
         await ctx.send(''.join(letters))
 
-    @commands.command(aliases = ['hug'], usage = "[@user/id]")
+    @commands.command(brief = 'misc', aliases = ['hug'], usage = "[@user/id]")
     async def notice(self, ctx, user: discord.Member = None):
         """Notice me senpai!"""
 
@@ -170,7 +171,7 @@ class FunCog(commands.Cog):
 
         await ctx.send(f"{user.mention}, `{random.choice(hugs)}`")
     
-    @commands.command(aliases = ["feline", "tom", "mouser", "pussy", "meow"])
+    @commands.command(brief = 'animals', aliases = ["feline", "tom", "mouser", "pussy", "meow"])
     async def cat(self, ctx, num: typing.Optional[int] = 0, fact : bool = False):
         """Gives you a cat pic."""
 
@@ -203,7 +204,7 @@ class FunCog(commands.Cog):
                 cat_fact = data['fact']
             await ctx.send(f"**Did you know?** {cat_fact}")
 
-    @commands.command(aliases=["pupper", "woof", "doggo", "bork", "canine"])
+    @commands.command(brief = 'animals', aliases = ["pupper", "woof", "doggo", "bork", "canine"])
     async def dog(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Gives you a dog pic."""
 
@@ -245,7 +246,7 @@ class FunCog(commands.Cog):
             await ctx.send(f"**Did you know?** {fact}")
             #https://dog-api.kinduff.com/api/facts  data["facts"][0]
     
-    @commands.command(name = "bird", aliases = ["birb", "ave", "birdie"])
+    @commands.command(brief = 'animals', aliases = ["birb", "ave", "birdie"])
     async def bird(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Gives you a bird pic."""
 
@@ -277,7 +278,7 @@ class FunCog(commands.Cog):
                 fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
     
-    @commands.command(name = "fox", aliases = ["foxie", "arf"])
+    @commands.command(brief = 'animals', aliases = ["foxie", "arf"])
     async def fox(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Gives you a fox pic."""
 
@@ -311,7 +312,7 @@ class FunCog(commands.Cog):
             await ctx.send(f"**Did you know?** {fact}")
             # Random Fox Fact: Did You Know? 
     
-    @commands.command(name = "panda", aliases = ["achoo"])
+    @commands.command(brief = 'animals', aliases = ["achoo"])
     async def panda(self, ctx, fact : bool = False):
         """Gives you a panda pic."""
 
@@ -335,7 +336,7 @@ class FunCog(commands.Cog):
                 fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
     
-    @commands.command(name = "koala")
+    @commands.command(brief = 'animals')
     async def koala(self, ctx, fact : bool = False):
         """Gives you a koala pic."""
 
@@ -359,7 +360,7 @@ class FunCog(commands.Cog):
                 fact = data["fact"]
             await ctx.send(f"**Did you know?** {fact}")
     
-    @commands.command(name = "anime")
+    @commands.command(name = "anime", brief = 'misc')
     async def uwu(self, ctx):
         """Gives you an anime girl pic."""
 
@@ -378,7 +379,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"{url} • r/{sub}")
         await ctx.send(embed = embed)
     
-    @commands.command(name = "quote")
+    @commands.command(name = "quote", brief = 'misc')
     async def quote(self, ctx):
         """Gives you a quote."""
 
@@ -402,7 +403,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = url)
         await ctx.send(embed = embed)
     
-    @commands.command(name = 'meme', aliases = ['dankmeme', 'memes'], usage = '[memes/dankmemes/me_irl]')
+    @commands.command(brief = 'reddit', aliases = ['dankmeme', 'memes'], usage = '[memes/dankmemes/me_irl]')
     async def meme(self, ctx, subreddit: str = 'any', sorting: str = 'any'):
         """Gives you a meme."""
 
@@ -441,7 +442,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"{subreddit}/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
-    @commands.command(aliases = ['wholesomememes', 'wholesome_meme', 'wholesomememe', 'wmeme'])
+    @commands.command(brief = 'reddit', aliases = ['wholesomememes', 'wholesome_meme', 'wholesomememe', 'wmeme'])
     async def wholesome(self, ctx, sorting: str = 'any'):
         """Gives you a wholesome meme."""
 
@@ -473,7 +474,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/wholesomememes/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
-    @commands.command(name = 'discordmeme', aliases = ['discordmemes', 'discordirl', 'discord_irl'])
+    @commands.command(brief = 'reddit', aliases = ['discordmemes', 'discordirl', 'discord_irl'])
     async def discordmeme(self, ctx, sorting: str = 'any'):
         """Gives you a discord meme."""
 
@@ -505,7 +506,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/discord_irl • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
-    @commands.command(name = 'surrealmeme', aliases = ['surreal', 'surrealmemes'])
+    @commands.command(brief = 'reddit', aliases = ['surreal', 'surrealmemes'])
     async def surrealmeme(self, ctx, sorting: str = 'any'):
         """Gives you a surreal meme."""
 
@@ -537,7 +538,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/surrealmemes/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
-    @commands.command(aliases = ['todayilearned'])
+    @commands.command(brief = 'reddit', aliases = ['todayilearned'])
     async def til(self, ctx):
         """You learn something new everyday!"""
 
@@ -568,7 +569,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/todayilearned • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
-    @commands.command(aliases = ['jokes'])
+    @commands.command(brief = 'reddit', aliases = ['jokes'])
     async def joke(self, ctx):
         """Gives you a joke."""
 
@@ -593,7 +594,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/Jokes • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
-    @commands.command(aliases = ['antijokes'])
+    @commands.command(brief = 'reddit', aliases = ['antijokes'])
     async def antijoke(self, ctx):
         """Gives you an anti-joke."""
 
@@ -618,7 +619,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/AntiJokes • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
-    @commands.command(aliases = ['antiantijokes'])
+    @commands.command(brief = 'reddit', aliases = ['antiantijokes'])
     async def antiantijoke(self, ctx):
         """Gives you an anti-anti-joke."""
 
@@ -643,7 +644,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/AntiAntiJokes • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
-    @commands.command(name = 'reddit', usage = '[r/subreddit]')
+    @commands.command(brief = 'reddit', usage = '[r/subreddit]')
     async def reddit(self, ctx, subreddit: str = 'r/all', sort_by: str = 'hot'):
         """Fetches content from a specified subreddit."""
 
@@ -696,7 +697,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"{subreddit} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
         
-    @commands.command(name = "trivia", usage = "[category] [difficulty] [type]")
+    @commands.command(brief = 'misc', usage = "[category] [difficulty] [type]")
     async def trivia(self, ctx, triviacategory : typing.Union[str, int] = 'any', triviadifficulty : str = 'any', triviatype : str = 'any'):
         """Gives you a trivia question."""
 
@@ -816,7 +817,7 @@ class FunCog(commands.Cog):
 
         await ctx.send(embed = embed)
 
-        def check(m): return m.author == ctx.author and m.channel == ctx.channel
+        check = lambda m: m.author == ctx.author and m.channel == ctx.channel
 
         try:
             user_answer = await self.bot.wait_for('message', check = check, timeout = timer)
@@ -829,7 +830,7 @@ class FunCog(commands.Cog):
             else:
                 await ctx.send(f"{self.emojis.cross} Your answer was incorrect. The correct answer was {answer}.")
 
-    @commands.command()
+    @commands.command(brief = 'misc')
     async def bored(self, ctx):
         """Bored? Try this command."""
 
@@ -846,7 +847,7 @@ class FunCog(commands.Cog):
         
         await ctx.send(embed = embed)
     
-    @commands.command()
+    @commands.command(brief = 'misc')
     async def smile(self, ctx):
         """Smile! :)"""
 
