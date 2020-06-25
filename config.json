@@ -14,6 +14,7 @@
 
     "cogs": [
         "cogs.owners",
+        "cogs.help",
         "cogs.utility",
         "cogs.information",
         "cogs.fun",
