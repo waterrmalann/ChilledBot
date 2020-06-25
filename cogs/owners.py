@@ -151,8 +151,26 @@ class OwnerCog(commands.Cog):
         print("[Disconnect] Bot Terminated")
         msg = await ctx.send(':skull: **Terminating...**')
         await asyncio.sleep(1.5)
-        await msg.edit(content = ":skull_crossbones: **Terminated**")
+        await msg.edit(content = ":skull_crossbones: **Terminated.**")
         await self.bot.logout()
+    
+    @commands.command(aliases = ['bsetname'], usage = '<username>')
+    @commands.is_owner()
+    async def bsetusername(self, ctx, *, name: str):
+    """Set the bot's username."""
+
+    await self.bot.user.edit(username = name)
+    await ctx.send(f"{self.emojis.tick} **My username has successfully been set to \"{name}\".**")
+
+
+    @commands.command(aliases = ['bsetnickname'], usage = '<nickname>')
+    @commands.is_owner()
+    @commands.guild_only()
+    async def bsetnick(self, ctx, *, nickname=None):
+    """Set the bot's nickname."""
+
+    await ctx.guild.get_member(self.bot.user.id).edit(nick = nickname)
+    await ctx.send(f"{self.emojis.tick} **My guild nickname has successfully been set to \"{nickname}\".**")
 
 def setup(bot):
     """Sets up the cog."""
