@@ -111,15 +111,24 @@ class HelpCog(commands.Cog):
             await ctx.send(embed = embed)
 
         elif request == 'fun':
-            cmds = self.bot.get_cog("FunCog").get_commands()
 
+            fun_cog = self.bot.get_cog("FunCog")
+            cmds = fun_cog.get_commands()
+            cats = fun_cog.categories
 
+            commands = {cat: [] for cat in cats}
+
+            for command in cmds:
+                commands[command.brief].append(command)
+            
             embed = discord.Embed(title = "Fun Commands.", color = self.colors.primary)
-            embed.add_field(
-                name = "Commands | The prefix is '.'",
-                value = '\n'.join(f"`{cmd.name}` {cmd.help}" for cmd in cmds if not cmd.hidden)
-            )
 
+            for key, value in commands.items():
+                embed.add_field(
+                    name = key.title(),
+                    value = '\n'.join(f"`{cmd.name}` {cmd.help}" for cmd in value if not cmd.hidden),
+                    inline = False
+                )
             embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
             await ctx.send(embed = embed)
 
@@ -158,15 +167,21 @@ class HelpCog(commands.Cog):
 
             command = self.bot.all_commands.get(request)
 
-            text = f"**Usage:** `.{command.name} {command.usage}`" if command.usage else f"**Usage:** `.{command.name}`"
-            if command.aliases: text += f"\n**Aliases:** `{', '.join(command.aliases)}`"
+            command_info = []
+            command_info.append(f"**Usage:** `.{command.name} {command.usage}`" if command.usage else f"**Usage:** `.{command.name}`")
+            command_info.append(f"**Description:** {command.help}")
+            if command.aliases: command_info.append(f"**Aliases:** `{', '.join(command.aliases)}`")
 
             embed = discord.Embed(
                 title = f"Command: `.{command.name}`",
-                description = text,
+                description = '\n'.join(command_info),
                 color = self.colors.primary
             )
-            embed.set_footer(text = command.help)
+
+            if command.usage:
+                embed.set_footer(text = '<> Required | [] Optional')
+            else: 
+                embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
             await ctx.send(embed = embed)
 
