@@ -424,7 +424,7 @@ class FunCog(commands.Cog):
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
-            post = posts[random.randint(0, len(posts))]["data"]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
 
             title = post["title"]
             image = post["url"]
@@ -456,7 +456,7 @@ class FunCog(commands.Cog):
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
-            post = posts[random.randint(0, len(posts))]["data"]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
 
             title = post["title"]
             image = post["url"]
@@ -488,7 +488,7 @@ class FunCog(commands.Cog):
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
-            post = posts[random.randint(0, len(posts))]["data"]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
 
             title = post["title"]
             image = post["url"]
@@ -520,7 +520,7 @@ class FunCog(commands.Cog):
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
-            post = posts[random.randint(0, len(posts))]["data"]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
 
             title = post["title"]
             image = post["url"]
@@ -672,7 +672,7 @@ class FunCog(commands.Cog):
             post = await r.json()
             print(len(post["data"]["children"]))
             posts = [post for post in post["data"]["children"] if not post["data"]["url"].startswith(videos)]
-            post = posts[random.randint(0, len(posts))]["data"]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
             print(len(posts))
 
             title = post["title"]
