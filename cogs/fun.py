@@ -33,10 +33,8 @@ class FunCog(commands.Cog):
 
 
     @commands.command(name = '8ball', aliases = ['eightball', 'eight-ball', '8-ball'], usage = '<question>')
-    async def eightball(self, ctx, *, question: str = None):
+    async def eightball(self, ctx, *, question: str):
         """Ask the magic 8-ball your doubts."""
-
-        if not question: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
 
         fortunes = (
             # Positive Responses
@@ -105,14 +103,15 @@ class FunCog(commands.Cog):
             embed.set_footer(text = f"Rolled by {ctx.author}", icon_url = ctx.author.avatar_url)
             await ctx.send(embed = embed)
     
-    @commands.command(aliases = ['sps', 'stonepaperscissors', 'rockpaperscissors'])
-    async def rps(self, ctx, choice = None):
+    @commands.command(aliases = ['sps', 'stonepaperscissors', 'rockpaperscissors'], usage = '<rock/paper/scissors>')
+    async def rps(self, ctx, choice: str):
         """Play rock, paper, scissors."""
 
         choices = ('rock', 'paper', 'scissors')
 
-        if not choice or choice.lower() not in choices:
-            return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
+        choice = choice.lower()
+        if choice == 'stone': choice = choice.replace('stone', 'rock')
+        if choice not in choices: raise commands.BadArgument
 
         choose = random.choice(choices)
 
@@ -131,24 +130,21 @@ class FunCog(commands.Cog):
         await ctx.send(f"I pick {random.choice(options)}")
 
     @commands.command(usage = '<text>')
-    async def clap(self, ctx, *, text = None):
+    async def clap(self, ctx, *, text: str):
         """Clappify text."""
 
-        if not text: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
         await ctx.send(text.replace(' ', '👏'))
 
     @commands.command(usage = '<text>')
-    async def reverse(self, ctx, *, text = None):
+    async def reverse(self, ctx, *, text: str):
         """Reverse given text."""
 
-        if not text: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
         await ctx.send(text[::-1])
 
     @commands.command(usage = '<word>')
-    async def scramble(self, ctx, *, word = None):
+    async def scramble(self, ctx, *, word: str):
         """Scramble given word."""
 
-        if not word: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
         letters = list(word)
         random.shuffle(letters)
         await ctx.send(''.join(letters))
