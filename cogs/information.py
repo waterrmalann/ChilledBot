@@ -61,7 +61,7 @@ class InformationCog(commands.Cog):
 
         # The server's (voice/host?) region with their respective country flags.
         region = str(ctx.guild.region)
-        if region in ('us-central', 'us-east', 'us-south', 'us-west'):region =  f"US {region[3:].capitalize()} :flag_us:"
+        if region in {'us-central', 'us-east', 'us-south', 'us-west'}:region =  f"US {region[3:].capitalize()} :flag_us:"
         elif region == 'europe': region = "Europe :flag_eu:"
         elif region == 'india': region = "India :flag_in:"
         elif region == 'russia': region = "Russia :flag_ru:"

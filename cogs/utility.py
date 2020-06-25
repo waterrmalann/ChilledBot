@@ -101,7 +101,7 @@ class UtilityCog(commands.Cog):
     async def invite(self, ctx):
         """Gives you a link to invite me!"""
 
-        invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot"
+        invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=2147483095&scope=bot"
         embed = discord.Embed(color = self.colors.secondary, description = f"🔗  You can invite me using __**[this link!]({invite_url})**__")
         await ctx.send(embed = embed)
         
