@@ -423,7 +423,7 @@ class FunCog(commands.Cog):
         subreddit = random.choice(meme_subreddits)
         url = f"https://www.reddit.com/{subreddit}/{sorting}.json?sort=hot"
 
-        allowed_formats = ('.jpg', '.png', '.jpeg', '.gif', '.gifv')
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
@@ -455,7 +455,7 @@ class FunCog(commands.Cog):
 
         url = f"https://www.reddit.com/r/wholesomememes/{sorting}.json?sort=hot"
         
-        allowed_formats = ('.jpg', '.png', '.jpeg', '.gif', '.gifv')
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
@@ -487,7 +487,7 @@ class FunCog(commands.Cog):
 
         url = f"https://www.reddit.com/r/discord_irl/{sorting}.json?sort=hot"
 
-        allowed_formats = ('.jpg', '.png', '.jpeg', '.gif', '.gifv')
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
@@ -517,9 +517,9 @@ class FunCog(commands.Cog):
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
-        url = f"https://www.reddit.com/r/surrealmemes/new.json?sort=hot"
+        url = f"https://www.reddit.com/r/surrealmemes/{sorting}.json?sort=hot"
 
-        allowed_formats = ('.jpg', '.png', '.jpeg', '.gif', '.gifv')
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
@@ -538,7 +538,7 @@ class FunCog(commands.Cog):
         if content: embed.description = content
         embed.set_author(name = f"u/{author}", url = link)
         embed.set_image(url = image)
-        embed.set_footer(text = f"r/surrealmemes • ⬆️ {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/surrealmemes/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
     @commands.command(aliases = ['todayilearned'])
@@ -551,18 +551,24 @@ class FunCog(commands.Cog):
             post = await r.json()
             rand = random.randint(0, len(post['data']['children']))
             post = post["data"]["children"][rand]["data"]
+            
             title = post["title"]
-            content = html.unescape(post["selftext"])
+            url = post["url"]
+            content = post["selftext"]
             upvotes = post["score"]
             comments = post["num_comments"]
+            author = post["author"]
             link = f'https://www.reddit.com{post["permalink"]}'
 
-        embed = discord.Embed(
-            title = title,
-            url = link,
-            description = content,
-            color = self.colors.primary
-        )
+        embed = discord.Embed(color = self.colors.primary)
+        if len(title) < 256:
+            embed.title = title
+            embed.url = link
+            embed.description = f"[Source]({url})"
+        else:
+            embed.description = f"**[{title}]({link})**\n\n[Source]({url})"
+
+        embed.set_author(name = f"u/{author}")
         embed.set_footer(text = f"r/todayilearned • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
