@@ -73,12 +73,12 @@ class FunCog(commands.Cog):
 
     @commands.command(aliases = ['flipcoin', 'tosscoin', 'coinflip'])
     async def coin(self, ctx):
-        """Flip a coin"""
+        """Toss a coin."""
 
         choices = ('heads', 'tails')
 
         embed = discord.Embed(
-            description = f"You flipped a coin and its **{random.choice(choices)}**",
+            description = f"You flipped a coin and it's **{random.choice(choices)}**",
             color = self.colors.primary
         )
         embed.set_footer(text=f"Tossed by {ctx.author}", icon_url=ctx.author.avatar_url)
@@ -86,7 +86,7 @@ class FunCog(commands.Cog):
     
     @commands.command(aliases = ['dice'], usage = '[number]')
     async def roll(self, ctx, number: typing.Optional[int] = 6):
-        """Roll a dice or a specified number"""
+        """Roll a dice or a number."""
 
         if number < 2: number = 6
 
@@ -107,7 +107,7 @@ class FunCog(commands.Cog):
     
     @commands.command(aliases = ['sps', 'stonepaperscissors', 'rockpaperscissors'])
     async def rps(self, ctx, choice = None):
-        """Rock, paper, scissors with the bot"""
+        """Play rock, paper, scissors."""
 
         choices = ('rock', 'paper', 'scissors')
 
@@ -125,17 +125,17 @@ class FunCog(commands.Cog):
 
     @commands.command(aliases = ['choice', 'choose'], usage = '<item> <item> [items...]')
     async def choices(self, ctx, *options):
-        """Randomly pick from a list of items."""
+        """Randomly pick an item from a list of items."""
 
         if not options: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
         await ctx.send(f"I pick {random.choice(options)}")
 
     @commands.command(usage = '<text>')
     async def clap(self, ctx, *, text = None):
-        """Clappify 👏 Text"""
+        """Clappify text."""
 
         if not text: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
-        await ctx.send(f"{'👏'.join(text.split(' '))}")
+        await ctx.send(text.replace(' ', '👏'))
 
     @commands.command(usage = '<text>')
     async def reverse(self, ctx, *, text = None):
@@ -143,6 +143,15 @@ class FunCog(commands.Cog):
 
         if not text: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
         await ctx.send(text[::-1])
+
+    @commands.command(usage = '<word>')
+    async def scramble(self, ctx, *, word = None):
+        """Scramble given word."""
+
+        if not word: return await ctx.send(f"**Syntax:** {ctx.command.name} {ctx.command.usage}")
+        letters = list(word)
+        random.shuffle(letters)
+        await ctx.send(''.join(letters))
 
     @commands.command(aliases = ['hug'], usage = "[@user/id]")
     async def notice(self, ctx, user: discord.Member = None):
@@ -167,7 +176,7 @@ class FunCog(commands.Cog):
     
     @commands.command(aliases = ["feline", "tom", "mouser", "pussy", "meow"])
     async def cat(self, ctx, num: typing.Optional[int] = 0, fact : bool = False):
-        """Fetches a random cat picture from the internet."""
+        """Gives you a cat pic."""
 
         choices = ("Meow... 🐱", "Meow 😻", "Here's a feline for you. 🐈")
         choice = random.choice(choices)
@@ -200,7 +209,7 @@ class FunCog(commands.Cog):
 
     @commands.command(aliases=["pupper", "woof", "doggo", "bork", "canine"])
     async def dog(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
-        """Fetches a random dog picture from the internet."""
+        """Gives you a dog pic."""
 
         choices = ("Woof 🐶", "Bork Bork :service_dog:", "Here's a canine for you. 🐕", "Arf! 🐶")
         choice = random.choice(choices)
@@ -242,7 +251,7 @@ class FunCog(commands.Cog):
     
     @commands.command(name = "bird", aliases = ["birb", "ave", "birdie"])
     async def bird(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
-        """Fetches a random birb picture from the internet."""
+        """Gives you a bird pic."""
 
         choices = ("🐦 Here's your birb.", "Here's a birdie for you. 🐦", "🐦 Here's a birdie.")
         choice = random.choice(choices)
@@ -274,7 +283,7 @@ class FunCog(commands.Cog):
     
     @commands.command(name = "fox", aliases = ["foxie", "arf"])
     async def fox(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
-        """Fetches a random fox picture from the internet."""
+        """Gives you a fox pic."""
 
         choices = ("🦊 Here's a fox.", "Here's a fox for you. 🦊", "🦊 Here's your fox.")
         choice = random.choice(choices)
@@ -308,7 +317,7 @@ class FunCog(commands.Cog):
     
     @commands.command(name = "panda", aliases = ["achoo"])
     async def panda(self, ctx, fact : bool = False):
-        """Fetches a random panda picture from the internet."""
+        """Gives you a panda pic."""
 
         choices = ("🐼 Here's a panda.", "Here's a panda for you. 🐼", "🐼 Here's your panda!", "Here's your panda... 🐼")
         choice = random.choice(choices)
@@ -332,7 +341,7 @@ class FunCog(commands.Cog):
     
     @commands.command(name = "koala")
     async def koala(self, ctx, fact : bool = False):
-        """Fetches a random koala picture from the internet."""
+        """Gives you a koala pic."""
 
         choices = ("🐨 Here's a koala.", "Here's a cute koala for you. 🐨", "🐨 Here's your koala!", "Here's your koala... 🐨")
         choice = random.choice(choices)
@@ -356,7 +365,7 @@ class FunCog(commands.Cog):
     
     @commands.command(name = "anime")
     async def uwu(self, ctx):
-        """Fetches a random anime picture from the internet."""
+        """Gives you an anime girl pic."""
 
         url = "http://api.cutegirls.moe/json"
         async with self.session.get(url) as r:
@@ -375,7 +384,7 @@ class FunCog(commands.Cog):
     
     @commands.command(name = "quote")
     async def quote(self, ctx):
-        """Fetches a random quote from the internet."""
+        """Gives you a quote."""
 
         url = "http://api.forismatic.com/api/1.0/?method=getQuote&key=457653&format=json&lang=en"
         async with self.session.get(url) as r:
@@ -398,86 +407,138 @@ class FunCog(commands.Cog):
         await ctx.send(embed = embed)
     
     @commands.command(name = 'meme', aliases = ['dankmeme', 'memes'], usage = '[memes/dankmemes/me_irl]')
-    async def meme(self, ctx, subreddit: str = 'any'):
-        """Fetches a meme for you."""
+    async def meme(self, ctx, subreddit: str = 'any', sorting: str = 'any'):
+        """Gives you a meme."""
 
         meme_subreddits = ('r/memes', 'r/dankmemes', 'r/me_irl')
+        sorts = ('new', 'hot')
 
+        subreddit = subreddit.lower().strip()
+        sorting = sorting.lower().strip()
         if not subreddit.startswith('r/'): subreddit = f"r/{subreddit}"
 
         if subreddit not in meme_subreddits: subreddit = random.choice(meme_subreddits)
+        if sorting not in sorts: sorting = random.choice(sorts)
 
         subreddit = random.choice(meme_subreddits)
-        url = f"https://www.reddit.com/{subreddit}/new.json?sort=hot"
+        url = f"https://www.reddit.com/{subreddit}/{sorting}.json?sort=hot"
 
+        allowed_formats = ('.jpg', '.png', '.jpeg', '.gif', '.gifv')
         async with self.session.get(url) as r:
-            res = await r.json()
-            rand = random.randint(0, len(res['data']['children']))
-            title = res["data"]["children"][rand]["data"]["title"]
-            image = res["data"]["children"][rand]["data"]["url"]
-            upvotes = res["data"]["children"][rand]["data"]["score"]
-            comments = res["data"]["children"][rand]["data"]["num_comments"]
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts))]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
         embed.set_image(url = image)
-        embed.set_footer(text = f"{subreddit} • 👍 {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"{subreddit}/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
     @commands.command(aliases = ['wholesomememes', 'wholesome_meme', 'wholesomememe', 'wmeme'])
-    async def wholesome(self, ctx):
-        """Fetches a wholesome meme for you."""
+    async def wholesome(self, ctx, sorting: str = 'any'):
+        """Gives you a wholesome meme."""
 
-        url = f"https://www.reddit.com/r/wholesomememes/new.json?sort=hot"
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
 
+        url = f"https://www.reddit.com/r/wholesomememes/{sorting}.json?sort=hot"
+        
+        allowed_formats = ('.jpg', '.png', '.jpeg', '.gif', '.gifv')
         async with self.session.get(url) as r:
-            res = await r.json()
-            rand = random.randint(0, len(res['data']['children']))
-            title = res["data"]["children"][rand]["data"]["title"]
-            image = res["data"]["children"][rand]["data"]["url"]
-            upvotes = res["data"]["children"][rand]["data"]["score"]
-            comments = res["data"]["children"][rand]["data"]["num_comments"]
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts))]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
         embed.set_image(url = image)
-        embed.set_footer(text = f"r/wholesomememes • 👍 {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/wholesomememes/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
     @commands.command(name = 'discordmeme', aliases = ['discordmemes', 'discordirl', 'discord_irl'])
-    async def discordmeme(self, ctx):
-        """Fetches a discord meme for you."""
+    async def discordmeme(self, ctx, sorting: str = 'any'):
+        """Gives you a discord meme."""
 
-        url = f"https://www.reddit.com/r/discord_irl/new.json?sort=hot"
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
 
+        url = f"https://www.reddit.com/r/discord_irl/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg', '.gif', '.gifv')
         async with self.session.get(url) as r:
-            res = await r.json()
-            rand = random.randint(0, len(res['data']['children']))
-            title = res["data"]["children"][rand]["data"]["title"]
-            image = res["data"]["children"][rand]["data"]["url"]
-            upvotes = res["data"]["children"][rand]["data"]["score"]
-            comments = res["data"]["children"][rand]["data"]["num_comments"]
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts))]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
         embed.set_image(url = image)
-        embed.set_footer(text = f"r/discord_irl • 👍 {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/discord_irl • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
     @commands.command(name = 'surrealmeme', aliases = ['surreal', 'surrealmemes'])
-    async def surrealmeme(self, ctx):
-        """Fetches a surreal meme for you."""
+    async def surrealmeme(self, ctx, sorting: str = 'any'):
+        """Gives you a surreal meme."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/surrealmemes/new.json?sort=hot"
 
+        allowed_formats = ('.jpg', '.png', '.jpeg', '.gif', '.gifv')
         async with self.session.get(url) as r:
-            res = await r.json()
-            rand = random.randint(0, len(res['data']['children']))
-            title = res["data"]["children"][rand]["data"]["title"]
-            image = res["data"]["children"][rand]["data"]["url"]
-            upvotes = res["data"]["children"][rand]["data"]["score"]
-            comments = res["data"]["children"][rand]["data"]["num_comments"]
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts))]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
         
         embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
         embed.set_image(url = image)
-        embed.set_footer(text = f"r/surrealmemes • 👍 {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/surrealmemes • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
     @commands.command(aliases = ['todayilearned'])
@@ -502,12 +563,12 @@ class FunCog(commands.Cog):
             description = content,
             color = self.colors.primary
         )
-        embed.set_footer(text = f"r/todayilearned • 👍 {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/todayilearned • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
     @commands.command(aliases = ['jokes'])
     async def joke(self, ctx):
-        """Gives you an joke."""
+        """Gives you a joke."""
 
         url = "https://www.reddit.com/r/Jokes/new.json?sort=hot"
 
@@ -527,7 +588,7 @@ class FunCog(commands.Cog):
             description = content,
             color = self.colors.primary
         )
-        embed.set_footer(text = f"r/Jokes • 👍 {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/Jokes • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
     @commands.command(aliases = ['antijokes'])
@@ -552,7 +613,7 @@ class FunCog(commands.Cog):
             description = content,
             color = self.colors.primary
         )
-        embed.set_footer(text = f"r/AntiJokes • 👍 {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/AntiJokes • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
     @commands.command(aliases = ['antiantijokes'])
@@ -577,7 +638,7 @@ class FunCog(commands.Cog):
             description = content,
             color = self.colors.primary
         )
-        embed.set_footer(text = f"r/AntiAntiJokes • 👍 {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/AntiAntiJokes • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
     @commands.command(name = 'reddit', usage = '[r/subreddit]')
@@ -590,28 +651,52 @@ class FunCog(commands.Cog):
         
         url = f"https://www.reddit.com/{subreddit}/new.json?sort={sort_by}"
 
+        #async with self.session.get(url) as r:
+        #    post = await r.json()
+        #    rand = random.randint(0, len(post['data']['children']))
+        #    post = post["data"]["children"][rand]["data"]
+        #    title = post["title"]
+        #    image = post["url"]
+        #    content = post["selftext"]
+        #    link = "https://www.reddit.com" + post["permalink"]
+        #    nsfw = post["over_18"]
+
+        # Replace with "allowed_formats = ('.jpg', '.png', '.jpeg', '.gif') and more you could find."
+        videos = ('https://v.redd', 'https://youtu', 'https://www.youtu', 'https://www.twitch', 'https://twitch')
+
+
         async with self.session.get(url) as r:
             post = await r.json()
-            rand = random.randint(0, len(post['data']['children']))
-            post = post["data"]["children"][rand]["data"]
+            print(len(post["data"]["children"]))
+            posts = [post for post in post["data"]["children"] if not post["data"]["url"].startswith(videos)]
+            post = posts[random.randint(0, len(posts))]["data"]
+            print(len(posts))
+
             title = post["title"]
             image = post["url"]
             content = post["selftext"]
-            link = "https://www.reddit.com" + post["permalink"]
             nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            link = f"https://www.reddit.com{post['permalink']}"
+
+        print()
+        print(f"Title: {title}")
+        print(f"Image: {image}")
+        print(f"Content: {content}")
+        print(f"NSFW: {nsfw}")
         
         if nsfw and not ctx.channel.nsfw:
-            await ctx.send("⚠️ This post contains NSFW content! It cannot be previewed here.")
-            return
-
+            return await ctx.send("⚠️ This post contains NSFW content! It cannot be previewed here.")
+            
         embed = discord.Embed(title = title, url = link, description = content, color = self.colors.primary)
         embed.set_image(url = image)
-        embed.set_footer(text = subreddit)
+        embed.set_footer(text = f"{subreddit} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
         
     @commands.command(name = "trivia", usage = "[category] [difficulty] [type]")
     async def trivia(self, ctx, triviacategory : typing.Union[str, int] = 'any', triviadifficulty : str = 'any', triviatype : str = 'any'):
-        """Gives you a trivia question to answer. `trivia help`"""
+        """Gives you a trivia question."""
 
         url = "https://opentdb.com/api.php?amount=1"
 
@@ -741,6 +826,34 @@ class FunCog(commands.Cog):
                 await ctx.send(f"{self.emojis.tick} Your answer was correct! It's {answer}.")
             else:
                 await ctx.send(f"{self.emojis.cross} Your answer was incorrect. The correct answer was {answer}.")
+
+    @commands.command()
+    async def bored(self, ctx):
+        """Bored? Try this command."""
+
+        async with self.session.get('http://www.boredapi.com/api/activity/') as r:
+            res = await r.json()
+
+        embed = discord.Embed(
+            title = "Bored?",
+            description = res['activity'],
+            color = self.colors.primary
+        )
+        embed.set_footer(text = f"{ctx.author} is bored.", icon_url = ctx.author.avatar_url)
+        embed.timestamp = datetime.utcnow()
+        
+        await ctx.send(embed = embed)
+    
+    @commands.command()
+    async def smile(self, ctx):
+        """Smile! :)"""
+
+        smiles = (
+            '😄', '😸', '😃', '😺',
+            '😅', '🙂', '😁', '😀'
+        )
+        
+        await ctx.send(random.choice(smiles))
 
 def setup(bot):
     bot.add_cog(FunCog(bot))
