@@ -110,8 +110,9 @@ class HelpCog(commands.Cog):
             embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
             await ctx.send(embed = embed)
 
-        elif request == 'fun' or request == 'uhfun':
+        elif request == 'fun':
             cmds = self.bot.get_cog("FunCog").get_commands()
+
 
             embed = discord.Embed(title = "Fun Commands.", color = self.colors.primary)
             embed.add_field(
