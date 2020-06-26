@@ -64,7 +64,7 @@ class HelpCog(commands.Cog):
 
             embed.add_field(
                 name = '» Support Server :link:',
-                value = '**[https://discord.gg/nG86J2U](https://www.youtube.com/watch?v=dQw4w9WgXcQ)**'
+                value = f'**[{self.config.guild_support_invite}](https://www.youtube.com/watch?v=dQw4w9WgXcQ)**'
             )
 
             embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
