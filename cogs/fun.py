@@ -403,7 +403,7 @@ class FunCog(commands.Cog):
         embed.set_footer(text = url)
         await ctx.send(embed = embed)
     
-    @commands.command(brief = 'reddit', aliases = ['dankmeme', 'memes'], usage = '[memes/dankmemes/me_irl]')
+    @commands.command(brief = 'reddit', aliases = ['memes'], usage = '[memes/dankmemes/me_irl]')
     async def meme(self, ctx, subreddit: str = 'any', sorting: str = 'any'):
         """Gives you a meme."""
 
@@ -413,11 +413,9 @@ class FunCog(commands.Cog):
         subreddit = subreddit.lower().strip()
         sorting = sorting.lower().strip()
         if not subreddit.startswith('r/'): subreddit = f"r/{subreddit}"
-
         if subreddit not in meme_subreddits: subreddit = random.choice(meme_subreddits)
         if sorting not in sorts: sorting = random.choice(sorts)
 
-        subreddit = random.choice(meme_subreddits)
         url = f"https://www.reddit.com/{subreddit}/{sorting}.json?sort=hot"
 
         allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
@@ -539,14 +537,18 @@ class FunCog(commands.Cog):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['todayilearned'])
-    async def til(self, ctx):
+    async def til(self, ctx, sorting: str = 'any'):
         """You learn something new everyday!"""
 
-        url = "https://www.reddit.com/r/todayilearned/new.json?sort=hot"
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/todayilearned/{sorting}.json?sort=hot"
 
         async with self.session.get(url) as r:
             post = await r.json()
-            rand = random.randint(0, len(post['data']['children']))
+            rand = random.randint(0, len(post['data']['children']) - 1)
             post = post["data"]["children"][rand]["data"]
             
             title = post["title"]
@@ -566,7 +568,7 @@ class FunCog(commands.Cog):
             embed.description = f"**[{title}]({link})**\n\n[Source]({url})"
 
         embed.set_author(name = f"u/{author}")
-        embed.set_footer(text = f"r/todayilearned • ⬆️ {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/todayilearned/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['jokes'])
@@ -577,7 +579,7 @@ class FunCog(commands.Cog):
 
         async with self.session.get(url) as r:
             post = await r.json()
-            rand = random.randint(0, len(post['data']['children']))
+            rand = random.randint(0, len(post['data']['children']) - 1)
             post = post["data"]["children"][rand]["data"]
             title = post["title"]
             content = html.unescape(post["selftext"])
@@ -602,7 +604,7 @@ class FunCog(commands.Cog):
 
         async with self.session.get(url) as r:
             post = await r.json()
-            rand = random.randint(0, len(post['data']['children']))
+            rand = random.randint(0, len(post['data']['children']) - 1)
             post = post["data"]["children"][rand]["data"]
             title = post["title"]
             content = html.unescape(post["selftext"])
@@ -627,7 +629,7 @@ class FunCog(commands.Cog):
 
         async with self.session.get(url) as r:
             post = await r.json()
-            rand = random.randint(0, len(post['data']['children']))
+            rand = random.randint(0, len(post['data']['children']) - 1)
             post = post["data"]["children"][rand]["data"]
             title = post["title"]
             content = html.unescape(post["selftext"])
