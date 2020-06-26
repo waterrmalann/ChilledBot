@@ -141,6 +141,24 @@ class FunCog(commands.Cog):
         """Reverse given text."""
 
         await ctx.send(text[::-1])
+    
+    # Why did I make this?
+    @commands.command(brief = 'text', usage = "<text>")
+    async def emojify(self, ctx, *, text: str):
+        """Convert text to block letters."""
+
+        numbers = {0: 'zero', 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine'}
+
+        emojified = []
+        for i in text:
+            if i.lower() in 'abcdefghijklmnopqrstuvwxyz':
+                emojified.append(f":regional_indicator_{i.lower()}:")
+            elif i.isdigit():
+                emojified.append(f":{numbers.get(int(i), ':zero:')}:")
+            else:
+                emojified.append(i)
+
+        await ctx.send(''.join(emojified))
 
     @commands.command(brief = 'text', usage = '<word>')
     async def scramble(self, ctx, *, word: str):
