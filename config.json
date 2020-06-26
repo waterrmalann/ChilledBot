@@ -29,9 +29,15 @@
     "bot_flavor": "cherry",
     "silent_mode": false,
 
+    "guild_support_invite": "https://discord.gg/DUAk3H5",
+    "guild_main_invite": "",
+
+    "guild_support": 725575900564947025,
     "guild_main": 694775062204514414,
+
+    "channel_cmdexceptions": 726024119455449149,
+    "channel_exceptions": 723019211559141479,
     "channel_logs": 723019169515438090,
-    "channel_errors": 723019211559141479,
     "channel_guilds": 723019271286030437,
 
     "BOT_MAIN_TOKEN": "",
