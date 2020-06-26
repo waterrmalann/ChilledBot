@@ -157,13 +157,9 @@ async def on_command_error(ctx, error):
     
     elif isinstance(error, commands.NotOwner):
         return await ctx.send(f"{emojis.cross} **You are not authorized to use this command.** `[ex AuthError]`")
-
-    elif isinstance(error, commands.BadArgument):
-        if ctx.command.qualified_name == 'tag list':
-            return await ctx.send('I could not find that member. Please try again.')
         
-    print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
-    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+    print('Ignoring exception in command {}:'.format(ctx.command), file = sys.stderr)
+    traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
 
 
 
