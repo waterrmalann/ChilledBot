@@ -102,35 +102,25 @@ async def on_ready():
         afk = True
     )
 
-    #await logger.log(bot, "**[Ready] ChilledBot has started.**")
-    #await logger.log(bot, f"**[Login] Logged in as {bot.user.name} ({bot.user.id}).**")
-    #await logger.log(bot, f"**[On] {datetime.now().strftime('%A, %B %d %Y @ %H:%M:%S %p')}**")
+    bot.channel_logs = bot.get_channel(config.channel_logs)
+    bot.channel_cmdexceptions = bot.get_channel(config.channel_cmdexceptions)
+    bot.channel_exceptions = bot.get_channel(config.channel_exceptions)
+    bot.channel_guilds = bot.get_channel(config.channel_guilds)
+
+    await bot.channel_logs.send(
+        "**[Ready]** __ChilledBot__ has started.\n" \
+        f"**[Login]** Logged in as **{bot.user.name}** (`{bot.user.id}`).\n" \
+        f"**[On]** {default.datefr(datetime.now())}"
+    )
 
 @bot.event
 async def on_disconnect():
     """http://discordpy.readthedocs.io/en/rewrite/api.html#discord.on_disconnect"""
 
     print("[Disconnected] Lost connection with Discord.")
-"""
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.NoPrivateMessage):
-        await ctx.author.send(f"{emojis.cross} **This command can't be used in DMs.** `[ex GuildOnly]`")
-        return
-    if isinstance(error, commands.DisabledCommand):
-        await ctx.send(f"{emojis.cross} **This command is disabled.** `[ex CmdDisabled]`")
-        return
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f"{emojis.neutral} **This command is on cooldown. Try again in {error.retry_after:.2f}s.** `[ex Cooldown]`")
-        return
-    if isinstance(error, commands.NotOwner):
-        await ctx.send(f"{emojis.cross} **You are not authorized to use this command.** `[ex AuthError]`")
-        return
-"""
 
 @bot.event
 async def on_command_error(ctx, error):
-
     if hasattr(ctx.command, 'on_error'): return
     
     ignored = (commands.CommandNotFound)
@@ -145,6 +135,7 @@ async def on_command_error(ctx, error):
     
     elif isinstance(error, input_errors):
         embed = discord.Embed(description = f"**Syntax:** {ctx.command.qualified_name} {ctx.command.usage}", color = colors.primary)
+        if error: embed.add_field(name = "Error", value = error)
         embed.set_footer(text = ctx.command.help)
         return await ctx.send(embed = embed)
 
@@ -157,12 +148,50 @@ async def on_command_error(ctx, error):
     
     elif isinstance(error, commands.NotOwner):
         return await ctx.send(f"{emojis.cross} **You are not authorized to use this command.** `[ex AuthError]`")
-        
+    
+    else:
+
+        desc_values = []
+        desc_values.append("This command has raised an unexpected error. My developers have been notified of this issue!")
+        desc_values.append(f"```\n{error}\n```")
+        desc_values.append(f"[Visit the support server to learn more.]({config.guild_support_invite})")
+
+        embed = discord.Embed(
+            title = "⚠️ **Unhandled Exception**",
+            description = '\n'.join(desc_values),
+            color = colors.error
+        )
+        embed.set_footer(text = f"Exception caused by {ctx.command.qualified_name}")
+        await ctx.send(embed = embed)
+
+        exception_embed = discord.Embed(
+            title = "⚠️ **Unhandled Command Exception**",
+            color = colors.error
+        )
+        exception_embed.add_field(
+            name = "Command",
+            value = f"`{ctx.command.qualified_name}` from `{ctx.command.cog_name}`",
+            inline = False
+        )
+        exception_embed.add_field(
+            name = "Error",
+            value = f"**Type:** {type(error)}\n" \
+                f"```{error}```\n" \
+                f"```{error.__traceback__}```",
+            inline = False
+        )
+        exception_embed.add_field(
+            name = "Context",
+            value = f"**Command Invoked by:** {ctx.author} ({ctx.author.id})\n" \
+                f"**Command Invoked in:** {ctx.guild} ({ctx.guild.id} #{ctx.channel})\n" \
+                f"**Command Message:** {ctx.message.content}",
+            inline = False
+        )
+        embed.timestamp = datetime.utcnow()
+        await bot.channel_cmdexceptions.send(embed = embed)
+
     print('Ignoring exception in command {}:'.format(ctx.command), file = sys.stderr)
     traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
-
-
-
 
 # Start the bot.
 bot.run(os.environ.get("BOT_TOKEN"), bot = True, reconnect = True)
