@@ -57,7 +57,7 @@ bot = commands.AutoShardedBot(
     description = "A simple, fun, and utility bot that can also do moderation.",
     owner_ids = set(config.bot_owners)
 )
-
+bot.launch_time = datetime.utcnow()
 bot.remove_command('help')
 prefix = '.'
 
@@ -187,8 +187,8 @@ async def on_command_error(ctx, error):
                 f"**Command Message:** {ctx.message.content}",
             inline = False
         )
-        embed.timestamp = datetime.utcnow()
-        await bot.channel_cmdexceptions.send(embed = embed)
+        exception_embed.timestamp = datetime.utcnow()
+        await bot.channel_cmdexceptions.send(embed = exception_embed)
 
     print('Ignoring exception in command {}:'.format(ctx.command), file = sys.stderr)
     traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
