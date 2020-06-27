@@ -22,6 +22,7 @@ class UtilityCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.session = aiohttp.ClientSession()
         self.config = default.get("config.json")
         self.emojis = default.get("emojis.json")
         self.colors = default.get("colors.json")
@@ -42,15 +43,15 @@ class UtilityCog(commands.Cog):
     @commands.command(aliases = ['updates', 'changes', 'whats_new', 'whatsnew'])
     async def changelog(self, ctx):
         """Changelog of the current version of the bot."""
-        changel = f"""
-            {self.config.bot_name} {self.config.bot_version} Changelog
-
-            __**1. Complete Rewrite*__
-            ChilledBot has completely been rewritten from scratch, and is now better optimized.
-            It also utilizes new functionality such as command cooldowns and sharding.
-            """
         
-        await ctx.send(changel)
+        embed = discord.Embed(title = f"{self.config.bot_name} {self.config.bot_version} Changelog.")
+        embed.add_field(
+            name = "Uptime Command",
+            value = "Displays for how long the bot has been online for. `uptime`",
+            inline = False
+        )
+        embed.set_footer(text = "Last updated June 27th, 2020")
+        await ctx.send(embed = embed)
     
     @commands.command(usage = "<color (hex/int)>")
     async def color(self, ctx, col = None):
@@ -93,13 +94,13 @@ class UtilityCog(commands.Cog):
         embed = discord.Embed(
             title = url,
             color = self.colors.secondary,
-            description = f"{self.emojis.tick} Evaluated in {duration:.2f}ms."
+            description = f"{self.emojis.tick} Evaluated in {duration:.2f}ms.",
+            timestamp = datetime.utcnow()
         )
 
         embed.add_field(name = "Retrieved Data", value = f"```py\n{data}```", inline = False)
         if isinstance(data, dict):
             embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
-        embed.timestamp = datetime.utcnow()
         await ctx.send(embed = embed)
     
     @commands.command(usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
@@ -166,6 +167,51 @@ class UtilityCog(commands.Cog):
 
         invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=2147483095&scope=bot"
         embed = discord.Embed(color = self.colors.secondary, description = f"🔗  You can invite me using __**[this link!]({invite_url})**__")
+        await ctx.send(embed = embed)
+    
+    @commands.command(usage='`["question"] {"option 1"} {option 2}`')
+    #@permissions(manage_messages = True)
+    @commands.guild_only()
+    async def poll(self, ctx, question, yes="yes", *, no="no"):
+        """Creates a simple voting poll."""
+
+        embed = discord.Embed(
+            title = question,
+            description = f"{self.emojis.tick} {yes}\n{self.emojis.cross} {no}",
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
+        )
+        try:
+            await ctx.message.delete() 
+        except:
+            await ctx.send("Could not execute command! Please try again later.")
+        else:
+            sent_embed = await ctx.send(embed = embed)
+            await sent_embed.add_reaction(self.emojis.tick)
+            await sent_embed.add_reaction(self.emojis.cross)
+        
+    
+    @commands.command(usage='[code block]')
+    async def hastebin(self, ctx, *, codeblock):
+        """Paste code to hastebin."""
+
+        if codeblock.startswith('```') and codeblock.endswith('```'):
+            code_to_post = codeblock[3:-3]
+        else:
+            raise commands.BadArgument('code must be in a codeblock')
+
+        async with self.session.post("https://hastebin.com/documents", data = code_to_post) as resp:
+            data = await resp.json()
+            pin = data['key']
+
+        embed = discord.Embed(
+            title = 'Your code has been successfully posted to hastebin!',
+            description = f"https://hastebin.com/{pin}",
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
+        ) 
+        embed.set_footer(text = f"Posted by {ctx.author}", icon_url = ctx.author.avatar_url)
+
         await ctx.send(embed = embed)
     
     #@commands.command()
