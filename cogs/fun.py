@@ -64,7 +64,7 @@ class FunCog(commands.Cog):
         )
 
         embed = discord.Embed(color = self.colors.primary, timestamp = datetime.utcnow())
-        embed.set_author(name='8ball', icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/8-Ball_Pool.svg/240px-8-Ball_Pool.svg.png')
+        embed.set_author(name='The Magic 8-Ball', icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/8-Ball_Pool.svg/240px-8-Ball_Pool.svg.png')
         embed.set_footer(text = f"Asked by {ctx.author}", icon_url = ctx.author.avatar_url)
         embed.add_field(name = question, value = f"**Answer:** {random.choice(fortunes)}")
         await ctx.send(embed = embed)
@@ -111,7 +111,7 @@ class FunCog(commands.Cog):
 
         choice = choice.lower()
         if choice == 'stone': choice = choice.replace('stone', 'rock')
-        if choice not in choices: raise commands.BadArgument
+        if choice not in choices: raise commands.BadArgument("Please pick a valid choice.")
 
         choose = random.choice(choices)
 
@@ -155,7 +155,7 @@ class FunCog(commands.Cog):
             elif i.isdigit():
                 emojified.append(f":{numbers.get(int(i), ':zero:')}:")
             else:
-                emojified.append(i)
+                emojified.append(' ')
 
         await ctx.send(''.join(emojified))
 
@@ -174,7 +174,7 @@ class FunCog(commands.Cog):
         # Return the author if an user is not specified.
         user = user or ctx.author
 
-        hugs = [
+        hugs = (
             "`＼(^o^)／`", "`d=(´▽｀)=b`", "`⊂((・▽・))⊃`"
             "`⊂( ◜◒◝ )⊃`", "`⊂（♡⌂♡）⊃`", r"`\(･◡･)/`",
             "`(づ｡◕‿‿◕｡)づ`", "`༼ つ ◕‿◕ ༽つ`", "`(づ￣ ³￣)づ`",
@@ -184,7 +184,7 @@ class FunCog(commands.Cog):
             "`⊂(´･◡･⊂ )∘˚˳°`", "`⊂(･ω･*⊂)`", "`⊂(・﹏・⊂)`",
             "`⊂(・▽・⊂)`", "`⊂(◉‿◉)つ`", "`o((*^▽^*))o`",
             "`╰(*´︶`*)╯`", "`╰(＾3＾)╯`", "`╰(⸝⸝⸝´꒳`⸝⸝⸝)╯`"
-        ]
+        )
 
         await ctx.send(f"{user.mention}, `{random.choice(hugs)}`")
     
