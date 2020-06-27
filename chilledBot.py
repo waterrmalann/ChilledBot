@@ -130,25 +130,38 @@ async def on_command_error(ctx, error):
     if isinstance(error, ignored):
         return
 
+    # On Cooldown
     elif isinstance(error, commands.CommandOnCooldown):
-        return await ctx.send(f"{emojis.neutral} **This command is on cooldown. Try again in {error.retry_after:.2f}s.** `[ex Cooldown]`")
+        return await ctx.send(f"{emojis.neutral} **This command is on cooldown. Try again in {error.retry_after:.2f}s.** `[ex Cooldown]`", delete_after = 5)
     
+    # Missing / Invalid / Bad Arguments
     elif isinstance(error, input_errors):
-        embed = discord.Embed(description = f"**Syntax:** {ctx.command.qualified_name} {ctx.command.usage}", color = colors.primary)
-        if error: embed.add_field(name = "Error", value = error)
+
+        description = f"**Syntax:** {ctx.command.qualified_name} {ctx.command.usage}"
+        if error: description += f"\n{error}"
+
+        embed = discord.Embed(description = description, color = colors.primary)
         embed.set_footer(text = ctx.command.help)
         return await ctx.send(embed = embed)
 
+    # Disabled
     elif isinstance(error, commands.DisabledCommand):
         return await ctx.send(f"{emojis.cross} **This command is disabled.** `[ex CmdDisabled]`")
 
+    # Guild Only
     elif isinstance(error, commands.NoPrivateMessage):
         try: return await ctx.author.send(f"{emojis.cross} **This command can't be used in DMs.** `[ex GuildOnly]`")
         except: pass
     
+    # Not Authorized
     elif isinstance(error, commands.NotOwner):
         return await ctx.send(f"{emojis.cross} **You are not authorized to use this command.** `[ex AuthError]`")
     
+    # NSFW Channel Required
+    elif isinstance(error, commands.NSFWChannelRequired):
+        return await ctx.send(f"🔞 **This command only works in NSFW channels.** `[ex NSFWRequired]`")
+    
+    # Unhandled
     else:
 
         desc_values = []
@@ -159,35 +172,44 @@ async def on_command_error(ctx, error):
         embed = discord.Embed(
             title = "⚠️ **Unhandled Exception**",
             description = '\n'.join(desc_values),
-            color = colors.error
+            color = colors.error,
+            timestamp = datetime.utcnow()
         )
         embed.set_footer(text = f"Exception caused by {ctx.command.qualified_name}")
         await ctx.send(embed = embed)
 
         exception_embed = discord.Embed(
-            title = "⚠️ **Unhandled Command Exception**",
+            title = "⚠️ Unhandled Command Exception",
             color = colors.error
         )
         exception_embed.add_field(
             name = "Command",
-            value = f"`{ctx.command.qualified_name}` from `{ctx.command.cog_name}`",
+            value = f"{ctx.command.qualified_name} ({ctx.command.cog_name})",
             inline = False
         )
         exception_embed.add_field(
             name = "Error",
-            value = f"**Type:** {type(error)}\n" \
-                f"```{error}```\n" \
-                f"```{error.__traceback__}```",
+            value = f"**{type(error)}**\n" \
+                f"```k\n{error}```" \
+                f"```k\n{error.__traceback__}```",
             inline = False
         )
         exception_embed.add_field(
-            name = "Context",
-            value = f"**Command Invoked by:** {ctx.author} ({ctx.author.id})\n" \
-                f"**Command Invoked in:** {ctx.guild} ({ctx.guild.id} #{ctx.channel})\n" \
-                f"**Command Message:** {ctx.message.content}",
+            name = "Invoked by",
+            value = f"{ctx.author} (`{ctx.author.id}`)",
             inline = False
         )
-        exception_embed.timestamp = datetime.utcnow()
+        exception_embed.add_field(
+            name = "Invoked in",
+            value = f"{ctx.guild} (`{ctx.guild.id}`)\n" \
+                f"#{ctx.channel} (`{ctx.channel.id}`)",
+            inline = False
+        )
+        exception_embed.add_field(
+            name = "Message Content",
+            value = ctx.message.content,
+            inline = False
+        )
         await bot.channel_cmdexceptions.send(embed = exception_embed)
 
     print('Ignoring exception in command {}:'.format(ctx.command), file = sys.stderr)
