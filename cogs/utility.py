@@ -53,8 +53,8 @@ class UtilityCog(commands.Cog):
         embed.set_footer(text = "Last updated June 27th, 2020")
         await ctx.send(embed = embed)
     
-    @commands.command(usage = "<color (hex/int)>")
-    async def color(self, ctx, col = None):
+    @commands.command(aliases = ['colour'], usage = "<color (hex/int)>")
+    async def color(self, ctx, col: str):
         """Displays a color"""
 
         col = col.strip()
@@ -160,6 +160,38 @@ class UtilityCog(commands.Cog):
         else:
 
             raise commands.BadArgument('missing parameter')
+    
+    @commands.command(aliases = ['ud', 'urbandict', 'udict'])
+    #@commands.is_nsfw()
+    async def urban(self, ctx, *, query):
+        """Search the urban dictionary for word meanings."""
+
+        async with self.session.get('http://api.urbandictionary.com/v0/define', params={'term': query}) as resp:
+            result = await resp.json()
+
+        if not result['list']:
+            return await ctx.send("No word was found.")
+
+        definition = result['list'][0]['definition']
+        word = result['list'][0]['word']
+        link = result['list'][0]['permalink']
+        example = result['list'][0]['example']
+        author = result['list'][0]['author'].title()
+        thumbs_up = result['list'][0]['thumbs_up']
+
+        embed = discord.Embed(
+            title = word,
+            url = link,
+            color = self.colors.ud_yellow,
+            timestamp = datetime.utcnow()
+        )
+        embed.set_author(name = f"By {author} on Urban Dictionary.")
+        embed.set_thumbnail(url = "https://cdn.discordapp.com/attachments/726353729842053171/726353766881689651/urban_dict.png")
+        embed.add_field(name = "Meaning", value = definition, inline = False)
+        embed.add_field(name = "Example", value = example, inline = False)
+        embed.set_footer(text = f"urbandictionary.com • 👍 {thumbs_up}", icon_url = ctx.author.avatar_url)
+        
+        await ctx.send(embed = embed)
     
     @commands.command()
     async def invite(self, ctx):
