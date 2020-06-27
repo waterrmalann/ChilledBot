@@ -50,7 +50,9 @@ class InformationCog(commands.Cog):
         else: verification = "[4] ┻━┻ ﾐヽ(ಠ益ಠ)ノ彡┻━┻ (Extreme)"
 
         # The guild's default notification level. We format the text properly.
-        notification = formatting.casify(ctx.guild.default_notifications)
+        notification = ctx.guild.default_notifications
+        if notification == 'all_messages': notification = "All Messages"
+        else: notification = "Only Mentions"
 
         # The guild's content filter status.
         # (Content filtering algorithms employed by Discord to identify and delete explicit content.)
@@ -118,29 +120,30 @@ class InformationCog(commands.Cog):
 
         embed = discord.Embed(
             title = f"{ctx.guild.name} (`{ctx.guild.id}`)",
-            color = self.colors.primary
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
         )
 
         embed.add_field(
-            name = "**❯ Server**",
+            name = "❯ Server",
             value = '\n'.join(server_values),
             inline = False
         )
         
         embed.add_field(
-            name = "**❯ Members**",
+            name = "❯ Members",
             value = '\n'.join(member_values),
             inline = False
         )
 
         embed.add_field(
-            name = "**❯ Channels**",
+            name = "❯ Channels",
             value = '\n'.join(channel_values),
             inline = False
         )
 
         embed.add_field(
-            name = "**❯ Roles**",
+            name = "❯ Roles",
             value = '\n'.join(role_values),
             inline = False
         )
@@ -148,14 +151,13 @@ class InformationCog(commands.Cog):
         if ctx.guild.features:
             features = ', '.join(formatting.casify(i) for i in ctx.guild.features)
             embed.add_field(
-                name = "**❯ Features**",
+                name = "❯ Features",
                 value = features,
                 inline = False
             )
 
         embed.set_thumbnail(url = ctx.guild.icon_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-        embed.timestamp = datetime.utcnow()
 
         await ctx.send(embed = embed)
 
@@ -208,16 +210,16 @@ class InformationCog(commands.Cog):
         server_values.append(f"**Joined At:** {default.datefr(user.joined_at)}")
         if user.top_role != ctx.guild.default_role: server_values.append(f"**Top Role:** {user.top_role.mention}")
 
-        embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1])
+        embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1], timestamp = datetime.utcnow())
 
         embed.add_field(
-            name = "**❯ Bot**" if user.bot else "**❯ Discord Staff**" if user.system else "**❯ User**",
+            name = "❯ Bot" if user.bot else "❯ Discord Staff" if user.system else "❯ User",
             value = '\n'.join(user_values),
             inline = False
         )
 
         embed.add_field(
-            name = "**❯ Server**",
+            name = "❯ Server",
             value = '\n'.join(server_values),
             inline = False
         )
@@ -225,15 +227,14 @@ class InformationCog(commands.Cog):
         
         if roles:
             # If the user has roles, we show that.
-            embed.add_field(name = f"**❯ Roles ({len(user.roles) - 1})**", value = roles, inline = False)
+            embed.add_field(name = f"❯ Roles ({len(user.roles) - 1})", value = roles, inline = False)
         else:
             # else we show all the permissions they have in the guild.
             permissions = list(user.guild_permissions)
-            embed.add_field(name = f"**❯ Permissions ({len(permissions)})**", value = ', '.join(formatting.casify(i[0]) for i in permissions), inline = False)
+            embed.add_field(name = f"❯ Permissions ({len(permissions)})", value = ', '.join(formatting.casify(i[0]) for i in permissions), inline = False)
 
         embed.set_thumbnail(url = user.avatar_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-        embed.timestamp = datetime.utcnow()
 
         await ctx.send(embed = embed)
 
