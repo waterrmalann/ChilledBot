@@ -14,6 +14,7 @@ import time
 from datetime import datetime
 # JSON Parser.
 from utils import default
+import base64
 
 class OwnerCog(commands.Cog):
 
@@ -157,20 +158,33 @@ class OwnerCog(commands.Cog):
     @commands.command(aliases = ['bsetname'], usage = '<username>')
     @commands.is_owner()
     async def bsetusername(self, ctx, *, name: str):
-    """Set the bot's username."""
+        """Set the bot's username."""
 
-    await self.bot.user.edit(username = name)
-    await ctx.send(f"{self.emojis.tick} **My username has successfully been set to \"{name}\".**")
+        await self.bot.user.edit(username = name)
+        await ctx.send(f"{self.emojis.tick} **My username has successfully been set to \"{name}\".**")
 
 
     @commands.command(aliases = ['bsetnickname'], usage = '<nickname>')
     @commands.is_owner()
     @commands.guild_only()
     async def bsetnick(self, ctx, *, nickname=None):
-    """Set the bot's nickname."""
+        """Set the bot's nickname."""
 
-    await ctx.guild.get_member(self.bot.user.id).edit(nick = nickname)
-    await ctx.send(f"{self.emojis.tick} **My guild nickname has successfully been set to \"{nickname}\".**")
+        await ctx.guild.get_member(self.bot.user.id).edit(nick = nickname)
+        await ctx.send(f"{self.emojis.tick} **My guild nickname has successfully been set to \"{nickname}\".**")
+    
+    @commands.command()
+    async def uptime(self, ctx):
+        """Check how long the bot has been up for."""
+
+        delta_uptime = datetime.utcnow() - self.bot.launch_time
+        hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+        await ctx.send(f"{days}d, {hours}h, {minutes}m, {seconds}s")
+
+
+
 
 def setup(bot):
     """Sets up the cog."""
