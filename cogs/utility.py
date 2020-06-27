@@ -111,7 +111,7 @@ class UtilityCog(commands.Cog):
 
         if param == 'search':
             if stuff is None:
-                raise commands.BadArgument(message = 'missing query')
+                raise commands.BadArgument(message = 'Missing query parameter.')
             else:
                 results = wikipedia.search(stuff)
                 new_results = [f"{count}. {result}" for count, result in enumerate(results)]
@@ -121,7 +121,7 @@ class UtilityCog(commands.Cog):
         elif param == 'summary':
 
             if stuff is None:
-                raise commands.BadArgument('missing query')
+                raise commands.BadArgument('Missing query parameter.')
             else:
                 msg = await ctx.send("🌐 **Searching...**")
                 try:
@@ -159,10 +159,10 @@ class UtilityCog(commands.Cog):
         
         else:
 
-            raise commands.BadArgument('missing parameter')
+            raise commands.BadArgument('Missing parameter.')
     
     @commands.command(aliases = ['ud', 'urbandict', 'udict'])
-    #@commands.is_nsfw()
+    @commands.is_nsfw()
     async def urban(self, ctx, *, query):
         """Search the urban dictionary for word meanings."""
 
@@ -230,7 +230,7 @@ class UtilityCog(commands.Cog):
         if codeblock.startswith('```') and codeblock.endswith('```'):
             code_to_post = codeblock[3:-3]
         else:
-            raise commands.BadArgument('code must be in a codeblock')
+            raise commands.BadArgument('Code must be in a codeblock!')
 
         async with self.session.post("https://hastebin.com/documents", data = code_to_post) as resp:
             data = await resp.json()
@@ -245,6 +245,23 @@ class UtilityCog(commands.Cog):
         embed.set_footer(text = f"Posted by {ctx.author}", icon_url = ctx.author.avatar_url)
 
         await ctx.send(embed = embed)
+    
+    @commands.command(aliases=['screenshot'], usage='<Website URL>')
+    @commands.is_nsfw()
+    async def ss(self, ctx, *, url: str):
+        """Takes a screenshot of the website linked."""
+        
+        async with ctx.typing():
+
+            async with self.session.post("http://magmafuck.herokuapp.com/api/v1", headers = {'website': url}) as r:
+                data = await r.json()
+                print(data)
+
+            image = data['snapshot']
+            embed = discord.Embed(title = f'Screenshot of {url}', color = self.colors.primary)
+            embed.set_image(url = image)
+            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+            await ctx.send(embed=embed)
     
     #@commands.command()
     #async def reverse(self, ctx, *, text = None):
