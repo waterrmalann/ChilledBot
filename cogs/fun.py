@@ -63,11 +63,10 @@ class FunCog(commands.Cog):
             "Very doubtful"
         )
 
-        embed = discord.Embed(color = self.colors.primary)
+        embed = discord.Embed(color = self.colors.primary, timestamp = datetime.utcnow())
         embed.set_author(name='8ball', icon_url='https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/8-Ball_Pool.svg/240px-8-Ball_Pool.svg.png')
         embed.set_footer(text = f"Asked by {ctx.author}", icon_url = ctx.author.avatar_url)
         embed.add_field(name = question, value = f"**Answer:** {random.choice(fortunes)}")
-        embed.timestamp = datetime.utcnow()
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'random', aliases = ['flipcoin', 'tosscoin', 'coinflip'])
@@ -860,10 +859,10 @@ class FunCog(commands.Cog):
         embed = discord.Embed(
             title = "Bored?",
             description = res['activity'],
-            color = self.colors.primary
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
         )
         embed.set_footer(text = f"{ctx.author} is bored.", icon_url = ctx.author.avatar_url)
-        embed.timestamp = datetime.utcnow()
         
         await ctx.send(embed = embed)
     
