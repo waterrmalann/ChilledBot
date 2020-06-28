@@ -11,6 +11,8 @@ import aiohttp
 import random
 # Wikiepdia Library.
 import wikipedia
+# Mathematics Parser.
+from py_expression_eval import Parser
 # JSON Parser.
 from utils import default
 # DateTime Parser.
@@ -23,6 +25,7 @@ class UtilityCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession()
+        self.exp_parser = Parser()  # Mathematic Expression Parser.
         self.config = default.get("config.json")
         self.emojis = default.get("emojis.json")
         self.colors = default.get("colors.json")
@@ -77,6 +80,59 @@ class UtilityCog(commands.Cog):
         )
 
         await ctx.send(embed=embed)
+
+    @commands.command(aliases = ['math', 'calculate'], usage = '<expression>')
+    async def calc(self, ctx, *, equation):
+        """Calculate a math equation. See `calc help`"""
+
+
+        if equation == 'help':
+
+            embed = discord.Embed(title = "Calculator Help", color = self.colors.primary)
+            embed.description = "```m\n" \
+                "2 + 3 -> 5\n" \
+                "2 - 3 -> -1\n" \
+                "2 * 3 -> 6\n" \
+                "2 / 3 -> 0.6666666666666666\n" \
+                "2 % 3 -> 2\n" \
+                "-3 * 4 -> -12\n" \
+                "abs(-2) -> 2\n\n" \
+                "ceil(1.4) -> 2.0\n" \
+                "floor(1.4) -> 1.0\n" \
+                "round(1.4) -> 1.0\n\n" \
+                "2^3 -> 8.0\n" \
+                "sqrt(16) -> 4.0\n\n" \
+                "sin(3.14) -> 0.0015926529164868282\n" \
+                "cos(3.14) -> -0.9999987317275395\n" \
+                "tan(3.14) -> -0.0015926549364072232\n\n" \
+                "asin(1) -> 1.5707963267948966\n" \
+                "acos(1) -> 0.0\n" \
+                "atan(1) -> 0.7853981633974483\n\n" \
+                "log(2.7) -> 0.9932517730102834\n" \
+                "log(16, 2) -> 4.0\n" \
+                "exp(1) -> 2.718281828459045\n\n" \
+                "log(E) -> 1.0\n" \
+                "cos(PI) -> -1.0```"
+            embed.set_footer(text = "Example: math 2 * 3")
+            return await ctx.send(embed = embed)
+    
+        try:
+            final = self.exp_parser.parse(equation).evaluate({})
+        except ZeroDivisionError:
+            return await ctx.send(f"{self.emojis.cross} **You cannot divide by zero!** `[ex ZeroDivisionError]`")
+        except OverflowError:
+            return await ctx.send(f"{self.emojis.cross} **Result too large to be represented. Are you trying to break me?** `[ex OverflowError]`")
+        except Exception as e:
+            return await ctx.send(f"{self.emojis.cross} **Cannot compute. Make sure expression is valid.** `[ex Exception]`")
+
+        embed = discord.Embed(
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
+        )
+        embed.add_field(name = equation, value = str(final))
+        embed.set_footer(text = f"Evaluated by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+        await ctx.send(embed = embed)
     
     @commands.command(usage = "<url>")
     async def request(self, ctx, url = None, debug : bool = False):
@@ -162,7 +218,7 @@ class UtilityCog(commands.Cog):
             raise commands.BadArgument('Missing parameter.')
     
     @commands.command(aliases = ['ud', 'urbandict', 'udict'])
-    @commands.is_nsfw()
+    #@commands.is_nsfw()
     async def urban(self, ctx, *, query):
         """Search the urban dictionary for word meanings."""
 
@@ -201,15 +257,15 @@ class UtilityCog(commands.Cog):
         embed = discord.Embed(color = self.colors.secondary, description = f"🔗  You can invite me using __**[this link!]({invite_url})**__")
         await ctx.send(embed = embed)
     
-    @commands.command(usage='`["question"] {"option 1"} {option 2}`')
-    #@permissions(manage_messages = True)
+    @commands.command(usage = '<"question"> ["option 1"] ["option 2"]')
+    #@commands.has_permissions(manage_messages = True)
     @commands.guild_only()
-    async def poll(self, ctx, question, yes="yes", *, no="no"):
+    async def poll(self, ctx, question: str, yes: str = "yes", no: str = "no", ):
         """Creates a simple voting poll."""
 
         embed = discord.Embed(
-            title = question,
-            description = f"{self.emojis.tick} {yes}\n{self.emojis.cross} {no}",
+            title = question.capitalize(),
+            description = f"{self.emojis.tick} {yes.capitalize()}\n{self.emojis.cross} {no.capitalize()}",
             color = self.colors.primary,
             timestamp = datetime.utcnow()
         )
@@ -223,16 +279,16 @@ class UtilityCog(commands.Cog):
             await sent_embed.add_reaction(self.emojis.cross)
         
     
-    @commands.command(usage='[code block]')
+    @commands.command(usage = '[code block]')
     async def hastebin(self, ctx, *, codeblock):
         """Paste code to hastebin."""
 
-        if codeblock.startswith('```') and codeblock.endswith('```'):
-            code_to_post = codeblock[3:-3]
+        if codeblock.startswith('`') and codeblock.endswith('`'):
+            code = codeblock.strip('`')
         else:
             raise commands.BadArgument('Code must be in a codeblock!')
 
-        async with self.session.post("https://hastebin.com/documents", data = code_to_post) as resp:
+        async with self.session.post("https://hastebin.com/documents", data = code) as resp:
             data = await resp.json()
             pin = data['key']
 
@@ -246,7 +302,7 @@ class UtilityCog(commands.Cog):
 
         await ctx.send(embed = embed)
     
-    @commands.command(aliases=['screenshot'], usage='<Website URL>')
+    @commands.command(aliases = ['screenshot'], usage = '<Website URL>')
     @commands.is_nsfw()
     async def ss(self, ctx, *, url: str):
         """Takes a screenshot of the website linked."""
@@ -255,14 +311,13 @@ class UtilityCog(commands.Cog):
 
             async with self.session.post("http://magmafuck.herokuapp.com/api/v1", headers = {'website': url}) as r:
                 data = await r.json()
-                print(data)
 
             image = data['snapshot']
             embed = discord.Embed(title = f'Screenshot of {url}', color = self.colors.primary)
             embed.set_image(url = image)
             embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
             await ctx.send(embed=embed)
-    
+
     #@commands.command()
     #async def reverse(self, ctx, *, text = None):
     #    if not text:
