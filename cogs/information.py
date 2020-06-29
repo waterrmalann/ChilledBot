@@ -31,10 +31,10 @@ class InformationCog(commands.Cog):
 
         # Get the link to the user's avatar.
         avatar_url = str(user.avatar_url)
-        embed = discord.Embed(title = user.name, url = avatar_url, color = self.colors.primary)
+        embed = discord.Embed(title = user, url = avatar_url, color = self.colors.primary)
         embed.set_image(url = avatar_url)
-        #embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+        
         await ctx.send(embed = embed)
 
     @commands.command()
