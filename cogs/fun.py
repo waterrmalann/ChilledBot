@@ -379,7 +379,7 @@ class FunCog(commands.Cog):
     
     @commands.command(name = "anime", brief = 'misc')
     async def uwu(self, ctx):
-        """Gives you an anime girl pic."""
+        """Yes."""
 
         url = "http://api.cutegirls.moe/json"
         async with self.session.get(url) as r:
@@ -395,6 +395,12 @@ class FunCog(commands.Cog):
         embed.set_image(url = image)
         embed.set_footer(text = f"{url} • r/{sub}")
         await ctx.send(embed = embed)
+
+        #https://www.reddit.com/r/awwnime/
+
+        
+
+        
     
     @commands.command(name = "quote", brief = 'misc')
     async def quote(self, ctx):
@@ -552,6 +558,70 @@ class FunCog(commands.Cog):
         embed.set_image(url = image)
         embed.set_footer(text = f"r/surrealmemes/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'reddit', aliases = ['bootleg', 'bootlegmemes'])
+    async def bootlegmeme(self, ctx, sorting: str = 'any'):
+        """Gives you a surreal meme."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/bootleg_memes/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/bootleg_memes/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'reddit')
+    async def funny(self, ctx, sorting: str = 'any'):
+        """Gives you something funny."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/funny/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/funny/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['todayilearned'])
     async def til(self, ctx, sorting: str = 'any'):
@@ -661,6 +731,102 @@ class FunCog(commands.Cog):
             color = self.colors.primary
         )
         embed.set_footer(text = f"r/AntiAntiJokes • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'reddit')
+    async def flowers(self, ctx, sorting: str = 'any'):
+        """Gives you flower pics."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/flowers/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/flowers/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'reddit', aliases = ['earthporn', 'landscape'])
+    async def earth(self, ctx, sorting: str = 'any'):
+        """Gives you amazing landscape photographs."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/earthporn/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/EarthPorn/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'reddit', aliases = ['foodporn', 'yummy'])
+    async def food(self, ctx, sorting: str = 'any'):
+        """Why is this a thing."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/foodporn/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/FoodPorn/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', usage = '[r/subreddit]')
