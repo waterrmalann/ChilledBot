@@ -13,6 +13,8 @@ import random
 import wikipedia
 # Mathematics Parser.
 from py_expression_eval import Parser
+# Color Conversion
+import colorsys
 # JSON Parser.
 from utils import default
 # DateTime Parser.
@@ -55,31 +57,52 @@ class UtilityCog(commands.Cog):
         )
         embed.set_footer(text = "Last updated June 27th, 2020")
         await ctx.send(embed = embed)
-    
-    @commands.command(aliases = ['colour'], usage = "<color (hex/int)>")
-    async def color(self, ctx, col: str):
-        """Displays a color"""
 
-        col = col.strip()
+    @commands.command(aliases=["color"], usage = '[color (hex/int)]')
+    async def colour(self, ctx, *, col: str = None):
+        """Returns information on a specific (or random) color."""
 
-        if len(col) == 8 and col.startswith('0x'):
-            col = int(col, 16)
-        elif len(col) == 6 or col.startswith('#'):
-            col = int(col[1:], 16)
-        elif col.isdigit():
-            col = int(col)
+        if col:
+            if len(col) == 8 and col.startswith('0x'):
+                col = int(col, 16)
+            elif len(col) == 6 or col.startswith('#'):
+                if col.startswith('#'):
+                    col = int(col[1:], 16)
+                else:
+                    col = int(col, 16)
+            elif col.isdigit():
+                col = int(col)
+            else:
+                raise commands.BadArgument('Invalid color!')
         else:
-            await ctx.send("Invalid Color.")
-            return
+            col = random.randint(0, 16777215)
+        hexcode = hex(col)[2:].upper()
         
-        hex_color_code = f"#{hex(col)[2:].upper()}"
         embed = discord.Embed(
-            title = f"{hex_color_code} | {col}",
+            title = f"#{hexcode}",  # Replace this with the color's name.
+            url = f"https://www.colorhexa.com/{hexcode}",
             color = col,
-            description = f"A preview of the color **{hex_color_code}**."
         )
+        embed.set_thumbnail(url = f"http://www.colourlovers.com/img/{hexcode}/200/200/image.png")
+    
+        # Thanks to Spinfish. I got inspired by his code for this part.
+        # https://github.com/spinfish/michael-bot/blob/master/cogs/utilities.py
+        r, g, b = discord.Color(col).to_rgb()
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        h, l, s = colorsys.rgb_to_hls(r, g, b)
+        y, i, q = colorsys.rgb_to_yiq(r, g, b)
 
-        await ctx.send(embed=embed)
+        embed.add_field(name = "Hex Code", value = f"`#{hexcode}`", inline = False)
+        embed.add_field(name = "RGB Value", value = f"`{r, g, b}`", inline = True)
+        embed.add_field(name = "HLS Value", value = f"`{(round(h, 2), round(l, 2), round(s, 2))}`", inline = True)
+        embed.add_field(name = "HSV Value", value = f"`{(round(h, 3), round(s, 3), round(v, 3))}`", inline = True)
+        embed.add_field(name = "YIQ Value", value = f"`{(round(y, 5), round(i, 5), round(q, 5))}`", inline = True)
+
+        embed.set_thumbnail(url = f"http://www.colourlovers.com/img/{hexcode}/200/200/image.png")
+        embed.set_footer(text = "https://colourlovers.com | https://colorhexa.com")
+        
+        await ctx.send(embed = embed)
+
 
     @commands.command(aliases = ['math', 'calculate'], usage = '<expression>')
     async def calc(self, ctx, *, equation):
@@ -123,7 +146,7 @@ class UtilityCog(commands.Cog):
         except OverflowError:
             return await ctx.send(f"{self.emojis.cross} **Result too large to be represented. Are you trying to break me?** `[ex OverflowError]`")
         except Exception as e:
-            return await ctx.send(f"{self.emojis.cross} **Cannot compute. Make sure expression is valid.** `[ex Exception]`")
+            return await ctx.send(f"{self.emojis.cross} **Cannot compute. Make sure expression is valid.** `[ex {e.__name__}]`")
 
         embed = discord.Embed(
             color = self.colors.primary,
@@ -159,6 +182,7 @@ class UtilityCog(commands.Cog):
             embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
         await ctx.send(embed = embed)
     
+    # Actually make these subcommands.
     @commands.command(usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
     async def wiki(self, ctx, param: str, *, stuff = None):
         """Searches for articles on Wikipedia."""
@@ -260,7 +284,7 @@ class UtilityCog(commands.Cog):
     @commands.command(usage = '<"question"> ["option 1"] ["option 2"]')
     #@commands.has_permissions(manage_messages = True)
     @commands.guild_only()
-    async def poll(self, ctx, question: str, yes: str = "yes", no: str = "no", ):
+    async def poll(self, ctx, question: str, yes: str = "yes", no: str = "no"):
         """Creates a simple voting poll."""
 
         embed = discord.Embed(
