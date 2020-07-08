@@ -24,6 +24,14 @@ class OwnerCog(commands.Cog):
         self.emojis = default.get("emojis.json")
         self.colors = default.get("colors.json")
     
+    @commands.command(name = 'print', hidden = True, usage = "<content>")
+    @commands.is_owner()
+    async def cout(self, ctx, *, content: str):
+        """Prints text to the console."""
+
+        print(content)
+        await ctx.send(f"{self.emojis.tick} **Successfully printed content to terminal!.**")
+    
     @commands.command(name = 'load', hidden = True, usage = "<cogs.name>")
     @commands.is_owner()
     async def cogs_load(self, ctx, *, cog: str):
