@@ -397,10 +397,6 @@ class FunCog(commands.Cog):
         await ctx.send(embed = embed)
 
         #https://www.reddit.com/r/awwnime/
-
-        
-
-        
     
     @commands.command(name = "quote", brief = 'misc')
     async def quote(self, ctx):
@@ -657,6 +653,43 @@ class FunCog(commands.Cog):
         embed.set_author(name = f"u/{author}")
         embed.set_footer(text = f"r/todayilearned/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'reddit', aliases = ['showerthoughts'])
+    async def showerthought(self, ctx, sorting: str = 'any'):
+        """Gets you a random shower thought."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/showerthoughts/{sorting}.json?sort=hot"
+
+        async with self.session.get(url) as r:
+            post = await r.json()
+            rand = random.randint(0, len(post['data']['children']) - 1)
+            post = post["data"]["children"][rand]["data"]
+            
+            title = post["title"]
+            url = post["url"]
+            content = html.unescape(post["selftext"])
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f'https://www.reddit.com{post["permalink"]}'
+
+        embed = discord.Embed(color = self.colors.primary)
+        if len(title) < 256:
+            embed.title = title
+            embed.url = link
+            if content: embed.description = content
+        else:
+            embed.description = f"**[{title}]({link})**"
+            if content: embed.description += f'\n{content}'
+
+        embed.set_author(name = f"u/{author}")
+        embed.set_footer(text = f"r/showerthoughts/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+
 
     @commands.command(brief = 'reddit', aliases = ['jokes'])
     async def joke(self, ctx):
@@ -1009,11 +1042,55 @@ class FunCog(commands.Cog):
         except asyncio.TimeoutError:
             await ctx.send(f"{self.emojis.cross} You didn't answer the question within {timer} seconds, {ctx.author.mention}. It was {answer}.")
         else:
-            user_answer = user_answer.content
-            if (user_answer.strip().lower() == answer.lower()) or (user_answer.strip() == str(answer_number)):
+            user_answer = user_answer.content.strip()
+            if (user_answer.lower() == answer.lower()) or (user_answer.strip() == str(answer_number)):
                 await ctx.send(f"{self.emojis.tick} Your answer was correct! It's {answer}.")
             else:
                 await ctx.send(f"{self.emojis.cross} Your answer was incorrect. The correct answer was {answer}.")
+    
+    @commands.command(brief = 'misc')
+    async def guess(self, ctx):
+        """Play a guessing game with the bot."""
+
+        alphabets = 'abcdefghijklmnopqrstuvwxyz'
+        guess = ''
+        hard = False
+
+        if random.randint(0, 1) == 0:
+            guess = random.choice(alphabets)
+            hard = True
+            await ctx.send("I've an alphabet in my mind. Guess it!")
+        else:
+            guess = str(random.randint(1, 10))
+            await ctx.send("I've a number between 1 and 10 in my mind. Guess it!")
+        
+        check = lambda m: m.author == ctx.author and m.channel == ctx.channel
+
+        tries = 2 if not hard else 3
+        tries_left = tries
+
+        while tries_left != 0:
+            tries_left -= 1
+            try:
+                user_guess = await self.bot.wait_for('message', check = check, timeout = 8)
+            except asyncio.TimeoutError:
+                await ctx.send(f"{self.emojis.cross} **You took too long to guess! It was '{guess.upper()}'**")
+                break
+            else:
+                user_guess = user_guess.content.strip()
+                if user_guess.lower() == guess:
+                    await ctx.send(f"{self.emojis.tick} **Your guess was correct! It was '{guess.upper()}'.**")
+                    break
+                else:
+                    if tries_left > 1:
+                        await ctx.send(f"{self.emojis.cross} **Your guess was wrong! Try again. You have {tries_left} more tries.**")
+                        continue
+                    elif tries_left == 1:
+                        await ctx.send(f"{self.emojis.cross} **Your guess was wrong! You have 1 more try!.**")
+                        continue
+                    else:
+                        await ctx.send(f"{self.emojis.cross} **Your guess was wrong! It was '{guess.upper()}'.**")
+                        break
 
     @commands.command(brief = 'misc')
     async def bored(self, ctx):
