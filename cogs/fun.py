@@ -618,6 +618,70 @@ class FunCog(commands.Cog):
         embed.set_image(url = image)
         embed.set_footer(text = f"r/funny/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'reddit', aliases = ['funnysign'])
+    async def funnysigns(self, ctx, sorting: str = 'any'):
+        """Gives you a funny sign."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/funnysigns/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/funnysigns/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'reddit', aliases = ['didthejob', 'yesboss', 'ididthejobboss'])
+    async def notmyjob(self, ctx, sorting: str = 'any'):
+        """Gives you a funny sign."""
+
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/notmyjob/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/NotMyJob/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['todayilearned'])
     async def til(self, ctx, sorting: str = 'any'):
@@ -666,6 +730,9 @@ class FunCog(commands.Cog):
 
         async with self.session.get(url) as r:
             post = await r.json()
+            posts = [post for post in post["data"]["children"] if len(post["data"]["selftext"]) < 2000]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
             rand = random.randint(0, len(post['data']['children']) - 1)
             post = post["data"]["children"][rand]["data"]
             
@@ -862,59 +929,50 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/FoodPorn/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
-    @commands.command(brief = 'reddit', usage = '[r/subreddit]')
-    async def reddit(self, ctx, subreddit: str = 'r/all', sort_by: str = 'hot'):
+    @commands.command(brief = 'reddit', aliases = ['subreddit'])
+    async def reddit(self, ctx, subreddit: str = 'r/all', sorting: str = 'hot'):
         """Fetches content from a specified subreddit."""
 
-        subreddit = subreddit.strip()
-        if not subreddit.startswith('r/'):
-            subreddit = 'r/' + subreddit
-        
-        url = f"https://www.reddit.com/{subreddit}/new.json?sort={sort_by}"
+        subreddit = subreddit.strip().lower()
+        if not subreddit.startswith('r/'): subreddit = 'r/' + subreddit
 
-        #async with self.session.get(url) as r:
-        #    post = await r.json()
-        #    rand = random.randint(0, len(post['data']['children']))
-        #    post = post["data"]["children"][rand]["data"]
-        #    title = post["title"]
-        #    image = post["url"]
-        #    content = post["selftext"]
-        #    link = "https://www.reddit.com" + post["permalink"]
-        #    nsfw = post["over_18"]
+        sorts = ('new', 'hot')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
 
-        # Replace with "allowed_formats = ('.jpg', '.png', '.jpeg', '.gif') and more you could find."
-        videos = ('https://v.redd', 'https://youtu', 'https://www.youtu', 'https://www.twitch', 'https://twitch')
+        url = f"https://www.reddit.com/{subreddit}/{sorting}.json?sort=hot"
 
-
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
         async with self.session.get(url) as r:
             post = await r.json()
-            print(len(post["data"]["children"]))
-            posts = [post for post in post["data"]["children"] if not post["data"]["url"].startswith(videos)]
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats) or len(post["data"]["selftext"]) < 2000]
+            if not posts:
+                return await ctx.send(f"{self.emojis.cross} **Sorry, I couldn't find anything interesting. Do try again later!**")
             post = posts[random.randint(0, len(posts) - 1)]["data"]
-            print(len(posts))
 
             title = post["title"]
             image = post["url"]
-            content = post["selftext"]
+            content = html.unescape(post["selftext"])
             nsfw = post["over_18"]
             upvotes = post["score"]
             comments = post["num_comments"]
+            author = post["author"]
             link = f"https://www.reddit.com{post['permalink']}"
 
-        print()
-        print(f"Title: {title}")
-        print(f"Image: {image}")
-        print(f"Content: {content}")
-        print(f"NSFW: {nsfw}")
-        
         if nsfw and not ctx.channel.nsfw:
             return await ctx.send("⚠️ This post contains NSFW content! It cannot be previewed here.")
-            
-        embed = discord.Embed(title = title, url = link, description = content, color = self.colors.primary)
-        embed.set_image(url = image)
-        embed.set_footer(text = f"{subreddit} • ⬆️ {upvotes} • 💬 {comments}")
+
+        embed = discord.Embed(url = image, color = self.colors.primary)
+        if title < 256: embed.title = title
+        else: embed.description = f"**{title}**\n"
+
+        if content: embed.description = content if not embed.description else embed.description += content
+
+        embed.set_author(name = f"u/{author}", url = link)
+        if image.endswith(allowed_formats): embed.set_image(url = image)
+        embed.set_footer(text = f"{subreddit}/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
-        
+
     @commands.command(brief = 'misc', usage = "[category] [difficulty] [type]")
     async def trivia(self, ctx, triviacategory : typing.Union[str, int] = 'any', triviadifficulty : str = 'any', triviatype : str = 'any'):
         """Gives you a trivia question."""
