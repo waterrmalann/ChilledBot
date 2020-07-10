@@ -427,7 +427,7 @@ class FunCog(commands.Cog):
         """Gives you a meme."""
 
         meme_subreddits = ('r/memes', 'r/dankmemes', 'r/me_irl')
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
 
         subreddit = subreddit.lower().strip()
         sorting = sorting.lower().strip()
@@ -463,7 +463,7 @@ class FunCog(commands.Cog):
     async def wholesome(self, ctx, sorting: str = 'any'):
         """Gives you a wholesome meme."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -495,7 +495,7 @@ class FunCog(commands.Cog):
     async def discordmeme(self, ctx, sorting: str = 'any'):
         """Gives you a discord meme."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -527,7 +527,7 @@ class FunCog(commands.Cog):
     async def surrealmeme(self, ctx, sorting: str = 'any'):
         """Gives you a surreal meme."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -559,7 +559,7 @@ class FunCog(commands.Cog):
     async def bootlegmeme(self, ctx, sorting: str = 'any'):
         """Gives you a surreal meme."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -587,11 +587,43 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/bootleg_memes/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
+    @commands.command(brief = 'reddit', aliases = ['antimemes'])
+    async def antimeme(self, ctx, sorting: str = 'any'):
+        """Gives you an anti-meme."""
+
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
+        sorting = sorting.lower().strip()
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/r/antimeme/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"r/antimeme/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
     @commands.command(brief = 'reddit')
     async def funny(self, ctx, sorting: str = 'any'):
         """Gives you something funny."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -619,11 +651,46 @@ class FunCog(commands.Cog):
         embed.set_footer(text = f"r/funny/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
+    @commands.command(brief = 'reddit', aliases = ['boneachingjuice'])
+    async def bonehurtingjuice(self, ctx, sorting: str = 'any'):
+        """ouch."""
+
+        meme_subreddits = ('r/boneachingjuice', 'r/bonehurtingjuice')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
+
+        sorting = sorting.lower().strip()
+        subreddit = random.choice(meme_subreddits)
+        if sorting not in sorts: sorting = random.choice(sorts)
+
+        url = f"https://www.reddit.com/{subreddit}/{sorting}.json?sort=hot"
+
+        allowed_formats = ('.jpg', '.png', '.jpeg') #, '.gif', '.gifv'
+        async with self.session.get(url) as r:
+            post = await r.json()
+            posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            post = posts[random.randint(0, len(posts) - 1)]["data"]
+
+            title = post["title"]
+            image = post["url"]
+            content = html.unescape(post["selftext"])
+            nsfw = post["over_18"]
+            upvotes = post["score"]
+            comments = post["num_comments"]
+            author = post["author"]
+            link = f"https://www.reddit.com{post['permalink']}"
+        
+        embed = discord.Embed(title = title, url = image, color = self.colors.primary)
+        if content: embed.description = content
+        embed.set_author(name = f"u/{author}", url = link)
+        embed.set_image(url = image)
+        embed.set_footer(text = f"{subreddit}/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
+        await ctx.send(embed = embed)
+    
     @commands.command(brief = 'reddit', aliases = ['funnysign'])
     async def funnysigns(self, ctx, sorting: str = 'any'):
         """Gives you a funny sign."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -655,7 +722,7 @@ class FunCog(commands.Cog):
     async def notmyjob(self, ctx, sorting: str = 'any'):
         """Gives you a funny sign."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -687,7 +754,7 @@ class FunCog(commands.Cog):
     async def til(self, ctx, sorting: str = 'any'):
         """You learn something new everyday!"""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -722,7 +789,7 @@ class FunCog(commands.Cog):
     async def showerthought(self, ctx, sorting: str = 'any'):
         """Gets you a random shower thought."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -837,7 +904,7 @@ class FunCog(commands.Cog):
     async def flowers(self, ctx, sorting: str = 'any'):
         """Gives you flower pics."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -869,7 +936,7 @@ class FunCog(commands.Cog):
     async def earth(self, ctx, sorting: str = 'any'):
         """Gives you amazing landscape photographs."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -901,7 +968,7 @@ class FunCog(commands.Cog):
     async def food(self, ctx, sorting: str = 'any'):
         """Why is this a thing."""
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -936,7 +1003,7 @@ class FunCog(commands.Cog):
         subreddit = subreddit.strip().lower()
         if not subreddit.startswith('r/'): subreddit = 'r/' + subreddit
 
-        sorts = ('new', 'hot')
+        sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
         if sorting not in sorts: sorting = random.choice(sorts)
 
@@ -963,10 +1030,15 @@ class FunCog(commands.Cog):
             return await ctx.send("⚠️ This post contains NSFW content! It cannot be previewed here.")
 
         embed = discord.Embed(url = image, color = self.colors.primary)
-        if title < 256: embed.title = title
-        else: embed.description = f"**{title}**\n"
-
-        if content: embed.description = content if not embed.description else embed.description += content
+        if len(title) < 256:
+            embed.title = title
+        else:
+            embed.description = f"**{title}**\n"
+        if content: 
+            if not embed.description:
+                embed.description = content
+            else:
+                 embed.description += content
 
         embed.set_author(name = f"u/{author}", url = link)
         if image.endswith(allowed_formats): embed.set_image(url = image)
