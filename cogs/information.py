@@ -37,6 +37,17 @@ class InformationCog(commands.Cog):
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
         
         await ctx.send(embed = embed)
+    
+    @commands.command(aliases = ['emoji', 'em'], usage = '<emoji>')
+    async def e(self, ctx, emoji: discord.Emoji):
+        """Returns a larger version of the specified emoji."""
+
+        emoji_url = str(emoji.url)
+        embed = discord.Embed(title = f":{emoji.name}:", url = emoji_url, color = self.colors.primary)
+        embed.set_image(url = emoji_url)
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+        await ctx.send(embed = embed)
 
     @commands.command()
     @commands.guild_only()
@@ -226,7 +237,6 @@ class InformationCog(commands.Cog):
             inline = False
         )
 
-        
         if roles:
             # If the user has roles, we show that.
             embed.add_field(name = f"❯ Roles ({len(user.roles) - 1})", value = roles, inline = False)
@@ -237,6 +247,36 @@ class InformationCog(commands.Cog):
 
         embed.set_thumbnail(url = user.avatar_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+        await ctx.send(embed = embed)
+    
+    @commands.command(aliases=['channel'], brief='Get some information on a channel.', usage='`;;channelinfo {channel}`')
+    @commands.guild_only()
+    async def channelinfo(self, ctx, *, channel: discord.TextChannel = None):
+        """Returns information about the specified or the current channel."""
+        # Add support for voice channels.
+
+        channel = channel or ctx.channel
+
+        channel_values = []
+        channel_values.append(f"**Created at:** {default.datefr(channel.created_at)}")
+        channel_values.append(f"**Slowmode:** {channel.slowmode_delay if channel.slowmode_delay > 0 else 'No Slowmode.'}")
+        channel_values.append(f"**NSFW:** {channel.nsfw}")
+
+        embed = discord.Embed(
+            title = f"{channel.name} (`{channel.id}`)",
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
+        )
+
+        embed.add_field(
+            name = "❯ Channel",
+            value = '\n'.join(channel_values),
+            inline = False
+        )
+
+        if channel.topic:
+            embed.add_field(name = "❯ Topic", value = channel.topic, inline = False)
 
         await ctx.send(embed = embed)
 
