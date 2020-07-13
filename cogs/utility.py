@@ -7,6 +7,8 @@ from discord.ext import commands
 import time
 # Asynchronous Requests.
 import aiohttp
+# Asynchronous Wikipedia.
+#import aiowiki
 # Randomization.
 import random
 # Wikiepdia Library.
@@ -19,6 +21,8 @@ import colorsys
 from utils import default
 # DateTime Parser.
 from datetime import datetime
+# Base64
+import base64
 
 
 class UtilityCog(commands.Cog):
@@ -31,6 +35,7 @@ class UtilityCog(commands.Cog):
         self.config = default.get("config.json")
         self.emojis = default.get("emojis.json")
         self.colors = default.get("colors.json")
+        #self.wiki = aiowiki.Wiki.wikipedia("en")
         self.bot_prefix = '.'
 
     @commands.command(name = 'ping')
@@ -92,8 +97,9 @@ class UtilityCog(commands.Cog):
         h, l, s = colorsys.rgb_to_hls(r, g, b)
         y, i, q = colorsys.rgb_to_yiq(r, g, b)
 
-        embed.add_field(name = "Hex Code", value = f"`#{hexcode}`", inline = False)
-        embed.add_field(name = "RGB Value", value = f"`{r, g, b}`", inline = True)
+        embed.add_field(name = "Hex Code", value = f"`#{hexcode}`", inline = True)
+        embed.add_field(name = "Integer", value = f"`{col}`", inline = True)
+        embed.add_field(name = "RGB Value", value = f"`{r, g, b}`", inline = False)
         embed.add_field(name = "HLS Value", value = f"`{(round(h, 2), round(l, 2), round(s, 2))}`", inline = True)
         embed.add_field(name = "HSV Value", value = f"`{(round(h, 3), round(s, 3), round(v, 3))}`", inline = True)
         embed.add_field(name = "YIQ Value", value = f"`{(round(y, 5), round(i, 5), round(q, 5))}`", inline = True)
@@ -166,7 +172,7 @@ class UtilityCog(commands.Cog):
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 if debug: await ctx.send(embed = discord.Embed(description=f"**Debug:**\n```py\n{r}```"))
-                data = await r.json()
+                data = await r.json(content_type = None)
         end = time.perf_counter()
         duration = (end - start) * 1000
         
@@ -181,7 +187,7 @@ class UtilityCog(commands.Cog):
         if isinstance(data, dict):
             embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
         await ctx.send(embed = embed)
-    
+
     # Actually make these subcommands.
     @commands.command(usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
     async def wiki(self, ctx, param: str, *, stuff = None):
@@ -341,6 +347,34 @@ class UtilityCog(commands.Cog):
             embed.set_image(url = image)
             embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
             await ctx.send(embed=embed)
+        
+    @commands.command()
+    async def guesstoken(self, ctx, member: discord.Member = None, confident: bool = False):
+        """Guesses the user's token to some level of acccuracy."""
+
+        member = member or ctx.author
+        token_parts = [
+            '####################',  # -> ID of the user.
+            '######',  # -> Timestamp of token creation.
+            '###########################'  # -> HMAC, Can't guess :/
+        ]
+
+        # User ID -> Base64 Encoding
+        user_id = bytes(str(member.id), encoding = 'utf8')
+        b64 = base64.b64encode(user_id)
+        b64 = b64.decode()
+        token_parts[0] = b64
+
+        if confident:
+            epoch = int(member.created_at.timestamp())
+            discord_epoch = epoch - 1293840000
+
+        await ctx.send(f"__**Non MFA Token:**__ **`{b64}.######.###########################`**")
+
+
+
+
+        
 
     #@commands.command()
     #async def reverse(self, ctx, *, text = None):
