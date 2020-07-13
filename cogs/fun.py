@@ -9,6 +9,8 @@ import aiohttp
 import typing
 # Randomization.
 import random
+# URL Parsing
+import urllib.parse
 # Parsing HTML Special Characters (for Trivia)
 import html
 # DateTime Parser.
@@ -28,6 +30,9 @@ class FunCog(commands.Cog):
         self.emojis = default.get("emojis.json")
         self.bot_prefix = '.'
         self.categories = ['random', 'animals', 'reddit', 'text', 'misc']
+
+        with open("data/roasts.txt") as file:
+            self.roasts = [line for line in file.readlines() if line.strip()]
 
     #Usage: .{command.name} {command.usage}
     #embed.set_footer(text = command.help)
@@ -1239,6 +1244,28 @@ class FunCog(commands.Cog):
         
         await ctx.send(embed = embed)
     
+    @commands.command(brief = 'misc', aliases = ["roastme"], usage = '[@user/id]')
+    async def roast(self, ctx, user: discord.Member = None):
+        """Roast yourself (or mentioned user)."""
+
+        user = user or ctx.author
+        await ctx.send(f"{user.mention}, {random.choice(self.roasts)}")
+    
+    @commands.command(brief = 'misc', usage = '[@user/id]')
+    async def insult(self, ctx, user: discord.Member = None):
+        """Insult yourself (or mentioned user)."""
+
+        url = 'https://insult.mattbas.org/api/en/insult.json'
+        if user:
+            name = urllib.parse.quote(user.name)
+            url = f'https://insult.mattbas.org/api/en/insult.json?who={name}'
+        
+        async with self.session.get(url) as r:
+            res = await r.json(content_type = None)
+            ins = res['insult']
+        
+        await ctx.send(ins)
+
     @commands.command(brief = 'misc')
     async def smile(self, ctx):
         """Smile! :)"""
