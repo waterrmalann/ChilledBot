@@ -11,6 +11,7 @@ from discord.ext import commands
 from datetime import datetime
 # JSON Parser & Text Formatter.
 from utils import default, formatting
+import typing
 
 class InformationCog(commands.Cog):
     """Information-Related Commands."""
@@ -31,7 +32,7 @@ class InformationCog(commands.Cog):
 
         # Get the link to the user's avatar.
         avatar_url = str(user.avatar_url)
-        embed = discord.Embed(title = user, url = avatar_url, color = self.colors.primary)
+        embed = discord.Embed(title = str(user), url = avatar_url, color = self.colors.primary)
         embed.set_image(url = avatar_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
         
@@ -195,8 +196,8 @@ class InformationCog(commands.Cog):
         roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
 
         user_values = []  # ❯ Bot / ❯ User / ❯ Discord Staff
-        if user.id in self.config.bot_owners: user_values.append(f"**I created this bot **")
-        if user.id in self.config.bot_vips: user_values.append(f"**I support this bot.**")
+        if user.id in self.config.bot_owners: user_values.append(f"**I created this bot.**")
+        if user.id in self.config.bot_vips and user.id not in self.config.bot_owners: user_values.append(f"**I support this bot.**")
         user_values.append(f"**Mention:** {user.mention}")
         user_values.append(f"**Status:** {status[2]} {status[0]} {discord_client}")
         if user.activity: user_values.append(f"**Activity:** {user.activity.type.name.capitalize()} {user.activity.name}")
@@ -204,7 +205,7 @@ class InformationCog(commands.Cog):
 
         server_values = []  # ❯ Server
         if user == ctx.guild.owner: server_values.append(f"**👑 Server Owner**")
-        #elif user.guild_permissions.administrator: server_values.append(f"**Server Administrator**")
+        elif user.guild_permissions.administrator: server_values.append(f"**🛠️ Server Administrator**")
         #elif user.guild_permissions.ban_members: server_values.append("**Server Staff**")
         #else: server_values.append("**Member**")
         server_values.append(f"**Nickname:** {user.display_name}")
@@ -238,6 +239,20 @@ class InformationCog(commands.Cog):
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
         await ctx.send(embed = embed)
+
+    @commands.command(usage = "[max uses] [temporary: yes/no]") # [max age (seconds)]
+    @commands.guild_only()
+    @commands.bot_has_permissions(create_instant_invite = True)
+    @commands.has_permissions(create_instant_invite = True)
+    async def createinvite(self, ctx, max_uses: typing.Optional[int] = 0, temporary: bool = False):
+        """Creates an invite link for the current server."""
+
+        invite = await ctx.guild.text_channels[0].create_invite(
+            max_uses = max_uses,
+            max_age = 0,
+            temporary = temporary
+        )
+        await ctx.send(f"**<{invite}>**")
 
     #role = discord.utils.get(ctx.guild.roles, name="Role") if role in ctx.author.roles:
 
