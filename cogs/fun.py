@@ -9,6 +9,8 @@ import aiohttp
 import typing
 # Randomization.
 import random
+# String Stuff
+import string
 # URL Parsing
 import urllib.parse
 # Parsing HTML Special Characters (for Trivia)
@@ -33,6 +35,8 @@ class FunCog(commands.Cog):
 
         with open("data/roasts.txt") as file:
             self.roasts = [line for line in file.readlines() if line.strip()]
+        with open("data/toasts.txt") as file:
+            self.toasts = [line for line in file.readlines() if line.strip()]
 
     #Usage: .{command.name} {command.usage}
     #embed.set_footer(text = command.help)
@@ -151,17 +155,18 @@ class FunCog(commands.Cog):
     async def emojify(self, ctx, *, text: str):
         """Convert text to block letters."""
 
-        numbers = {0: 'zero', 1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five', 6: 'six', 7: 'seven', 8: 'eight', 9: 'nine'}
+        text = text.lower()
+        numbers = {num: nums[int(num)] for num in string.digits}
 
         emojified = []
-        for i in text:
-            if i.lower() in 'abcdefghijklmnopqrstuvwxyz':
-                emojified.append(f":regional_indicator_{i.lower()}:")
-            elif i.isdigit():
-                emojified.append(f":{numbers.get(int(i), ':zero:')}:")
+        for character in text:
+            if character in string.ascii_lowercase:
+                emojified.append(f":regional_indicatr_{character}:")
+            elif character.isdigit():
+                emojified.append(f":{character}:")
             else:
-                emojified.append(' ')
-
+                emojified.append('  ')
+        
         await ctx.send(''.join(emojified))
 
     @commands.command(brief = 'text', usage = '<word>')
@@ -253,6 +258,7 @@ class FunCog(commands.Cog):
         
         if image.endswith(('.webm', '.mp4')):
             # Sending videos as a raw message because apparently discord embeds don't support videos.
+            # duck you discord
             await ctx.send(image)
         else:
             embed = discord.Embed(title = choice, color = self.colors.primary)
@@ -1265,6 +1271,23 @@ class FunCog(commands.Cog):
             ins = res['insult']
         
         await ctx.send(ins)
+    
+    @commands.command(brief = 'misc', usage = '[@user/id]')
+    async def toast(self, ctx, user: discord.Member = None)
+        """Praise yourself (or mentioned user)."""
+
+        user = user or ctx.author
+        await ctx.send(f"{user.mention}, {random.choice(self.toasts)}")
+    
+    @commands.command(brief = 'misc')
+    async def affirmation(self, ctx):
+        """Get an affirmation."""
+
+        async with self.session.get('https://www.affirmations.dev') as r:
+            res = await r.json()
+            affirmation = res['affirmation']
+        
+        await ctx.send(affirmation)
 
     @commands.command(brief = 'misc')
     async def smile(self, ctx):
@@ -1276,6 +1299,16 @@ class FunCog(commands.Cog):
         )
         
         await ctx.send(random.choice(smiles))
+    
+    @commands.command(brief = 'misc')
+    async def wave(self, ctx):
+        """Wave! 👋🏻"""
+
+        waves = (
+            '👋🏻', '🌊'
+        )
+
+        await ctx.send(random.choice(waves))
 
 def setup(bot):
     bot.add_cog(FunCog(bot))
