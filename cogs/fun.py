@@ -156,6 +156,7 @@ class FunCog(commands.Cog):
         """Convert text to block letters."""
 
         text = text.lower()
+        nums = ('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
         numbers = {num: nums[int(num)] for num in string.digits}
 
         emojified = []
@@ -163,7 +164,7 @@ class FunCog(commands.Cog):
             if character in string.ascii_lowercase:
                 emojified.append(f":regional_indicatr_{character}:")
             elif character.isdigit():
-                emojified.append(f":{character}:")
+                emojified.append(f":{numbers.get(int(character), 'zero')}:")
             else:
                 emojified.append('  ')
         
@@ -1273,7 +1274,7 @@ class FunCog(commands.Cog):
         await ctx.send(ins)
     
     @commands.command(brief = 'misc', usage = '[@user/id]')
-    async def toast(self, ctx, user: discord.Member = None)
+    async def toast(self, ctx, user: discord.Member = None):
         """Praise yourself (or mentioned user)."""
 
         user = user or ctx.author
