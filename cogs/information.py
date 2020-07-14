@@ -259,12 +259,16 @@ class InformationCog(commands.Cog):
         channel = channel or ctx.channel
 
         channel_values = []
+        channel_values.append(f"**Mention:** {channel.mention}")
+        if channel.category: channel_values.append(f"**Category:** {channel.category.name} (`{channel.category.id}`)")
         channel_values.append(f"**Created at:** {default.datefr(channel.created_at)}")
+        channel_values.append(f"**Members:** {len(channel.members)}")
+        channel_values.append(f"**Position:** {default.int_suffix(channel.position + 1)}")
         channel_values.append(f"**Slowmode:** {channel.slowmode_delay if channel.slowmode_delay > 0 else 'No Slowmode.'}")
         channel_values.append(f"**NSFW:** {channel.nsfw}")
-
+        
         embed = discord.Embed(
-            title = f"{channel.name} (`{channel.id}`)",
+            title = f"#{channel.name} (`{channel.id}`)",
             color = self.colors.primary,
             timestamp = datetime.utcnow()
         )
