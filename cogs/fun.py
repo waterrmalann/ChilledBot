@@ -31,6 +31,8 @@ class FunCog(commands.Cog):
         self.colors = default.get("colors.json")
         self.emojis = default.get("emojis.json")
         self.bot_prefix = '.'
+        self.name = "Fun & Misc"
+        self.aliases = ['fun', 'misc', 'fun/misc', 'entertainment']
         self.categories = ['random', 'animals', 'reddit', 'text', 'misc']
 
         with open("data/roasts.txt") as file:
@@ -156,19 +158,50 @@ class FunCog(commands.Cog):
         """Convert text to block letters."""
 
         text = text.lower()
-        nums = ('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
-        numbers = {num: nums[int(num)] for num in string.digits}
+        
+        special = {
+            '0': ':zero:', '1': ':one:', '2': ':two:', '3': ':three:', '4': ':four:', '5': ':five:', '6': ':six:', '7': ':seven:', '8': ':eight:', '9': ':nine:',
+            '!': '❕', '?': '❔', '>': '▶️', '<': '◀️'
+        }
 
         emojified = []
         for character in text:
             if character in string.ascii_lowercase:
-                emojified.append(f":regional_indicatr_{character}:")
-            elif character.isdigit():
-                emojified.append(f":{numbers.get(int(character), 'zero')}:")
+                emojified.append(f":regional_indicator_{character}:")
+            elif character in special:
+                emojified.append(special.get(character))
             else:
                 emojified.append('  ')
+        out = ''.join(emojified)
+        if not out or out.isspace():
+            return await ctx.send(f"{self.emojis.cross} **There's nothing to output!**")
         
-        await ctx.send(''.join(emojified))
+        await ctx.send(out)
+    
+    @commands.command(brief = 'text', usage = '<text>')
+    async def nato(self, ctx, *, text: str):
+        """Convert text to NATO Phonetic Alphabets."""
+
+        text = text.upper()
+
+        alphabets = {
+            'A': "Alfa", 'B': "Charlie", 'C': "Charlie", 'D': "Delta", 'E': "Echo",
+            'F': "Foxtrot", 'G': "Golf", 'H': "Hotel", 'I': "India", 'J': "Juliett",
+            'K': "Kilo", 'L': "Lima", 'M': "Mike", 'N': "November", 'O': "Oscar",
+            'P': "Papa", 'Q': "Quebec", 'R': "Romeo", 'S': "Sierra", 'T': "Tango",
+            'U': "Uniform", 'V': "Victor", 'W': "Whiskey", 'X': "X-Ray", 'Y': "Yankee", 'Z': "Zulu",
+
+            '0': "Zero", '1': "One", '2': "Two", '3': "Three", '4': "Four", '5': "Five",
+            '6': "Six", '7': "Seven", '8': "Eight", '9': "Niner"
+        }
+
+        out = ' '.join(alphabets.get(l, '') for l in text if l in alphabets)
+        if len(out) > 1999:
+            return await ctx.send(f"{self.emojis.cross} **Output exceeds 2000 characters!**")
+        if not out:
+            return await ctx.send(f"{self.emojis.cross} **There's nothing to output!**")
+
+        await ctx.send(out)
 
     @commands.command(brief = 'text', usage = '<word>')
     async def scramble(self, ctx, *, word: str):

@@ -9,9 +9,11 @@ import discord
 from discord.ext import commands
 # DateTime Parser.
 from datetime import datetime
+from humanize import naturaldelta
 # JSON Parser & Text Formatter.
 from utils import default, formatting
 import typing
+
 
 class InformationCog(commands.Cog):
     """Information-Related Commands."""
@@ -21,9 +23,12 @@ class InformationCog(commands.Cog):
         self.config = default.get("config.json")
         self.colors = default.get("colors.json")
         self.emojis = default.get("emojis.json")
+        self.name = "Information"
+        self.aliases = ['info', 'information']
+        self.categories = ['user', 'server', 'discord']
         self.bot_prefix = '.'
     
-    @commands.command(aliases = ['pfp', 'pic'], usage = "[@user/id]")
+    @commands.command(brief = 'user', aliases = ['pfp', 'pic'], usage = "[@user/id]")
     async def avatar(self, ctx, user: discord.Member = None):
         """Return the avatar of an user (if specified) or the author."""
 
@@ -38,7 +43,7 @@ class InformationCog(commands.Cog):
         
         await ctx.send(embed = embed)
     
-    @commands.command(aliases = ['emoji', 'em'], usage = '<emoji>')
+    @commands.command(brief = 'discord', aliases = ['emoji', 'em'], usage = '<emoji>')
     async def e(self, ctx, emoji: discord.Emoji):
         """Returns a larger version of the specified emoji."""
 
@@ -49,7 +54,7 @@ class InformationCog(commands.Cog):
 
         await ctx.send(embed = embed)
 
-    @commands.command()
+    @commands.command(brief = 'server')
     @commands.guild_only()
     async def serverinfo(self, ctx):
         """Detailed information about the current guild the bot is in."""
@@ -173,8 +178,43 @@ class InformationCog(commands.Cog):
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
         await ctx.send(embed = embed)
+    
+    @commands.guild_only()
+    async def channelinfo(self, ctx, *, channel: discord.TextChannel = None):
+        """Returns information about the specified or the current channel."""
+        # Add support for voice channels.
 
-    @commands.command(aliases = ['whois'], usage = "[@user/id]")
+        channel = channel or ctx.channel
+
+        channel_values = []
+        channel_values.append(f"**Mention:** {channel.mention}")
+        if channel.category: channel_values.append(f"**Category:** {channel.category.name} (`{channel.category.id}`)")
+        channel_values.append(f"**Created at:** {default.datefr(channel.created_at)}")
+        channel_values.append(f"**Members:** {len(channel.members)}")
+        #channel_values.append(f"**Position:** {default.int_suffix(channel.position + 1)}")
+        channel_values.append(f"**Slowmode:** {naturaldelta(channel.slowmode_delay) if channel.slowmode_delay > 0 else 'No Slowmode.'}")
+        
+        embed = discord.Embed(
+            title = f"#{channel.name} (`{channel.id}`)",
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
+        )
+
+        embed.add_field(
+            name = f"❯ Text Channel {'[⚠️ NSFW]' if channel.nsfw else ''}",
+            value = '\n'.join(channel_values),
+            inline = False
+        )
+
+        if channel.topic:
+            embed.add_field(name = "❯ Topic", value = channel.topic, inline = False)
+        
+        #embed.set_thumbnail(url = "perhaps something like a hashtag?")
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+        await ctx.send(embed = embed)
+
+    @commands.command(brief = 'user', aliases = ['whois'], usage = "[@user/id]")
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         """Returns information about an user (if specified) or the author."""
@@ -249,42 +289,8 @@ class InformationCog(commands.Cog):
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
         await ctx.send(embed = embed)
-    
-    @commands.command(aliases=['channel'], brief='Get some information on a channel.', usage='`;;channelinfo {channel}`')
-    @commands.guild_only()
-    async def channelinfo(self, ctx, *, channel: discord.TextChannel = None):
-        """Returns information about the specified or the current channel."""
-        # Add support for voice channels.
 
-        channel = channel or ctx.channel
-
-        channel_values = []
-        channel_values.append(f"**Mention:** {channel.mention}")
-        if channel.category: channel_values.append(f"**Category:** {channel.category.name} (`{channel.category.id}`)")
-        channel_values.append(f"**Created at:** {default.datefr(channel.created_at)}")
-        channel_values.append(f"**Members:** {len(channel.members)}")
-        channel_values.append(f"**Position:** {default.int_suffix(channel.position + 1)}")
-        channel_values.append(f"**Slowmode:** {channel.slowmode_delay if channel.slowmode_delay > 0 else 'No Slowmode.'}")
-        channel_values.append(f"**NSFW:** {channel.nsfw}")
-        
-        embed = discord.Embed(
-            title = f"#{channel.name} (`{channel.id}`)",
-            color = self.colors.primary,
-            timestamp = datetime.utcnow()
-        )
-
-        embed.add_field(
-            name = "❯ Channel",
-            value = '\n'.join(channel_values),
-            inline = False
-        )
-
-        if channel.topic:
-            embed.add_field(name = "❯ Topic", value = channel.topic, inline = False)
-
-        await ctx.send(embed = embed)
-
-    @commands.command(usage = "[max uses] [temporary: yes/no]") # [max age (seconds)]
+    @commands.command(brief = 'server', usage = "[max uses] [temporary: yes/no]") # [max age (seconds)]
     @commands.guild_only()
     @commands.bot_has_permissions(create_instant_invite = True)
     @commands.has_permissions(create_instant_invite = True)

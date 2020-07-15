@@ -14,14 +14,15 @@ class HelpCog(commands.Cog):
         self.config = default.get("config.json")
         self.colors = default.get("colors.json")
         self.bot_prefix = '.'
+        self.hidden = True
     
-    @commands.command(aliases = ['cmds', 'commands', 'helpme'])
-    async def help(self, ctx, param = 'help'):
+    @commands.command(name = 'help', aliases = ['cmds', 'commands', 'helpme'])
+    async def _help(self, ctx, param: str = 'help'):
         """Gives a list of bot commands"""
 
         request = param.strip().lower()
 
-        if request == 'help':
+        if request == 'help' or not request:
             
             embed = discord.Embed(
                 title = f'Bot Help [Prefix: {self.bot_prefix}]',
@@ -70,99 +71,7 @@ class HelpCog(commands.Cog):
             embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
             await ctx.send(embed = embed)
-
-        elif request == 'utility':
-            
-            cmds = self.bot.get_cog("UtilityCog").get_commands()
-            # {"help": "Gives help", ["helpme", "commands"]}
-            #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
-
-            commands = '\n'.join(f"`{cmd.name}` {cmd.help}" for cmd in cmds if not cmd.hidden)
-            
-            embed = discord.Embed(title = f"Utility Commands.", color = self.colors.primary)
-            embed.add_field(
-                name = "Commands | The prefix is '.'",
-                value = commands
-            )
-            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-            await ctx.send(embed = embed)
-
-        elif request == 'mod':
-
-            cmds = self.bot.get_cog("ModerationCog").get_commands()
-            # {"help": "Gives help", ["helpme", "commands"]}
-            #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
-
-            commands = '\n'.join(f"`{cmd.name}` {cmd.help}" for cmd in cmds if not cmd.hidden)
-            
-            embed = discord.Embed(title = f"Moderation Commands.", color = self.colors.primary)
-            embed.add_field(
-                name = "Commands | The prefix is '.'",
-                value = commands
-            )
-            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-            await ctx.send(embed = embed)
-            
-        elif request == 'music':
-            embed = discord.Embed(title = f"Music Commands.", color = self.colors.primary)
-
-            embed.add_field(name="👩🏻‍🏭 Work-In-Progress", value="This module is a work in progress.")
-            embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
-            await ctx.send(embed = embed)
-
-        elif request == 'fun':
-
-            fun_cog = self.bot.get_cog("FunCog")
-            cmds = fun_cog.get_commands()
-            cats = fun_cog.categories
-
-            commands = {cat: [] for cat in cats}
-
-            for command in cmds:
-                commands[command.brief].append(command)
-            
-            embed = discord.Embed(title = "Fun Commands.", color = self.colors.primary)
-
-            for key, value in commands.items():
-                embed.add_field(
-                    name = key.title(),
-                    value = '\n'.join(f"`{cmd.name}` {cmd.help}" for cmd in value if not cmd.hidden),
-                    inline = False
-                )
-            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-            await ctx.send(embed = embed)
-
-        elif request == 'info':
-            cmds = self.bot.get_cog("InformationCog").get_commands()
-            # {"help": "Gives help", ["helpme", "commands"]}
-            #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
-
-            commands = '\n'.join(f"`{cmd.name}` {cmd.help}" for cmd in cmds if not cmd.hidden)
-            
-            embed = discord.Embed(title = f"Information Commands.", color = self.colors.primary)
-            embed.add_field(
-                name = "Commands | The prefix is '.'",
-                value = commands
-            )
-            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-            await ctx.send(embed = embed)
-
-        elif request == 'config':
-            cmds = self.bot.get_cog("ConfigCog").get_commands()
-            # {"help": "Gives help", ["helpme", "commands"]}
-            #commands = {cmd.name: (cmd.help, cmd.aliases) for cmd in cmds if not cmd.hidden}
-
-            commands = '\n'.join(f"`{cmd.name}` {cmd.help}" for cmd in cmds if not cmd.hidden)
-            
-            embed = discord.Embed(title = f"Config Commands.", color = self.colors.primary)
-            embed.add_field(
-                name = "Commands | The prefix is '.'",
-                value = commands
-            )
-            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-            await ctx.send(embed = embed)
-
-        # Commands
+        
         elif request in self.bot.all_commands:
 
             command = self.bot.all_commands.get(request)
@@ -185,12 +94,33 @@ class HelpCog(commands.Cog):
 
             await ctx.send(embed = embed)
 
-
         else:
-            embed = discord.Embed(description = f'**Usage:** {self.bot_prefix}help <module/command>',color = self.colors.primary)
-            embed.set_footer(text='Shows the command list.')
+            for cogg in self.bot.cogs:
+                cog = self.bot.get_cog(cogg)
+                if not cog.hidden:
+                    if request in cog.aliases:
+                        name = cog.name
+                        commands = cog.get_commands()
+                        cats = cog.categories
+                        
+                        cmds = {cat: [] for cat in cats}
 
-            await ctx.send(embed=embed)
+                        for command in commands:
+                            cmds[command.brief].append(command)
+                        
+                        embed = discord.Embed(title = f"{name} | Command List", color = self.colors.primary)
+                        for key, value in cmds.items():
+                            embed.add_field(
+                                name = key.title(),
+                                value = '\n'.join(f"`{cmd.name}` {cmd.help}" for cmd in value if not cmd.hidden),
+                                inline = False
+                            )
+                        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+                        return await ctx.send(embed = embed)
+            else:
+                embed = discord.Embed(description = f'**Usage:** {self.bot_prefix}help <module/command>', color = self.colors.primary)
+                embed.set_footer(text = 'Shows the command list.')
+                return await ctx.send(embed = embed)
 
 def setup(bot):
     bot.add_cog(HelpCog(bot))
