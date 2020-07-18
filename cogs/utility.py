@@ -18,9 +18,12 @@ from py_expression_eval import Parser
 # Color Conversion
 import colorsys
 # JSON Parser.
-from utils import default
+from utils import default, formatting
 # DateTime Parser.
+from humanize import naturaldelta
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import pytz
 # Base64
 import base64
 
@@ -37,6 +40,7 @@ class UtilityCog(commands.Cog):
         self.colors = default.get("colors.json")
         #self.wiki = aiowiki.Wiki.wikipedia("en")
         self.bot_prefix = '.'
+        self.hidden = True
 
     @commands.command(name = 'ping')
     async def ping(self, ctx):
@@ -162,6 +166,47 @@ class UtilityCog(commands.Cog):
         embed.set_footer(text = f"Evaluated by {ctx.author}", icon_url = ctx.author.avatar_url)
 
         await ctx.send(embed = embed)
+    
+    @commands.command(aliases = ['tz'], usage = "<timezone> [timezones...]")
+    async def time(self, ctx, *timezones):
+        if not timezones:
+            raise commands.BadArgument('no timezones provided.')
+            
+        if len(timezones) > 24:
+            raise commands.BadArgument('too many timezones to handle.')
+        
+        tzones = []
+        for timezone in timezones:
+            if not timezone in pytz.all_timezones_set:
+                raise commands.BadArgument(f"'{timezone}' is an invalid timezone.")
+            
+            name = formatting.casify(timezone.replace('/', ' / '))
+            timez = pytz.timezone(timezone)
+
+            tzones.append((name, timez))
+        
+        main_timezone = tzones[0]
+        utcnow = pytz.timezone('utc').localize(datetime.utcnow())
+        main_astimezone = utcnow.astimezone(main_timezone[1]).replace(tzinfo = None)
+
+        times = []
+        for timezone in tzones:
+            astimezone = utcnow.astimezone(timezone[1]).replace(tzinfo = None)
+            # Calculate the difference between the two timezones.
+            offset = relativedelta(main_astimezone, astimezone)
+
+            diff = []
+            if offset.days: diff.append(f"{abs(offset.days)} days")
+            if offset.hours: diff.append(f"{abs(offset.hours)} hours")
+            if offset.minutes: diff.append(f"{abs(offset.minutes)} minutes")
+            
+            diff = f"*`({', '.join(diff)})`*" if diff else ''
+
+            strftime = datetime.now(tz = timezone[1]).strftime('%a, %b %d %I:%M %p')
+
+            times.append(f"**__`{timezone[0]} Time:`__** `{strftime}` {diff}")
+
+        await ctx.send('\n'.join(times))
     
     @commands.command(usage = "<url>")
     async def request(self, ctx, url = None, debug : bool = False):
