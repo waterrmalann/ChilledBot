@@ -13,6 +13,7 @@ from datetime import datetime
 from utils import default
 # File Line Counter.
 from line_counter import count_lines
+import random
 
 """
    A simple utility-first discord bot written in Python using the Discord.py library.
@@ -61,21 +62,27 @@ bot.launch_time = datetime.utcnow()
 bot.remove_command('help')
 prefix = '.'
 
-# We load the extensions here from the initial_extensions list.
 
-#for file in os.listdir("cogs"):
-#    if file.endswith('.py'):
-#        name = file[:-3]
-#        bot.load_extension(f"cogs.{name}")
-
+# Startup Stuff
 os.system('clear')
-print("ChilledBot by Zeesmic#8023...", '\n')
+print(r"   ________    _ ____         __   ____        __ ")
+print(r"  / ____/ /_  (_) / /__  ____/ /  / __ )____  / /_")
+print(r" / /   / __ \/ / / / _ \/ __  /  / __  / __ \/ __/")
+print(r"/ /___/ / / / / / /  __/ /_/ /  / /_/ / /_/ / /_  ")
+print(r"\____/_/ /_/_/_/_/\___/\__,_/  /_____/\____/\__/  ")
+print("\n", "Version: 1.0.0 | Closed Beta | By Zeesmic#8023", "\n")
+
+# Loading all the command/event extensions.
 for extension in config.cogs:
     try:
         bot.load_extension(extension)
         print(f"[Cogs] Successfully loaded {extension}.")
-    except Exception as ex:
-        print(f"[Cogs] Failed to load {extension} due to exception {ex}")
+    except Exception as error:
+        print()
+        print(f"[Cogs] Failed to load {extension}. due to exception {error}")
+        print(f"Exception: {error}\nException (Type): {type(error)}\nException (Traceback): {error.__traceback__}")
+        #traceback.print_exception(type(error), error, error.__traceback__, file = sys.stderr)
+        print()
 print()
 
 @bot.event
@@ -102,6 +109,7 @@ async def on_ready():
         afk = True
     )
 
+    # Loading bot channels into variables.
     bot.channel_logs = bot.get_channel(config.channel_logs)
     bot.channel_cmdexceptions = bot.get_channel(config.channel_cmdexceptions)
     bot.channel_exceptions = bot.get_channel(config.channel_exceptions)
@@ -120,7 +128,18 @@ async def on_disconnect():
     print("[Disconnected] Lost connection with Discord.")
 
 @bot.event
+async def on_command(ctx):
+    """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command"""
+    print(f"\n[CMD] {ctx.command.qualified_name} by {ctx.author} in {ctx.guild.name}")
+
+@bot.event
+async def on_command_completion(ctx):
+    """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command_completion"""
+    print(f"[CMD] {ctx.command.qualified_name} Successful.")
+
+@bot.event
 async def on_command_error(ctx, error):
+    """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command_error"""
     if hasattr(ctx.command, 'on_error'): return
     
     ignored = (commands.CommandNotFound)
@@ -137,11 +156,18 @@ async def on_command_error(ctx, error):
     # Missing / Invalid / Bad Arguments
     elif isinstance(error, input_errors):
 
-        description = f"**Syntax:** {ctx.command.qualified_name} {ctx.command.usage}"
-        if error: description += f"\n{error}"
+        description_values = []
+        description_values.append(f"**Usage:** `{ctx.command.qualified_name} {ctx.command.usage}`")
+        description_values.append(f"**Description:** {ctx.command.help}")
+        if error: description_values.append(f"\n**`{error}`**")
 
-        embed = discord.Embed(description = description, color = colors.primary)
-        embed.set_footer(text = ctx.command.help)
+        embed = discord.Embed(
+            title = f"Help: {ctx.command.qualified_name}",
+            description = '\n'.join(description_values),
+            color = colors.primary
+        )
+        embed.set_footer(text = f"{ctx.command.cog.name}/{ctx.command.brief.title()}")
+
         return await ctx.send(embed = embed)
 
     # Disabled

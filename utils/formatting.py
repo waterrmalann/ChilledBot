@@ -1,9 +1,10 @@
-def casify(text, case_type='normal'):
-    if case_type == 'normal':
-        if '-' in text: text = text.replace('-', ' ')
-        if '_' in text: text = text.replace('_', ' ')
-        tokens = text.split(' ')
-        return ' '.join(i.strip().capitalize() for i in tokens if i.strip())
+def casify(text, case_type='pascal'):
+    if case_type == 'pascal':
+        return text.title().replace('_', '').replace('-', '')
+    elif case_type == 'camel':
+        tex = casify(text, case_type = 'pascal')
+        if len(text.split(' ')) > 1: return text[0].lower() + tex[1:]
+        else: return tex
     else:
-        return text.title()
+        raise ValueError('Inappropriate argument value. Use a proper case type.')
 

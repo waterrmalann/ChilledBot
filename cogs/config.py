@@ -6,13 +6,14 @@ from discord.ext import commands
 from utils import default
 
 
-class ConfigCog(commands.Cog):
+class ConfigCog(commands.Cog, name = "Configuration"):
     """Guild Specific Bot Configuration Commands."""
 
     def __init__(self, bot):
         self.bot = bot
         self.config = default.get("config.json")
         self.bot_prefix = '.'
+        self.hidden = True
     
     @commands.command()
     async def test_config(self, ctx):
