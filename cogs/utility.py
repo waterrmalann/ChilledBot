@@ -28,7 +28,7 @@ import pytz
 import base64
 
 
-class UtilityCog(commands.Cog):
+class UtilityCog(commands.Cog, name = "Utility"):
     """Utility Commands."""
 
     def __init__(self, bot):
@@ -40,9 +40,14 @@ class UtilityCog(commands.Cog):
         self.colors = default.get("colors.json")
         #self.wiki = aiowiki.Wiki.wikipedia("en")
         self.bot_prefix = '.'
-        self.hidden = True
 
-    @commands.command(name = 'ping')
+        # Cog Info
+        self.hidden = False
+        self.name = "Utility"
+        self.aliases = {'utility', 'utils', 'tools'}
+        self.categories = ('bot', 'design', 'useful', 'other')
+
+    @commands.command(brief = 'bot', name = 'ping')
     async def ping(self, ctx):
         """Check the bot's latency."""
 
@@ -52,9 +57,9 @@ class UtilityCog(commands.Cog):
         msg = await ctx.send('Ping?')
         end = time.perf_counter()
         duration = (end - start) * 1000
-        await msg.edit(content=f':ping_pong: Pong! Latency is {duration:.2f}ms. API Latency is {(self.bot.latency * 1000):.2f}ms.')
+        await msg.edit(content = f'🏓 Pong! Latency is {duration:.2f}ms. API Latency is {(self.bot.latency * 1000):.2f}ms.')
 
-    @commands.command(aliases = ['updates', 'changes', 'whats_new', 'whatsnew'])
+    @commands.command(brief = 'bot', aliases = ['updates', 'changes', 'whats_new', 'whatsnew'])
     async def changelog(self, ctx):
         """Changelog of the current version of the bot."""
         
@@ -64,10 +69,23 @@ class UtilityCog(commands.Cog):
             value = "Displays for how long the bot has been online for. `uptime`",
             inline = False
         )
-        embed.set_footer(text = "Last updated June 27th, 2020")
+        embed.set_footer(text = "Last updated July 19th, 2020")
         await ctx.send(embed = embed)
 
-    @commands.command(aliases=["color"], usage = '[color (hex/int)]')
+    @commands.command(brief = 'bot')
+    async def invite(self, ctx):
+        """Gives you a link to invite me!"""
+
+        invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=2147483095&scope=bot"
+        embed = discord.Embed(
+            title = "Invite me to your server!",
+            description = f"🔗  You can invite me using __**[this link!]({invite_url})**__",
+            color = self.colors.secondary
+        )
+
+        await ctx.send(embed = embed)
+
+    @commands.command(brief = 'design', aliases = ["color"], usage = '[color (hex/int)]')
     async def colour(self, ctx, *, col: str = None):
         """Returns information on a specific (or random) color."""
 
@@ -114,7 +132,7 @@ class UtilityCog(commands.Cog):
         await ctx.send(embed = embed)
 
 
-    @commands.command(aliases = ['math', 'calculate'], usage = '<expression>')
+    @commands.command(brief = 'useful', aliases = ['math', 'calculate'], usage = '<expression>')
     async def calc(self, ctx, *, equation):
         """Calculate a math equation. See `calc help`"""
 
@@ -156,7 +174,7 @@ class UtilityCog(commands.Cog):
         except OverflowError:
             return await ctx.send(f"{self.emojis.cross} **Result too large to be represented. Are you trying to break me?** `[ex OverflowError]`")
         except Exception as e:
-            return await ctx.send(f"{self.emojis.cross} **Cannot compute. Make sure expression is valid.** `[ex {e.__name__}]`")
+            return await ctx.send(f"{self.emojis.cross} **Cannot compute. Make sure expression is valid.** `[ex {type(e).__name__}]`")
 
         embed = discord.Embed(
             color = self.colors.primary,
@@ -167,8 +185,10 @@ class UtilityCog(commands.Cog):
 
         await ctx.send(embed = embed)
     
-    @commands.command(aliases = ['tz'], usage = "<timezone> [timezones...]")
+    @commands.command(brief = 'useful', aliases = ['tz'], usage = "<timezone> [timezones...]")
     async def time(self, ctx, *timezones):
+        """Show time(s) for specified timezone(s)"""
+
         if not timezones:
             raise commands.BadArgument('no timezones provided.')
             
@@ -189,7 +209,11 @@ class UtilityCog(commands.Cog):
         utcnow = pytz.timezone('utc').localize(datetime.utcnow())
         main_astimezone = utcnow.astimezone(main_timezone[1]).replace(tzinfo = None)
 
-        times = []
+        embed = discord.Embed(
+            title = "Timzones",
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
+        )
         for timezone in tzones:
             astimezone = utcnow.astimezone(timezone[1]).replace(tzinfo = None)
             # Calculate the difference between the two timezones.
@@ -204,11 +228,15 @@ class UtilityCog(commands.Cog):
 
             strftime = datetime.now(tz = timezone[1]).strftime('%a, %b %d %I:%M %p')
 
-            times.append(f"**__`{timezone[0]} Time:`__** `{strftime}` {diff}")
+            embed.add_field(
+                name = f"{timezone[0]} Time",
+                value = f"{strftime} {diff}",
+                inline = False
+            )
 
-        await ctx.send('\n'.join(times))
-    
-    @commands.command(usage = "<url>")
+        await ctx.send(embed = embed)
+
+    @commands.command(brief = 'useful', usage = "<url>")
     async def request(self, ctx, url = None, debug : bool = False):
         """Sends a request and returns data from an url."""
 
@@ -234,7 +262,7 @@ class UtilityCog(commands.Cog):
         await ctx.send(embed = embed)
 
     # Actually make these subcommands.
-    @commands.command(usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
+    @commands.command(brief = 'useful', usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
     async def wiki(self, ctx, param: str, *, stuff = None):
         """Searches for articles on Wikipedia."""
 
@@ -292,47 +320,7 @@ class UtilityCog(commands.Cog):
 
             raise commands.BadArgument('Missing parameter.')
     
-    @commands.command(aliases = ['ud', 'urbandict', 'udict'])
-    #@commands.is_nsfw()
-    async def urban(self, ctx, *, query):
-        """Search the urban dictionary for word meanings."""
-
-        async with self.session.get('http://api.urbandictionary.com/v0/define', params={'term': query}) as resp:
-            result = await resp.json()
-
-        if not result['list']:
-            return await ctx.send("No word was found.")
-
-        definition = result['list'][0]['definition']
-        word = result['list'][0]['word']
-        link = result['list'][0]['permalink']
-        example = result['list'][0]['example']
-        author = result['list'][0]['author'].title()
-        thumbs_up = result['list'][0]['thumbs_up']
-
-        embed = discord.Embed(
-            title = word,
-            url = link,
-            color = self.colors.ud_yellow,
-            timestamp = datetime.utcnow()
-        )
-        embed.set_author(name = f"By {author} on Urban Dictionary.")
-        embed.set_thumbnail(url = "https://cdn.discordapp.com/attachments/726353729842053171/726353766881689651/urban_dict.png")
-        embed.add_field(name = "Meaning", value = definition, inline = False)
-        embed.add_field(name = "Example", value = example, inline = False)
-        embed.set_footer(text = f"urbandictionary.com • 👍 {thumbs_up}", icon_url = ctx.author.avatar_url)
-        
-        await ctx.send(embed = embed)
-    
-    @commands.command()
-    async def invite(self, ctx):
-        """Gives you a link to invite me!"""
-
-        invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=2147483095&scope=bot"
-        embed = discord.Embed(color = self.colors.secondary, description = f"🔗  You can invite me using __**[this link!]({invite_url})**__")
-        await ctx.send(embed = embed)
-    
-    @commands.command(usage = '<"question"> ["option 1"] ["option 2"]')
+    @commands.command(brief = 'useful', usage = '<"question"> ["option 1"] ["option 2"]')
     #@commands.has_permissions(manage_messages = True)
     @commands.guild_only()
     async def poll(self, ctx, question: str, yes: str = "yes", no: str = "no"):
@@ -354,7 +342,7 @@ class UtilityCog(commands.Cog):
             await sent_embed.add_reaction(self.emojis.cross)
         
     
-    @commands.command(usage = '[code block]')
+    @commands.command(brief = 'useful', usage = '[code block]')
     async def hastebin(self, ctx, *, codeblock):
         """Paste code to hastebin."""
 
@@ -377,8 +365,8 @@ class UtilityCog(commands.Cog):
 
         await ctx.send(embed = embed)
     
-    @commands.command(aliases = ['screenshot'], usage = '<Website URL>')
-    @commands.is_nsfw()
+    @commands.command(brief = 'useful', aliases = ['screenshot'], usage = '<Website URL>')
+    #@commands.is_nsfw()
     async def ss(self, ctx, *, url: str):
         """Takes a screenshot of the website linked."""
         
@@ -393,7 +381,7 @@ class UtilityCog(commands.Cog):
             embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
             await ctx.send(embed=embed)
         
-    @commands.command()
+    @commands.command(brief = 'other')
     async def guesstoken(self, ctx, member: discord.Member = None, confident: bool = False):
         """Guesses the user's token to some level of acccuracy."""
 
@@ -416,10 +404,113 @@ class UtilityCog(commands.Cog):
 
         await ctx.send(f"__**Non MFA Token:**__ **`{b64}.######.###########################`**")
 
+    @commands.group(name = 'base64', brief = 'other', usage = '<encode/decode> [text]')
+    async def bbase64(self, ctx):
+        """Base64 Encode/Decode."""
 
+        if not ctx.invoked_subcommand:
+            raise commands.BadArgument('Missing <encode/decode> parameter.')
+    
+    @bbase64.command(name = 'encode')
+    async def bbase64_encode(self, ctx, *, text: str):
+        """Base64 Encode Text."""
 
+        text = base64.urlsafe_b64encode(bytes(text, 'utf8')).decode()
+        await ctx.send(f"**URL Safe Base64 Encoding:**\n```{text}```")
+    
+    @bbase64.command(name = 'decode')
+    async def bbase64_decode(self, ctx, *, text: str):
+        """Base64 Decode Text."""
 
+        if text.startswith('`') and text.endswith('`'): text = text.strip('`')
+
+        try:
+            text = base64.urlsafe_b64decode(bytes(text, 'utf8')).decode()
+        except Exception as ex:
+            return await ctx.send(f"{self.emojis.cross} **Couldn't decode. Make sure text is a valid Base64 string.** `[ex {type(ex).__name__}]`")
+
+        await ctx.send(f"```{text}```")
+    
+    @commands.group(name = 'base16', brief = 'other', usage = '<encode/decode> [text]')
+    async def base16(self, ctx):
+        """Base16 Encode/Decode."""
         
+        if not ctx.invoked_subcommand:
+            raise commands.BadArgument('Missing <encode/decode> parameter.')
+            
+    @base16.command(name = 'encode')
+    async def base16_encode(self, ctx, *, text: str):
+        """Base16 encode text."""
+
+        text = base64.b16encode(bytes(text, 'utf8')).decode()
+        await ctx.send(f"**Base16 Encoding:**\n```{text}```")
+    
+    @base16.command(name = 'decode')
+    async def base16_decode(self, ctx, *, text: str):
+        """Base16 decode text."""
+
+        if text.startswith('`') and text.endswith('`'): text = text.strip('`')
+
+        try:
+            text = base64.b16decode(bytes(text, 'utf8')).decode()
+        except Exception as ex:
+            return await ctx.send(f"{self.emojis.cross} **Couldn't decode. Make sure text is a valid Base16 string.** `[ex {type(ex).__name__}]`")
+        
+        await ctx.send(f"```{text}```")
+    
+    @commands.group(name = 'base32', brief = 'other', usage = '<encode/decode> [text]')
+    async def base32(self, ctx):
+        """Base32 Encode/Decode."""
+        
+        if not ctx.invoked_subcommand:
+            raise commands.BadArgument('Missing <encode/decode> parameter.')
+            
+    @base32.command(name = 'encode')
+    async def base32_encode(self, ctx, *, text: str):
+        """Base32 encode text."""
+
+        text = base64.b32encode(bytes(text, 'utf8')).decode()
+        await ctx.send(f"**Base32 Encoding:**\n```{text}```")
+    
+    @base32.command(name = 'decode')
+    async def base32_decode(self, ctx, *, text: str):
+        """Base32 decode text."""
+
+        if text.startswith('`') and text.endswith('`'): text = text.strip('`')
+
+        try:
+            text = base64.b32decode(bytes(text, 'utf8')).decode()
+        except Exception as ex:
+            return await ctx.send(f"{self.emojis.cross} **Couldn't decode. Make sure text is a valid Base32 string.** `[ex {type(ex).__name__}]`")
+        
+        await ctx.send(f"```{text}```")
+    
+    @commands.group(name = 'base85', brief = 'other', usage = '<encode/decode> [text]')
+    async def base85(self, ctx):
+        """Base85 Encode/Decode."""
+        
+        if not ctx.invoked_subcommand:
+            raise commands.BadArgument('Missing <encode/decode> parameter.')
+            
+    @base85.command(name = 'encode')
+    async def base85_encode(self, ctx, *, text: str):
+        """Base85 encode text."""
+
+        text = base64.b85encode(bytes(text, 'utf8')).decode()
+        await ctx.send(f"**Base85 Encoding:**\n```{text}```")
+    
+    @base85.command(name = 'decode')
+    async def base85_decode(self, ctx, *, text: str):
+        """Base85 decode text."""
+
+        if text.startswith('`') and text.endswith('`'): text = text.strip('`')
+
+        try:
+            text = base64.b85decode(bytes(text, 'utf8')).decode()
+        except Exception as ex:
+            return await ctx.send(f"{self.emojis.cross} **Couldn't decode. Make sure text is a valid Base85 string.** `[ex {type(ex).__name__}]`")
+        
+        await ctx.send(f"```{text}```")
 
     #@commands.command()
     #async def reverse(self, ctx, *, text = None):
