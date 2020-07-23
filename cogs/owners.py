@@ -16,13 +16,27 @@ from datetime import datetime
 from utils import default
 import base64
 
-class OwnerCog(commands.Cog):
+class OwnerCog(commands.Cog, name = "Owners"):
 
     def __init__(self, bot):
         self.bot = bot
         self.config = default.get("config.json")
         self.emojis = default.get("emojis.json")
         self.colors = default.get("colors.json")
+
+        # Cog Info
+        self.hidden = True
+        self.name = "Developer"
+        self.aliases = {'dev', 'owner', 'developer'}
+        self.categories = ('bot', 'python', 'cogs')
+
+    @commands.command()
+    async def botstats(self, ctx):
+        """Get statistics on the bot."""
+
+        embed = discord.Embed(title = "Bot Statistics", color = self.colors.primary)
+        await ctx.send(embed = embed)
+
     
     @commands.command(name = 'print', hidden = True, usage = "<content>")
     @commands.is_owner()
@@ -80,7 +94,7 @@ class OwnerCog(commands.Cog):
                     progress.append(f"{self.emojis.cross} | **`Couldn't Reload {cog}`**")
                 else:
                     cog_counter += 1
-                    progress.append(f"{self.emojis.tick} **`Reloaded {cog}`**`")
+                    progress.append(f"{self.emojis.tick} | **`Reloaded {cog}`**")
             end = time.perf_counter()
             duration = (end - start) * 1000
 

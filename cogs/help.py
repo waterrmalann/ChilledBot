@@ -6,7 +6,7 @@ from discord.ext import commands
 from utils import default
 
 
-class HelpCog(commands.Cog):
+class HelpCog(commands.Cog, name = "Help"):
     """Bot Help."""
 
     def __init__(self, bot):

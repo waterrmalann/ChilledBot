@@ -15,7 +15,7 @@ from utils import default, formatting
 import typing
 
 
-class InformationCog(commands.Cog):
+class InformationCog(commands.Cog, name = "Information"):
     """Information-Related Commands."""
 
     def __init__(self, bot):
@@ -23,10 +23,14 @@ class InformationCog(commands.Cog):
         self.config = default.get("config.json")
         self.colors = default.get("colors.json")
         self.emojis = default.get("emojis.json")
-        self.name = "Information"
-        self.aliases = ['info', 'information']
-        self.categories = ['user', 'server', 'discord']
         self.bot_prefix = '.'
+
+        # Cog Info
+        self.hidden = False
+        self.name = "Information"
+        self.aliases = {'info', 'information'}
+        self.categories = ('user', 'server', 'discord')
+        
     
     @commands.command(brief = 'user', aliases = ['pfp', 'pic'], usage = "[@user/id]")
     async def avatar(self, ctx, user: discord.Member = None):
@@ -43,8 +47,8 @@ class InformationCog(commands.Cog):
         
         await ctx.send(embed = embed)
     
-    @commands.command(brief = 'discord', aliases = ['emoji', 'em'], usage = '<emoji>')
-    async def e(self, ctx, emoji: discord.Emoji):
+    @commands.command(brief = 'discord', aliases = ['e', 'em'], usage = '<emoji>')
+    async def emoji(self, ctx, emoji: discord.Emoji):
         """Returns a larger version of the specified emoji."""
 
         emoji_url = str(emoji.url)
@@ -234,7 +238,7 @@ class InformationCog(commands.Cog):
             # The color is to color the embed line based on their status.
             # The emoji is to show alongside the name.
             'online': ("Online", self.colors.online, self.emojis.online),
-            'offline': ("Invisible" if user == ctx.author else "Offline", self.colors.offline, self.emojis.offline),
+            'offline': ("Invisible" if user == ctx.author or user.voice else "Offline", self.colors.offline, self.emojis.offline),
             'dnd': ("Do Not Disturb", self.colors.dnd, self.emojis.dnd),
             'idle': ("Idle", self.colors.idle, self.emojis.idle)
         }
