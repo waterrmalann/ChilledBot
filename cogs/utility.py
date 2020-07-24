@@ -130,6 +130,64 @@ class UtilityCog(commands.Cog, name = "Utility"):
         embed.set_footer(text = "https://colourlovers.com | https://colorhexa.com")
         
         await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'design', aliases = ['screenshot'], usage = '<Website URL>')
+    @commands.is_nsfw()
+    async def ss(self, ctx, *, url: str):
+        """Takes a screenshot of the website linked."""
+        
+        async with ctx.typing():
+
+            async with self.session.post("http://magmafuck.herokuapp.com/api/v1", headers = {'website': url}) as r:
+                data = await r.json()
+
+            image = data['snapshot']
+            embed = discord.Embed(title = f'Screenshot of {url}', color = self.colors.primary)
+            embed.set_image(url = image)
+            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+            await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'design', name = 'lorem', usage = '[characters (upto 2000)]')
+    async def lorem(self, ctx, character_count: int = 502):
+        """Generates dummy text. (lorem ipsum)"""
+
+        if character_count > 2000:
+            raise commands.BadArgument('character count exceeds 2000 limit.')
+
+        lorem_ipsum = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. " \
+            "Aenean commodo ligula eget dolor. Aenean massa. " \
+            "Cum sociis natoque penatibus et magnis dis parturient montes, " \
+            "nascetur ridiculus mus. Donec quam felis, ultricies nec, " \
+            "pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. " \
+            "Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. " \
+            "In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. " \
+            "Nullam dictum felis eu pede mollis pretium. Integer tincidunt. " \
+            "Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. " \
+            "Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. " \
+            "Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. " \
+            "Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. " \
+            "Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. " \
+            "Nam eget dui. " \
+            "Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, " \
+            "sem quam semper libero, sit amet adipiscing sem neque sed ipsum. " \
+            "Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. " \
+            "Maecenas nec odio et ante tincidunt tempus. " \
+            "Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. " \
+            "Etiam sit amet orci eget eros faucibus tincidunt. " \
+            "Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. " \
+            "Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. " \
+            "Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. " \
+            "Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. " \
+            "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; " \
+            "In ac dui quis mi consectetuer lacinia. " \
+            "Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. " \
+            "Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. " \
+            "Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestib"
+        
+        print(len(lorem_ipsum))
+        dummy_text = lorem_ipsum[:character_count]
+
+        await ctx.send(dummy_text)
 
 
     @commands.command(brief = 'useful', aliases = ['math', 'calculate'], usage = '<expression>')
@@ -364,24 +422,8 @@ class UtilityCog(commands.Cog, name = "Utility"):
         embed.set_footer(text = f"Posted by {ctx.author}", icon_url = ctx.author.avatar_url)
 
         await ctx.send(embed = embed)
-    
-    @commands.command(brief = 'useful', aliases = ['screenshot'], usage = '<Website URL>')
-    #@commands.is_nsfw()
-    async def ss(self, ctx, *, url: str):
-        """Takes a screenshot of the website linked."""
-        
-        async with ctx.typing():
 
-            async with self.session.post("http://magmafuck.herokuapp.com/api/v1", headers = {'website': url}) as r:
-                data = await r.json()
-
-            image = data['snapshot']
-            embed = discord.Embed(title = f'Screenshot of {url}', color = self.colors.primary)
-            embed.set_image(url = image)
-            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-            await ctx.send(embed=embed)
-        
-    @commands.command(brief = 'other')
+    @commands.command(brief = 'other', usage = '<@user/id> [confident (yes/no)]')
     async def guesstoken(self, ctx, member: discord.Member = None, confident: bool = False):
         """Guesses the user's token to some level of acccuracy."""
 
@@ -399,6 +441,8 @@ class UtilityCog(commands.Cog, name = "Utility"):
         token_parts[0] = b64
 
         if confident:
+            #return datetime.utcfromtimestamp(int.from_bytes(base64.b64decode(token_part + "=="), "big"))
+
             epoch = int(member.created_at.timestamp())
             discord_epoch = epoch - 1293840000
 
@@ -511,11 +555,6 @@ class UtilityCog(commands.Cog, name = "Utility"):
             return await ctx.send(f"{self.emojis.cross} **Couldn't decode. Make sure text is a valid Base85 string.** `[ex {type(ex).__name__}]`")
         
         await ctx.send(f"```{text}```")
-
-    #@commands.command()
-    #async def reverse(self, ctx, *, text = None):
-    #    if not text:
-    #        help_message = get_help_message(reverse)
 
 def setup(bot):
     bot.add_cog(UtilityCog(bot))
