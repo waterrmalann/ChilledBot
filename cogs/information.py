@@ -116,6 +116,9 @@ class InformationCog(commands.Cog, name = "Information"):
         total_online = bots_online + humans_online
         total_offline = bots_offline + humans_offline
 
+        total_emojis = len(ctx.guild.emojis)
+        animated_emojis = sum(1 for emoji in ctx.guild.emojis if emoji.animated)
+        static_emojis = total_emojis - animated_emojis
         
         server_values = []  # ❯ Server
         server_values.append(f"**Owner:** {ctx.guild.owner.mention} (`{ctx.guild.owner.id}`)")
@@ -124,19 +127,22 @@ class InformationCog(commands.Cog, name = "Information"):
         server_values.append(f"**Verification Level:** {verification}")
         server_values.append(f"**Notification Level:** {notification}")
         server_values.append(f"**Content Filter:** {contentfilter}")
+        server_values.append(f"**2FA (for Staff):** {'Enabled' if ctx.guild.mfa_level else 'Disabled'}")
+        if total_emojis: server_values.append(f"**Custom Emojis:** {len(ctx.guild.emojis)} ({static_emojis} static, {animated_emojis} animated)")
+        if ctx.guild.premium_tier: server_values.append(f"**Premium Tier:** {ctx.guild.premium_tier} ({ctx.guild.premium_subscription_count} boosts)")
 
         member_values = []  # ❯ Members
-        member_values.append(f"{ctx.guild.member_count} total. ({total_humans} humans, {total_bots} bots)")
-        member_values.append(f"{(total_online / total_members * 100):.2f}% of members online. ({(humans_online / total_members * 100):.2f}% humans, {(bots_online / total_members * 100):.2f}% bots)")
+        member_values.append(f"{ctx.guild.member_count} total ({total_humans} humans, {total_bots} bots)")
+        member_values.append(f"{(total_online / total_members * 100):.1f}% of members online ({(humans_online / total_members * 100):.1f}% humans, {(bots_online / total_members * 100):.1f}% bots)")
         member_values.append(f"*`{self.bot_prefix}userinfo [@user]` for more info.*")
 
         channel_values = []  # ❯ Channels
-        channel_values.append(f"{categories} categories.")
-        channel_values.append(f"{total_channels} channels. ({text_channels} text channels, {voice_channels} voice channels)")
+        channel_values.append(f"{categories} categories")
+        channel_values.append(f"{total_channels} channels ({text_channels} text, {voice_channels} voice)")
         channel_values.append(f"*`{self.bot_prefix}channelinfo [#channel]` for more info.*")
 
         role_values = []  # ❯ Roles
-        role_values.append(f"{len(ctx.guild.roles) - 1} roles.")
+        role_values.append(f"{len(ctx.guild.roles) - 1} roles")
         role_values.append(f"{ctx.guild.roles[-1].mention} (Top Role)")
         role_values.append(f"*`{self.bot_prefix}roleinfo [role]` for more info.*")
 
@@ -183,40 +189,53 @@ class InformationCog(commands.Cog, name = "Information"):
 
         await ctx.send(embed = embed)
     
+    @commands.command(brief = 'server')
     @commands.guild_only()
-    async def channelinfo(self, ctx, *, channel: discord.TextChannel = None):
+    async def channelinfo(self, ctx, *, channel: typing.Union[discord.TextChannel, discord.VoiceChannel] = None):
         """Returns information about the specified or the current channel."""
-        # Add support for voice channels.
 
         channel = channel or ctx.channel
+        voice_channel = isinstance(channel, discord.VoiceChannel)
+        if not voice_channel and ctx.author not in channel.members:
+            return await ctx.send(f"{self.emojis.cross} **You aren't supposed to see this channel!**")
 
+        # permissions_synced
         channel_values = []
         channel_values.append(f"**Mention:** {channel.mention}")
         if channel.category: channel_values.append(f"**Category:** {channel.category.name} (`{channel.category.id}`)")
         channel_values.append(f"**Created at:** {default.datefr(channel.created_at)}")
-        channel_values.append(f"**Members:** {len(channel.members)}")
+        if voice_channel and channel.user_limit:
+            channel_values.append(f"**Members:** {len(channel.members)}/{channel.user_limit}")
+        else:
+            channel_values.append(f"**Members:** {len(channel.members)}")
+        if voice_channel:
+            channel_values.append(f"**Bitrate:** {round(channel.bitrate / 1000)}kbps")
+        else:
+            channel_values.append(f"**Slowmode:** {naturaldelta(channel.slowmode_delay) if channel.slowmode_delay > 0 else 'No Slowmode.'}")
         #channel_values.append(f"**Position:** {default.int_suffix(channel.position + 1)}")
-        channel_values.append(f"**Slowmode:** {naturaldelta(channel.slowmode_delay) if channel.slowmode_delay > 0 else 'No Slowmode.'}")
         
         embed = discord.Embed(
-            title = f"#{channel.name} (`{channel.id}`)",
+            title = f"#{channel.name} (`{channel.id}`)" if not voice_channel else f"\🔊 {channel.name} (`{channel.id}`)",
             color = self.colors.primary,
             timestamp = datetime.utcnow()
         )
 
         embed.add_field(
-            name = f"❯ Text Channel {'[⚠️ NSFW]' if channel.nsfw else ''}",
+            name = f"❯ Text Channel {'- ⚠️ NSFW' if channel.nsfw else ''}" if not voice_channel else "❯ Voice Channel",
             value = '\n'.join(channel_values),
             inline = False
         )
 
-        if channel.topic:
+        if not voice_channel and channel.topic:
             embed.add_field(name = "❯ Topic", value = channel.topic, inline = False)
         
-        #embed.set_thumbnail(url = "perhaps something like a hashtag?")
+        if voice_channel: thumb = "https://cdn.discordapp.com/attachments/726353729842053171/736108059264548886/channel_speaker.png"
+        else: thumb = "https://cdn.discordapp.com/attachments/726353729842053171/736108052750663761/channel_hashtag.png"
+        embed.set_thumbnail(url = thumb)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
         await ctx.send(embed = embed)
+
 
     @commands.command(brief = 'user', aliases = ['whois'], usage = "[@user/id]")
     @commands.guild_only()
@@ -259,8 +278,8 @@ class InformationCog(commands.Cog, name = "Information"):
         user_values.append(f"**Registered at:** {default.datefr(user.created_at)}")
 
         server_values = []  # ❯ Server
-        if user == ctx.guild.owner: server_values.append(f"**👑 Server Owner**")
-        elif user.guild_permissions.administrator: server_values.append(f"**🛠️ Server Administrator**")
+        if user == ctx.guild.owner: server_values.append(f"**\👑 Server Owner**")
+        elif user.guild_permissions.administrator: server_values.append(f"**\🛠️ Server Administrator**")
         #elif user.guild_permissions.ban_members: server_values.append("**Server Staff**")
         #else: server_values.append("**Member**")
         server_values.append(f"**Nickname:** {user.display_name}")
