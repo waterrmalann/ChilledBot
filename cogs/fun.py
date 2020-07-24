@@ -21,7 +21,7 @@ from datetime import datetime
 from utils import default
 
 
-class FunCog(commands.Cog):
+class FunCog(commands.Cog, name = "Fun"):
     """Entertainment & Miscellaneous Commands."""
 
     def __init__(self, bot):
@@ -31,9 +31,12 @@ class FunCog(commands.Cog):
         self.colors = default.get("colors.json")
         self.emojis = default.get("emojis.json")
         self.bot_prefix = '.'
+
+        # Cog Info
+        self.hidden = False
         self.name = "Fun & Misc"
-        self.aliases = ['fun', 'misc', 'fun/misc', 'entertainment']
-        self.categories = ['random', 'animals', 'reddit', 'text', 'misc']
+        self.aliases = {'fun', 'misc', 'fun/misc', 'entertainment'}
+        self.categories = ('random', 'animals', 'reddit', 'text', 'misc')
 
         with open("data/roasts.txt") as file:
             self.roasts = [line for line in file.readlines() if line.strip()]
@@ -152,6 +155,12 @@ class FunCog(commands.Cog):
 
         await ctx.send(text[::-1])
     
+    @commands.command(brief = 'text', usage = '<sentence>')
+    async def reverseorder(self, ctx, *, text: str):
+        """Reverse the order of the given text."""
+
+        await ctx.send(' '.join(text.split(' ')[::-1]))
+    
     # Why did I make this?
     @commands.command(brief = 'text', usage = "<text>")
     async def emojify(self, ctx, *, text: str):
@@ -185,7 +194,7 @@ class FunCog(commands.Cog):
         text = text.upper()
 
         alphabets = {
-            'A': "Alfa", 'B': "Charlie", 'C': "Charlie", 'D': "Delta", 'E': "Echo",
+            'A': "Alfa", 'B': "Bravo", 'C': "Charlie", 'D': "Delta", 'E': "Echo",
             'F': "Foxtrot", 'G': "Golf", 'H': "Hotel", 'I': "India", 'J': "Juliett",
             'K': "Kilo", 'L': "Lima", 'M': "Mike", 'N': "November", 'O': "Oscar",
             'P': "Papa", 'Q': "Quebec", 'R': "Romeo", 'S': "Sierra", 'T': "Tango",
@@ -478,7 +487,7 @@ class FunCog(commands.Cog):
         sorting = sorting.lower().strip()
         if not subreddit.startswith('r/'): subreddit = f"r/{subreddit}"
         if subreddit not in meme_subreddits: subreddit = random.choice(meme_subreddits)
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/{subreddit}/{sorting}.json?sort=hot"
 
@@ -510,7 +519,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/wholesomememes/{sorting}.json?sort=hot"
         
@@ -542,7 +551,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/discord_irl/{sorting}.json?sort=hot"
 
@@ -565,7 +574,7 @@ class FunCog(commands.Cog):
         if content: embed.description = content
         embed.set_author(name = f"u/{author}", url = link)
         embed.set_image(url = image)
-        embed.set_footer(text = f"r/discord_irl • ⬆️ {upvotes} • 💬 {comments}")
+        embed.set_footer(text = f"r/discord_irl/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['surreal', 'surrealmemes'])
@@ -574,7 +583,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/surrealmemes/{sorting}.json?sort=hot"
 
@@ -602,11 +611,11 @@ class FunCog(commands.Cog):
     
     @commands.command(brief = 'reddit', aliases = ['bootleg', 'bootlegmemes'])
     async def bootlegmeme(self, ctx, sorting: str = 'any'):
-        """Gives you a surreal meme."""
+        """Gives you a bootleg meme."""
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/bootleg_memes/{sorting}.json?sort=hot"
 
@@ -638,7 +647,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/antimeme/{sorting}.json?sort=hot"
 
@@ -670,7 +679,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/funny/{sorting}.json?sort=hot"
 
@@ -705,7 +714,7 @@ class FunCog(commands.Cog):
 
         sorting = sorting.lower().strip()
         subreddit = random.choice(meme_subreddits)
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/{subreddit}/{sorting}.json?sort=hot"
 
@@ -737,7 +746,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/funnysigns/{sorting}.json?sort=hot"
 
@@ -765,11 +774,11 @@ class FunCog(commands.Cog):
     
     @commands.command(brief = 'reddit', aliases = ['didthejob', 'yesboss', 'ididthejobboss'])
     async def notmyjob(self, ctx, sorting: str = 'any'):
-        """Gives you a funny sign."""
+        """I did the job, boss."""
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/notmyjob/{sorting}.json?sort=hot"
 
@@ -801,7 +810,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/todayilearned/{sorting}.json?sort=hot"
 
@@ -836,7 +845,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/showerthoughts/{sorting}.json?sort=hot"
 
@@ -844,9 +853,6 @@ class FunCog(commands.Cog):
             post = await r.json()
             posts = [post for post in post["data"]["children"] if len(post["data"]["selftext"]) < 2000]
             post = posts[random.randint(0, len(posts) - 1)]["data"]
-
-            rand = random.randint(0, len(post['data']['children']) - 1)
-            post = post["data"]["children"][rand]["data"]
             
             title = post["title"]
             url = post["url"]
@@ -951,7 +957,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/flowers/{sorting}.json?sort=hot"
 
@@ -983,7 +989,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/earthporn/{sorting}.json?sort=hot"
 
@@ -1015,7 +1021,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/r/foodporn/{sorting}.json?sort=hot"
 
@@ -1050,7 +1056,7 @@ class FunCog(commands.Cog):
 
         sorts = ('new', 'hot', 'rising', 'top', 'best')
         sorting = sorting.lower().strip()
-        if sorting not in sorts: sorting = random.choice(sorts)
+        if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
         url = f"https://www.reddit.com/{subreddit}/{sorting}.json?sort=hot"
 
@@ -1266,6 +1272,38 @@ class FunCog(commands.Cog):
                     else:
                         await ctx.send(f"{self.emojis.cross} **Your guess was wrong! It was '{guess.upper()}'.**")
                         break
+    
+    @commands.command(brief = 'misc', aliases = ['ud', 'urbandict', 'udict'])
+    #@commands.is_nsfw()
+    async def urban(self, ctx, *, query):
+        """Search the urban dictionary for word meanings."""
+
+        async with self.session.get('http://api.urbandictionary.com/v0/define', params={'term': query}) as resp:
+            result = await resp.json()
+
+        if not result['list']:
+            return await ctx.send("No word was found.")
+
+        definition = result['list'][0]['definition']
+        word = result['list'][0]['word']
+        link = result['list'][0]['permalink']
+        example = result['list'][0]['example']
+        author = result['list'][0]['author'].title()
+        thumbs_up = result['list'][0]['thumbs_up']
+
+        embed = discord.Embed(
+            title = word,
+            url = link,
+            color = self.colors.ud_yellow,
+            timestamp = datetime.utcnow()
+        )
+        embed.set_author(name = f"By {author} on Urban Dictionary.")
+        embed.set_thumbnail(url = "https://cdn.discordapp.com/attachments/726353729842053171/726353766881689651/urban_dict.png")
+        embed.add_field(name = "Meaning", value = definition, inline = False)
+        embed.add_field(name = "Example", value = example, inline = False)
+        embed.set_footer(text = f"urbandictionary.com • 👍 {thumbs_up}", icon_url = ctx.author.avatar_url)
+        
+        await ctx.send(embed = embed)
 
     @commands.command(brief = 'misc')
     async def bored(self, ctx):
