@@ -40,9 +40,11 @@ class InformationCog(commands.Cog, name = "Information"):
         user = user or ctx.author
 
         # Get the link to the user's avatar.
-        avatar_url = str(user.avatar_url)
-        embed = discord.Embed(title = str(user), url = avatar_url, color = self.colors.primary)
-        embed.set_image(url = avatar_url)
+        avatar_urls = [str(user.avatar_url_as(size = sz)) for sz in (128, 256, 512, 1024, 2048)]
+        sizes = f"**[[128]({avatar_urls[0]})] | [[256]({avatar_urls[1]})] | [512] | [[1024]({avatar_urls[3]})] | [[2048]({avatar_urls[4]})]**"
+
+        embed = discord.Embed(title = str(user), description = sizes, url = avatar_urls[2], color = self.colors.primary)
+        embed.set_image(url = avatar_urls[2])
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
         
         await ctx.send(embed = embed)
@@ -195,7 +197,7 @@ class InformationCog(commands.Cog, name = "Information"):
         """Returns information about the specified or the current channel."""
 
         channel = channel or ctx.channel
-        voice_channel = isinstance(channel, discord.VoiceChannel)
+        voice_channel = type(channel) is discord.VoiceChannel
         if not voice_channel and ctx.author not in channel.members:
             return await ctx.send(f"{self.emojis.cross} **You aren't supposed to see this channel!**")
 
@@ -237,7 +239,7 @@ class InformationCog(commands.Cog, name = "Information"):
         await ctx.send(embed = embed)
 
 
-    @commands.command(brief = 'user', aliases = ['whois'], usage = "[@user/id]")
+    @commands.command(brief = 'user', aliases = ['whois'], usage = "[@user/id]", description = "this crazy mf can go 0-60 in 6 seconds!")
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         """Returns information about an user (if specified) or the author."""
@@ -277,10 +279,10 @@ class InformationCog(commands.Cog, name = "Information"):
         if user.activity: user_values.append(f"**Activity:** {user.activity.type.name.capitalize()} {user.activity.name}")
         user_values.append(f"**Registered at:** {default.datefr(user.created_at)}")
 
-        server_values = []  # ❯ Server
+        server_values = []  # ❯ Server️
         if user == ctx.guild.owner: server_values.append(f"**\👑 Server Owner**")
         elif user.guild_permissions.administrator: server_values.append(f"**\🛠️ Server Administrator**")
-        #elif user.guild_permissions.ban_members: server_values.append("**Server Staff**")
+        elif user.guild_permissions.ban_members: server_values.append("**️️\🛡️ Server Staff**")
         #else: server_values.append("**Member**")
         server_values.append(f"**Nickname:** {user.display_name}")
         server_values.append(f"**Joined At:** {default.datefr(user.joined_at)}")

@@ -26,7 +26,24 @@ from dateutil.relativedelta import relativedelta
 import pytz
 # Base64
 import base64
+import typing
 
+
+class Color(commands.Converter):
+    """Returns the color integer from hex codes and nuances."""
+    async def convert(self, ctx, col):
+        if len(col) == 8 and col.startswith('0x'):
+            col = int(col, 16)
+        elif len(col) == 6 or col.startswith('#'):
+            if col.startswith('#'):
+                col = int(col[1:], 16)
+            else:
+                col = int(col, 16)
+        elif col.isdigit():
+            col = int(col)
+        else:
+            raise commands.BadArgument('invalid color')
+        return col
 
 class UtilityCog(commands.Cog, name = "Utility"):
     """Utility Commands."""
@@ -86,23 +103,24 @@ class UtilityCog(commands.Cog, name = "Utility"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'design', aliases = ["color"], usage = '[color (hex/int)]')
-    async def colour(self, ctx, *, col: str = None):
+    async def colour(self, ctx, *, col: typing.Optional[Color] = None):
         """Returns information on a specific (or random) color."""
 
-        if col:
-            if len(col) == 8 and col.startswith('0x'):
-                col = int(col, 16)
-            elif len(col) == 6 or col.startswith('#'):
-                if col.startswith('#'):
-                    col = int(col[1:], 16)
-                else:
-                    col = int(col, 16)
-            elif col.isdigit():
-                col = int(col)
-            else:
-                raise commands.BadArgument('Invalid color!')
-        else:
-            col = random.randint(0, 16777215)
+        #if col:
+        #    if len(col) == 8 and col.startswith('0x'):
+        #        col = int(col, 16)
+        #    elif len(col) == 6 or col.startswith('#'):
+        #        if col.startswith('#'):
+        #            col = int(col[1:], 16)
+        #        else:
+        #            col = int(col, 16)
+        #    elif col.isdigit():
+        #        col = int(col)
+        #    else:
+        #        raise commands.BadArgument('invalid color')
+        #else:
+        #    col = random.randint(0, 16777215)
+        col = col or random.randint(0, 16777215)
         hexcode = hex(col)[2:].upper()
         
         embed = discord.Embed(
@@ -112,7 +130,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         )
         embed.set_thumbnail(url = f"http://www.colourlovers.com/img/{hexcode}/200/200/image.png")
     
-        # Thanks to Spinfish. I got inspired by his code for this part.
+        # Thanks to Spinfish. I got inspired by their code for this part.
         # https://github.com/spinfish/michael-bot/blob/master/cogs/utilities.py
         r, g, b = discord.Color(col).to_rgb()
         h, s, v = colorsys.rgb_to_hsv(r, g, b)
@@ -147,7 +165,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
             embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
             await ctx.send(embed = embed)
     
-    @commands.command(brief = 'design', name = 'lorem', usage = '[characters (upto 2000)]')
+    @commands.command(brief = 'design', aliases = ['lipsum', 'dummytext'], usage = '[characters (upto 2000)]')
     async def lorem(self, ctx, character_count: int = 502):
         """Generates dummy text. (lorem ipsum)"""
 
@@ -187,7 +205,13 @@ class UtilityCog(commands.Cog, name = "Utility"):
         print(len(lorem_ipsum))
         dummy_text = lorem_ipsum[:character_count]
 
-        await ctx.send(dummy_text)
+        embed = discord.Embed(
+            title = f"Lorem Ipsum ({character_count} characters)",
+            description = f"```{dummy_text}```",
+            color = self.colors.primary
+        )
+        embed.set_footer(text = "Tip: triple click the text block to select all content.")
+        await ctx.send(embed = embed)
 
 
     @commands.command(brief = 'useful', aliases = ['math', 'calculate'], usage = '<expression>')
@@ -319,7 +343,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
             embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
         await ctx.send(embed = embed)
 
-    # Actually make these subcommands.
+    # Actually make these subcommands. (Also these are blocking)
     @commands.command(brief = 'useful', usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
     async def wiki(self, ctx, param: str, *, stuff = None):
         """Searches for articles on Wikipedia."""
@@ -447,6 +471,12 @@ class UtilityCog(commands.Cog, name = "Utility"):
             discord_epoch = epoch - 1293840000
 
         await ctx.send(f"__**Non MFA Token:**__ **`{b64}.######.###########################`**")
+
+    @commands.command(name = 'play', brief = 'other', usage = '<lofi/white noise/fire>')
+    async def play(self, ctx, to_play: str):
+        """Play lofi or noise for focus while studying/writing/working."""
+
+        await ctx.send("Work-In-Progress...")
 
     @commands.group(name = 'base64', brief = 'other', usage = '<encode/decode> [text]')
     async def bbase64(self, ctx):
