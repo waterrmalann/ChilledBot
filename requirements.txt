@@ -1,0 +1,6 @@
+git+https://github.com/Rapptz/discord.py@rewrite
+psutil==5.7.0
+wikipedia==1.4.0
+py-expression-eval==0.3.9
+jishaku==1.18.2
+pytz==2020.1
