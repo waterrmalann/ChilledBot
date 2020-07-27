@@ -3,6 +3,7 @@
 import discord
 # Commnd Handler.
 from discord.ext import commands
+from discord.ext.commands.cooldowns import BucketType
 # Time Value Manipulation.
 import time
 # Asynchronous Requests.
@@ -65,6 +66,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         self.categories = ('bot', 'design', 'useful', 'other')
 
     @commands.command(brief = 'bot', name = 'ping')
+    @commands.cooldown(1, 2, BucketType.user)
     async def ping(self, ctx):
         """Check the bot's latency."""
 
@@ -77,6 +79,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         await msg.edit(content = f'🏓 Pong! Latency is {duration:.2f}ms. API Latency is {(self.bot.latency * 1000):.2f}ms.')
 
     @commands.command(brief = 'bot', aliases = ['updates', 'changes', 'whats_new', 'whatsnew'])
+    @commands.cooldown(1, 5, BucketType.user)
     async def changelog(self, ctx):
         """Changelog of the current version of the bot."""
         
@@ -90,10 +93,11 @@ class UtilityCog(commands.Cog, name = "Utility"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'bot')
+    @commands.cooldown(1, 5, BucketType.user)
     async def invite(self, ctx):
         """Gives you a link to invite me!"""
 
-        invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=2147483095&scope=bot"
+        invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=2147483351&scope=bot"
         embed = discord.Embed(
             title = "Invite me to your server!",
             description = f"🔗  You can invite me using __**[this link!]({invite_url})**__",
@@ -103,23 +107,10 @@ class UtilityCog(commands.Cog, name = "Utility"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'design', aliases = ["color"], usage = '[color (hex/int)]')
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def colour(self, ctx, *, col: typing.Optional[Color] = None):
         """Returns information on a specific (or random) color."""
 
-        #if col:
-        #    if len(col) == 8 and col.startswith('0x'):
-        #        col = int(col, 16)
-        #    elif len(col) == 6 or col.startswith('#'):
-        #        if col.startswith('#'):
-        #            col = int(col[1:], 16)
-        #        else:
-        #            col = int(col, 16)
-        #    elif col.isdigit():
-        #        col = int(col)
-        #    else:
-        #        raise commands.BadArgument('invalid color')
-        #else:
-        #    col = random.randint(0, 16777215)
         col = col or random.randint(0, 16777215)
         hexcode = hex(col)[2:].upper()
         
@@ -151,6 +142,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
     
     @commands.command(brief = 'design', aliases = ['screenshot'], usage = '<Website URL>')
     @commands.is_nsfw()
+    @commands.cooldown(1, 5, BucketType.user)
     async def ss(self, ctx, *, url: str):
         """Takes a screenshot of the website linked."""
         
@@ -166,6 +158,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
             await ctx.send(embed = embed)
     
     @commands.command(brief = 'design', aliases = ['lipsum', 'dummytext'], usage = '[characters (upto 2000)]')
+    @commands.cooldown(1, 5, BucketType.user)
     async def lorem(self, ctx, character_count: int = 502):
         """Generates dummy text. (lorem ipsum)"""
 
@@ -215,6 +208,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
 
 
     @commands.command(brief = 'useful', aliases = ['math', 'calculate'], usage = '<expression>')
+    @commands.cooldown(1, 3, BucketType.user)
     async def calc(self, ctx, *, equation):
         """Calculate a math equation. See `calc help`"""
 
@@ -268,6 +262,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'useful', aliases = ['tz'], usage = "<timezone> [timezones...]")
+    @commands.cooldown(1, 3, BucketType.user)
     async def time(self, ctx, *timezones):
         """Show time(s) for specified timezone(s)"""
 
@@ -345,6 +340,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
 
     # Actually make these subcommands. (Also these are blocking)
     @commands.command(brief = 'useful', usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
+    @commands.cooldown(1, 3, BucketType.user)
     async def wiki(self, ctx, param: str, *, stuff = None):
         """Searches for articles on Wikipedia."""
 
@@ -405,6 +401,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
     @commands.command(brief = 'useful', usage = '<"question"> ["option 1"] ["option 2"]')
     #@commands.has_permissions(manage_messages = True)
     @commands.guild_only()
+    @commands.cooldown(1, 5, BucketType.user)
     async def poll(self, ctx, question: str, yes: str = "yes", no: str = "no"):
         """Creates a simple voting poll."""
 
@@ -425,6 +422,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         
     
     @commands.command(brief = 'useful', usage = '[code block]')
+    @commands.cooldown(1, 10, BucketType.user)
     async def hastebin(self, ctx, *, codeblock):
         """Paste code to hastebin."""
 
@@ -448,6 +446,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'other', usage = '<@user/id> [confident (yes/no)]')
+    @commands.cooldown(1, 5, BucketType.user)
     async def guesstoken(self, ctx, member: discord.Member = None, confident: bool = False):
         """Guesses the user's token to some level of acccuracy."""
 
@@ -473,39 +472,14 @@ class UtilityCog(commands.Cog, name = "Utility"):
         await ctx.send(f"__**Non MFA Token:**__ **`{b64}.######.###########################`**")
 
     @commands.command(name = 'play', brief = 'other', usage = '<lofi/white noise/fire>')
+    @commands.cooldown(1, 10, BucketType.user)
     async def play(self, ctx, to_play: str):
         """Play lofi or noise for focus while studying/writing/working."""
 
         await ctx.send("Work-In-Progress...")
-
-    @commands.group(name = 'base64', brief = 'other', usage = '<encode/decode> [text]')
-    async def bbase64(self, ctx):
-        """Base64 Encode/Decode."""
-
-        if not ctx.invoked_subcommand:
-            raise commands.BadArgument('Missing <encode/decode> parameter.')
-    
-    @bbase64.command(name = 'encode')
-    async def bbase64_encode(self, ctx, *, text: str):
-        """Base64 Encode Text."""
-
-        text = base64.urlsafe_b64encode(bytes(text, 'utf8')).decode()
-        await ctx.send(f"**URL Safe Base64 Encoding:**\n```{text}```")
-    
-    @bbase64.command(name = 'decode')
-    async def bbase64_decode(self, ctx, *, text: str):
-        """Base64 Decode Text."""
-
-        if text.startswith('`') and text.endswith('`'): text = text.strip('`')
-
-        try:
-            text = base64.urlsafe_b64decode(bytes(text, 'utf8')).decode()
-        except Exception as ex:
-            return await ctx.send(f"{self.emojis.cross} **Couldn't decode. Make sure text is a valid Base64 string.** `[ex {type(ex).__name__}]`")
-
-        await ctx.send(f"```{text}```")
     
     @commands.group(name = 'base16', brief = 'other', usage = '<encode/decode> [text]')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def base16(self, ctx):
         """Base16 Encode/Decode."""
         
@@ -533,6 +507,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         await ctx.send(f"```{text}```")
     
     @commands.group(name = 'base32', brief = 'other', usage = '<encode/decode> [text]')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def base32(self, ctx):
         """Base32 Encode/Decode."""
         
@@ -559,7 +534,36 @@ class UtilityCog(commands.Cog, name = "Utility"):
         
         await ctx.send(f"```{text}```")
     
+    @commands.group(name = 'base64', brief = 'other', usage = '<encode/decode> [text]')
+    @commands.cooldown(1, 3.5, BucketType.user)
+    async def bbase64(self, ctx):
+        """Base64 Encode/Decode."""
+
+        if not ctx.invoked_subcommand:
+            raise commands.BadArgument('Missing <encode/decode> parameter.')
+    
+    @bbase64.command(name = 'encode')
+    async def bbase64_encode(self, ctx, *, text: str):
+        """Base64 Encode Text."""
+
+        text = base64.urlsafe_b64encode(bytes(text, 'utf8')).decode()
+        await ctx.send(f"**URL Safe Base64 Encoding:**\n```{text}```")
+    
+    @bbase64.command(name = 'decode')
+    async def bbase64_decode(self, ctx, *, text: str):
+        """Base64 Decode Text."""
+
+        if text.startswith('`') and text.endswith('`'): text = text.strip('`')
+
+        try:
+            text = base64.urlsafe_b64decode(bytes(text, 'utf8')).decode()
+        except Exception as ex:
+            return await ctx.send(f"{self.emojis.cross} **Couldn't decode. Make sure text is a valid Base64 string.** `[ex {type(ex).__name__}]`")
+
+        await ctx.send(f"```{text}```")
+    
     @commands.group(name = 'base85', brief = 'other', usage = '<encode/decode> [text]')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def base85(self, ctx):
         """Base85 Encode/Decode."""
         

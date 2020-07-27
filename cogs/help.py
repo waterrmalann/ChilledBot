@@ -53,12 +53,12 @@ class HelpCog(commands.Cog, name = "Help"):
                 inline = True
             )
             embed.add_field(
-                name = '» Music 🎵',
+                name = '» ~~Music~~ 🎵',
                 value = f"`{self.bot_prefix}help music`",
                 inline = True
             )
             embed.add_field(
-                name = '» Config ⚙️',
+                name = '» ~~Config~~ ⚙️',
                 value = f"`{self.bot_prefix}help config`", 
                 inline = True
             )

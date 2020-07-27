@@ -5,16 +5,16 @@
 
 # Discord.
 import discord
-# Command Handler.
+# Command Handler & Cooldowns.
 from discord.ext import commands
+from discord.ext.commands.cooldowns import BucketType
 # DateTime Parser.
 from datetime import datetime
 from humanize import naturaldelta
 # JSON Parser & Text Formatter.
 from utils import default, formatting
 import typing
-
-
+    
 class InformationCog(commands.Cog, name = "Information"):
     """Information-Related Commands."""
 
@@ -30,9 +30,21 @@ class InformationCog(commands.Cog, name = "Information"):
         self.name = "Information"
         self.aliases = {'info', 'information'}
         self.categories = ('user', 'server', 'discord')
+
+        self.key_permissions = {
+            "kick_members", "ban_members",
+            "administrator", "mention_everyone",
+            "manage_channels", "manage_guild",
+            "manage_nicknames", "manage_webhooks",
+            "manage_emojis", "manage_roles",
+            "view_audit_log", "view_guild_insights",
+            "mute_members", "deafen_members",
+            "move_members", "priority_speaker"
+        }
         
     
     @commands.command(brief = 'user', aliases = ['pfp', 'pic'], usage = "[@user/id]")
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def avatar(self, ctx, user: discord.Member = None):
         """Return the avatar of an user (if specified) or the author."""
 
@@ -50,6 +62,7 @@ class InformationCog(commands.Cog, name = "Information"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'discord', aliases = ['e', 'em'], usage = '<emoji>')
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def emoji(self, ctx, emoji: discord.Emoji):
         """Returns a larger version of the specified emoji."""
 
@@ -62,6 +75,7 @@ class InformationCog(commands.Cog, name = "Information"):
 
     @commands.command(brief = 'server')
     @commands.guild_only()
+    @commands.cooldown(1, 5, BucketType.guild)
     async def serverinfo(self, ctx):
         """Detailed information about the current guild the bot is in."""
 
@@ -193,6 +207,7 @@ class InformationCog(commands.Cog, name = "Information"):
     
     @commands.command(brief = 'server')
     @commands.guild_only()
+    @commands.cooldown(1, 3, BucketType.user)
     async def channelinfo(self, ctx, *, channel: typing.Union[discord.TextChannel, discord.VoiceChannel] = None):
         """Returns information about the specified or the current channel."""
 
@@ -239,8 +254,9 @@ class InformationCog(commands.Cog, name = "Information"):
         await ctx.send(embed = embed)
 
 
-    @commands.command(brief = 'user', aliases = ['whois'], usage = "[@user/id]", description = "this crazy mf can go 0-60 in 6 seconds!")
+    @commands.command(brief = 'user', aliases = ['whois'], usage = "[@user/id]", description = "put stuff here idk uh")
     @commands.guild_only()
+    @commands.cooldown(1, 3, BucketType.user)
     async def userinfo(self, ctx, user: discord.Member = None):
         """Returns information about an user (if specified) or the author."""
 
@@ -307,11 +323,45 @@ class InformationCog(commands.Cog, name = "Information"):
             embed.add_field(name = f"❯ Roles ({len(user.roles) - 1})", value = roles, inline = False)
         else:
             # else we show all the permissions they have in the guild.
-            permissions = list(user.guild_permissions)
-            embed.add_field(name = f"❯ Permissions ({len(permissions)})", value = ', '.join(formatting.casify(i[0]) for i in permissions), inline = False)
+
+            # to-do: maybe bold the key roles.
+            permissions = ', '.join(formatting.casify(name) for name, value in user.guild_permissions)
+            embed.add_field(name = f"❯ Permissions ({len(user.guild_permissions)})", value = permissions, inline = False)
 
         embed.set_thumbnail(url = user.avatar_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+        await ctx.send(embed = embed)
+    
+    @commands.command(aliases = ['ri', 'rinfo'], brief = 'server', usage = '[role]')
+    @commands.guild_only()
+    @commands.cooldown(1, 3, BucketType.user)
+    async def roleinfo(self, ctx, role: discord.Role):
+        """Returns information about a specified role."""
+
+        role_values = []
+        role_values.append(f"**Mention:** {role.mention} {'(Mentionable)' if role.mentionable else '(Unmentionable)'}")
+        role_values.append(f"**Color (Hex):** {role.color}")
+        role_values.append(f"**Created on:** {default.datefr(role.created_at)}")
+        role_values.append(f"**Hoist:** {'Yes' if role.hoist else 'No'}")
+        role_values.append(f"**Members:** {len(role.members)}")
+
+        key_perms = [formatting.casify(name) for name, value in role.permissions if name in self.key_permissions]
+        key_perms_count = len(key_perms)
+        key_perms = ', '.join(key_perms)
+        
+        embed = discord.Embed(title = f"{role.name} (`{role.id}`)", color = role.color, timestamp = datetime.utcnow())
+        embed.add_field(
+            name = "❯ Role",
+            value = '\n'.join(role_values),
+            inline = False
+        )
+
+        embed.add_field(
+            name = f"❯ Key Permissions ({key_perms_count})",
+            value = '\n'.join(key_perms),
+            inline = False
+        )
 
         await ctx.send(embed = embed)
 
@@ -319,6 +369,7 @@ class InformationCog(commands.Cog, name = "Information"):
     @commands.guild_only()
     @commands.bot_has_permissions(create_instant_invite = True)
     @commands.has_permissions(create_instant_invite = True)
+    @commands.cooldown(1, 5, BucketType.guild)
     async def createinvite(self, ctx, max_uses: typing.Optional[int] = 0, temporary: bool = False):
         """Creates an invite link for the current server."""
 

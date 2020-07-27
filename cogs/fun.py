@@ -1,7 +1,8 @@
 # Discord.
 import discord
-# Command Handler.
+# Command Handler & Cooldowns.
 from discord.ext import commands
+from discord.ext.commands.cooldowns import BucketType
 # Asynchronous Package & Requests.
 import asyncio
 import aiohttp
@@ -19,7 +20,6 @@ import html
 from datetime import datetime
 # JSON Parser.
 from utils import default
-
 
 class FunCog(commands.Cog, name = "Fun"):
     """Entertainment & Miscellaneous Commands."""
@@ -48,6 +48,7 @@ class FunCog(commands.Cog, name = "Fun"):
 
 
     @commands.command(name = '8ball', brief = 'random', aliases = ['eightball', 'eight-ball', '8-ball'], usage = '<question>')
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def eightball(self, ctx, *, question: str):
         """Ask the magic 8-ball your doubts."""
 
@@ -84,6 +85,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'random', aliases = ['flipcoin', 'tosscoin', 'coinflip'])
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def coin(self, ctx):
         """Toss a coin."""
 
@@ -97,6 +99,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed=embed)
     
     @commands.command(brief = 'random', aliases = ['dice'], usage = '[number]')
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def roll(self, ctx, number: typing.Optional[int] = 6):
         """Roll a dice or a number."""
 
@@ -118,6 +121,7 @@ class FunCog(commands.Cog, name = "Fun"):
             await ctx.send(embed = embed)
     
     @commands.command(brief = 'random', aliases = ['sps', 'stonepaperscissors', 'rockpaperscissors'], usage = '<rock/paper/scissors>')
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def rps(self, ctx, choice: str):
         """Play rock, paper, scissors."""
 
@@ -137,6 +141,7 @@ class FunCog(commands.Cog, name = "Fun"):
 
 
     @commands.command(brief = 'random', aliases = ['choice', 'choose'], usage = '<item> <item> [items...]')
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def choices(self, ctx, *options):
         """Randomly pick an item from a list of items."""
 
@@ -144,18 +149,21 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(f"I pick {random.choice(options)}")
 
     @commands.command(brief = 'text', usage = '<text>')
+    @commands.cooldown(1, 3, BucketType.user)
     async def clap(self, ctx, *, text: str):
         """Clappify text."""
 
         await ctx.send(text.replace(' ', '👏'))
 
     @commands.command(brief = 'text', usage = '<text>')
+    @commands.cooldown(1, 3, BucketType.user)
     async def reverse(self, ctx, *, text: str):
         """Reverse given text."""
 
         await ctx.send(text[::-1])
     
     @commands.command(brief = 'text', usage = '<sentence>')
+    @commands.cooldown(1, 3, BucketType.user)
     async def reverseorder(self, ctx, *, text: str):
         """Reverse the order of the given text."""
 
@@ -163,6 +171,7 @@ class FunCog(commands.Cog, name = "Fun"):
     
     # Why did I make this?
     @commands.command(brief = 'text', usage = "<text>")
+    @commands.cooldown(1, 3, BucketType.user)
     async def emojify(self, ctx, *, text: str):
         """Convert text to block letters."""
 
@@ -188,6 +197,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(out)
     
     @commands.command(brief = 'text', usage = '<text>')
+    @commands.cooldown(1, 3, BucketType.user)
     async def nato(self, ctx, *, text: str):
         """Convert text to NATO Phonetic Alphabets."""
 
@@ -213,6 +223,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(out)
 
     @commands.command(brief = 'text', usage = '<word>')
+    @commands.cooldown(1, 3, BucketType.user)
     async def scramble(self, ctx, *, word: str):
         """Scramble given word."""
 
@@ -221,6 +232,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(''.join(letters))
 
     @commands.command(brief = 'misc', aliases = ['hug'], usage = "[@user/id]")
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def notice(self, ctx, user: discord.Member = None):
         """Notice me senpai!"""
 
@@ -242,6 +254,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(f"{user.mention}, `{random.choice(hugs)}`")
     
     @commands.command(brief = 'animals', aliases = ["feline", "tom", "mouser", "pussy", "meow"])
+    @commands.cooldown(1, 4, BucketType.user)
     async def cat(self, ctx, num: typing.Optional[int] = 0, fact : bool = False):
         """Gives you a cat pic."""
 
@@ -275,6 +288,7 @@ class FunCog(commands.Cog, name = "Fun"):
             await ctx.send(f"**Did you know?** {cat_fact}")
 
     @commands.command(brief = 'animals', aliases = ["pupper", "woof", "doggo", "bork", "canine"])
+    @commands.cooldown(1, 4, BucketType.user)
     async def dog(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Gives you a dog pic."""
 
@@ -318,6 +332,7 @@ class FunCog(commands.Cog, name = "Fun"):
             #https://dog-api.kinduff.com/api/facts  data["facts"][0]
     
     @commands.command(brief = 'animals', aliases = ["birb", "ave", "birdie"])
+    @commands.cooldown(1, 4, BucketType.user)
     async def bird(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Gives you a bird pic."""
 
@@ -350,6 +365,7 @@ class FunCog(commands.Cog, name = "Fun"):
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(brief = 'animals', aliases = ["foxie", "arf"])
+    @commands.cooldown(1, 4, BucketType.user)
     async def fox(self, ctx, num : typing.Optional[int] = 0, fact : bool = False):
         """Gives you a fox pic."""
 
@@ -384,6 +400,7 @@ class FunCog(commands.Cog, name = "Fun"):
             # Random Fox Fact: Did You Know? 
     
     @commands.command(brief = 'animals', aliases = ["achoo"])
+    @commands.cooldown(1, 4, BucketType.user)
     async def panda(self, ctx, fact : bool = False):
         """Gives you a panda pic."""
 
@@ -408,6 +425,7 @@ class FunCog(commands.Cog, name = "Fun"):
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(brief = 'animals')
+    @commands.cooldown(1, 4, BucketType.user)
     async def koala(self, ctx, fact : bool = False):
         """Gives you a koala pic."""
 
@@ -432,6 +450,7 @@ class FunCog(commands.Cog, name = "Fun"):
             await ctx.send(f"**Did you know?** {fact}")
     
     @commands.command(name = "anime", brief = 'misc')
+    @commands.cooldown(1, 4, BucketType.user)
     async def uwu(self, ctx):
         """Yes."""
 
@@ -453,6 +472,7 @@ class FunCog(commands.Cog, name = "Fun"):
         #https://www.reddit.com/r/awwnime/
     
     @commands.command(name = "quote", brief = 'misc')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def quote(self, ctx):
         """Gives you a quote."""
 
@@ -477,6 +497,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['memes'], usage = '[memes/dankmemes/me_irl]')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def meme(self, ctx, subreddit: str = 'any', sorting: str = 'any'):
         """Gives you a meme."""
 
@@ -514,6 +535,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['wholesomememes', 'wholesome_meme', 'wholesomememe', 'wmeme'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def wholesome(self, ctx, sorting: str = 'any'):
         """Gives you a wholesome meme."""
 
@@ -546,6 +568,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['discordmemes', 'discordirl', 'discord_irl'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def discordmeme(self, ctx, sorting: str = 'any'):
         """Gives you a discord meme."""
 
@@ -578,6 +601,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['surreal', 'surrealmemes'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def surrealmeme(self, ctx, sorting: str = 'any'):
         """Gives you a surreal meme."""
 
@@ -610,6 +634,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['bootleg', 'bootlegmemes'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def bootlegmeme(self, ctx, sorting: str = 'any'):
         """Gives you a bootleg meme."""
 
@@ -642,6 +667,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['antimemes'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def antimeme(self, ctx, sorting: str = 'any'):
         """Gives you an anti-meme."""
 
@@ -674,6 +700,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def funny(self, ctx, sorting: str = 'any'):
         """Gives you something funny."""
 
@@ -706,6 +733,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['boneachingjuice'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def bonehurtingjuice(self, ctx, sorting: str = 'any'):
         """ouch."""
 
@@ -741,6 +769,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['funnysign'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def funnysigns(self, ctx, sorting: str = 'any'):
         """Gives you a funny sign."""
 
@@ -773,6 +802,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['didthejob', 'yesboss', 'ididthejobboss'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def notmyjob(self, ctx, sorting: str = 'any'):
         """I did the job, boss."""
 
@@ -805,6 +835,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'reddit', aliases = ['todayilearned'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def til(self, ctx, sorting: str = 'any'):
         """You learn something new everyday!"""
 
@@ -840,6 +871,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['showerthoughts'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def showerthought(self, ctx, sorting: str = 'any'):
         """Gets you a random shower thought."""
 
@@ -877,6 +909,7 @@ class FunCog(commands.Cog, name = "Fun"):
 
 
     @commands.command(brief = 'reddit', aliases = ['jokes'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def joke(self, ctx):
         """Gives you a joke."""
 
@@ -902,6 +935,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['antijokes'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def antijoke(self, ctx):
         """Gives you an anti-joke."""
 
@@ -927,6 +961,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['antiantijokes'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def antiantijoke(self, ctx):
         """Gives you an anti-anti-joke."""
 
@@ -952,6 +987,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def flowers(self, ctx, sorting: str = 'any'):
         """Gives you flower pics."""
 
@@ -984,6 +1020,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['earthporn', 'landscape'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def earth(self, ctx, sorting: str = 'any'):
         """Gives you amazing landscape photographs."""
 
@@ -1016,6 +1053,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['foodporn', 'yummy'])
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def food(self, ctx, sorting: str = 'any'):
         """Why is this a thing."""
 
@@ -1048,6 +1086,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'reddit', aliases = ['subreddit'])
+    @commands.cooldown(1, 4, BucketType.user)
     async def reddit(self, ctx, subreddit: str = 'r/all', sorting: str = 'hot'):
         """Fetches content from a specified subreddit."""
 
@@ -1097,6 +1136,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'misc', usage = "[category] [difficulty] [type]")
+    @commands.cooldown(1, 3, BucketType.user)
     async def trivia(self, ctx, triviacategory : typing.Union[str, int] = 'any', triviadifficulty : str = 'any', triviatype : str = 'any'):
         """Gives you a trivia question."""
 
@@ -1230,6 +1270,7 @@ class FunCog(commands.Cog, name = "Fun"):
                 await ctx.send(f"{self.emojis.cross} Your answer was incorrect. The correct answer was {answer}.")
     
     @commands.command(brief = 'misc')
+    @commands.cooldown(1, 3, BucketType.user)
     async def guess(self, ctx):
         """Play a guessing game with the bot."""
 
@@ -1275,6 +1316,7 @@ class FunCog(commands.Cog, name = "Fun"):
     
     @commands.command(brief = 'misc', aliases = ['ud', 'urbandict', 'udict'])
     #@commands.is_nsfw()
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def urban(self, ctx, *, query):
         """Search the urban dictionary for word meanings."""
 
@@ -1306,6 +1348,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'misc')
+    @commands.cooldown(1, 2.5, BucketType.user)
     async def bored(self, ctx):
         """Bored? Try this command."""
 
@@ -1323,6 +1366,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(embed = embed)
     
     @commands.command(brief = 'misc', aliases = ["roastme"], usage = '[@user/id]')
+    @commands.cooldown(1, 2, BucketType.user)
     async def roast(self, ctx, user: discord.Member = None):
         """Roast yourself (or mentioned user)."""
 
@@ -1330,6 +1374,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(f"{user.mention}, {random.choice(self.roasts)}")
     
     @commands.command(brief = 'misc', usage = '[@user/id]')
+    @commands.cooldown(1, 3, BucketType.user)
     async def insult(self, ctx, user: discord.Member = None):
         """Insult yourself (or mentioned user)."""
 
@@ -1345,6 +1390,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(ins)
     
     @commands.command(brief = 'misc', usage = '[@user/id]')
+    @commands.cooldown(1, 2, BucketType.user)
     async def toast(self, ctx, user: discord.Member = None):
         """Praise yourself (or mentioned user)."""
 
@@ -1352,6 +1398,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(f"{user.mention}, {random.choice(self.toasts)}")
     
     @commands.command(brief = 'misc')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def affirmation(self, ctx):
         """Get an affirmation."""
 
@@ -1362,6 +1409,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(affirmation)
 
     @commands.command(brief = 'misc')
+    @commands.cooldown(1, 2, BucketType.user)
     async def smile(self, ctx):
         """Smile! :)"""
 
@@ -1373,6 +1421,7 @@ class FunCog(commands.Cog, name = "Fun"):
         await ctx.send(random.choice(smiles))
     
     @commands.command(brief = 'misc')
+    @commands.cooldown(1, 3.5, BucketType.user)
     async def wave(self, ctx):
         """Wave! 👋🏻"""
 
