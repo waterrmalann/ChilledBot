@@ -364,7 +364,7 @@ class InformationCog(commands.Cog, name = "Information"):
                 inline = False
             )
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
-
+        embed.set_thumbnail(url = "https://cdn.discordapp.com/attachments/726353729842053171/737663400032600194/role_at.png")
         await ctx.send(embed = embed)
 
     @commands.command(brief = 'server', usage = "[max uses] [temporary: yes/no]") # [max age (seconds)]
