@@ -5,7 +5,7 @@ from discord.ext import commands
 
 emojis = default.get("emojis.json")
 
-async def check_modcmd_perms(ctx, member):
+async def verify_user_modcmd(ctx, member):
     """Permission check for moderation commands such as ban, kick, mute, etc..."""
     
     if member == ctx.author:
@@ -29,3 +29,15 @@ async def check_modcmd_perms(ctx, member):
         return await ctx.send(f"{emojis.cross} **You can't {ctx.command.name} someone with the same permissions as you.**")
     if ctx.author.top_role < member.top_role:
         return await ctx.send(f"{emojis.cross} **You can't {ctx.command.name} someone above you in the role hierarchy.**")
+
+async def verify_id_modcmd(ctx, user_id):
+    """Permission check for commands that only support IDs like hackban."""
+
+    if user_id == ctx.author.id:
+        return await ctx.send(f"{emojis.cross} **You can't {ctx.command.name} yourself, goober.**")
+    if user_id == ctx.bot.user.id:
+        if ctx.command.name in {'kick', 'ban', 'softban', 'hackban'}:
+            return await ctx.send(f"{emojis.cross} **You can't {ctx.command.name} me. Use `leave` instead.**")
+        return await ctx.send(f"{emojis.cross} **You can't make me use this command on me.**")
+    if user_id == ctx.guild.owner.id:
+        return await ctx.send(f"{emojis.cross} **You can't {ctx.command.name} the owner of this server.**")
