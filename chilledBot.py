@@ -60,6 +60,7 @@ bot = commands.AutoShardedBot(
 )
 bot.launch_time = datetime.utcnow()
 bot.remove_command('help')
+bot.command_counter = 0
 prefix = '.'
 
 
@@ -115,11 +116,13 @@ async def on_ready():
     bot.channel_exceptions = bot.get_channel(config.channel_exceptions)
     bot.channel_guilds = bot.get_channel(config.channel_guilds)
 
-    await bot.channel_logs.send(
-        "**[Ready]** __ChilledBot__ has started.\n" \
-        f"**[Login]** Logged in as **{bot.user.name}** (`{bot.user.id}`).\n" \
-        f"**[On]** {default.datefr(datetime.now())}"
+    embed = discord.Embed(
+        title = "[Ready] ChilledBot has started.",
+        description = f"Logged in as **{bot.user}** (`{bot.user.id}`)",
+        color = colors.primary
     )
+    embed.set_footer(text = default.datefr(datetime.now()))
+    await bot.channel_logs.send(embed = embed)
 
 @bot.event
 async def on_disconnect():
@@ -128,14 +131,40 @@ async def on_disconnect():
     print("[Disconnected] Lost connection with Discord.")
 
 @bot.event
+async def on_guild_join(guild):
+    embed = discord.Embed(
+        title = f"[Guild Joined] {guild.name} (`{guild.id}`)",
+        description = f"**Owned by:** {guild.owner} (`{guild.owner.id}`)\n" \
+            f"**Members:** {guild.member_count}\n" \
+            f"**Region:** {guild.region}",
+        color = colors.primary,
+    )
+    embed.set_footer(text = default.datefr(datetime.now()))
+    embed.set_thumbnail(url = guild.icon_url)
+    await bot.channel_guilds.send(embed = embed)
+
+@bot.event
+async def on_guild_remove(guild):
+    embed = discord.Embed(
+        title = f"[Guild Removed] {guild.name} (`{guild.id}`)",
+        description = f"**Owned by:** {guild.owner} (`{guild.owner.id}`)",
+        color = colors.primary
+    )
+    embed.set_footer(text = default.datefr(datetime.now()))
+    await bot.channel_guilds.send(embed = embed)
+
+@bot.event
 async def on_command(ctx):
     """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command"""
+    
     print(f"\n[CMD] {ctx.command.qualified_name} by {ctx.author} in {ctx.guild.name}")
 
 @bot.event
 async def on_command_completion(ctx):
     """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command_completion"""
+
     print(f"[CMD] {ctx.command.qualified_name} Successful.")
+    bot.command_counter += 1
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -206,7 +235,8 @@ async def on_command_error(ctx, error):
 
         exception_embed = discord.Embed(
             title = "⚠️ Unhandled Command Exception",
-            color = colors.error
+            color = colors.error,
+            timestamp = datetime.utcnow()
         )
         exception_embed.add_field(
             name = "Command",
