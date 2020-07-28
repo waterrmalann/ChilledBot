@@ -325,8 +325,9 @@ class InformationCog(commands.Cog, name = "Information"):
             # else we show all the permissions they have in the guild.
 
             # to-do: maybe bold the key roles.
-            permissions = ', '.join(formatting.casify(name) for name, value in user.guild_permissions)
-            embed.add_field(name = f"❯ Permissions ({len(user.guild_permissions)})", value = permissions, inline = False)
+            permissions = [formatting.casify(name) for name, value in user.guild_permissions]
+            perms = len(permissions)
+            embed.add_field(name = f"❯ Permissions ({perms})", value = ', '.join(permissions), inline = False)
 
         embed.set_thumbnail(url = user.avatar_url)
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
@@ -346,9 +347,8 @@ class InformationCog(commands.Cog, name = "Information"):
         role_values.append(f"**Hoist:** {'Yes' if role.hoist else 'No'}")
         role_values.append(f"**Members:** {len(role.members)}")
 
-        key_perms = [formatting.casify(name) for name, value in role.permissions if name in self.key_permissions]
+        key_perms = [formatting.casify(name) for name, value in role.permissions if value and name in self.key_permissions]
         key_perms_count = len(key_perms)
-        key_perms = ', '.join(key_perms)
         
         embed = discord.Embed(title = f"{role.name} (`{role.id}`)", color = role.color, timestamp = datetime.utcnow())
         embed.add_field(
@@ -357,11 +357,13 @@ class InformationCog(commands.Cog, name = "Information"):
             inline = False
         )
 
-        embed.add_field(
-            name = f"❯ Key Permissions ({key_perms_count})",
-            value = '\n'.join(key_perms),
-            inline = False
-        )
+        if key_perms:
+            embed.add_field(
+                name = f"❯ Key Permissions ({key_perms_count})",
+                value = ', '.join(key_perms),
+                inline = False
+            )
+        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
         await ctx.send(embed = embed)
 
