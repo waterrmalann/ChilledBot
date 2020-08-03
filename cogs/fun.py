@@ -155,7 +155,7 @@ class FunCog(commands.Cog, name = "Fun"):
 
         await ctx.send(text.replace(' ', '👏'))
 
-    @commands.command(brief = 'text', usage = '<text>')
+    @commands.command(brief = 'text', usage = '<text>', aliases = ['backwards'])
     @commands.cooldown(1, 3, BucketType.user)
     async def reverse(self, ctx, *, text: str):
         """Reverse given text."""
@@ -1276,14 +1276,20 @@ class FunCog(commands.Cog, name = "Fun"):
 
         alphabets = 'abcdefghijklmnopqrstuvwxyz'
         guess = ''
-        hard = False
 
-        if random.randint(0, 1) == 0:
+        integer = False  # If the type is an integer or a string.
+        hard = False  # Difficulty: Hard = 3 Tries, Easy = 2 Tries.
+
+        rand = random.randint(0, 1)
+        if rand == 0:  # English Alphabets.
             guess = random.choice(alphabets)
             hard = True
-            await ctx.send("I've an alphabet in my mind. Guess it!")
-        else:
+            integer = False
+            await ctx.send("I've an english alphabet in my mind. Guess it!")
+        else:  # 1 - 10 Integers.
             guess = str(random.randint(1, 10))
+            hard = False
+            integer = True
             await ctx.send("I've a number between 1 and 10 in my mind. Guess it!")
         
         check = lambda m: m.author == ctx.author and m.channel == ctx.channel
@@ -1291,24 +1297,52 @@ class FunCog(commands.Cog, name = "Fun"):
         tries = 2 if not hard else 3
         tries_left = tries
 
+        last_guess = ''
+        used_hint = False  # If the user has used one hint that was available to them.
         while tries_left != 0:
             tries_left -= 1
             try:
-                user_guess = await self.bot.wait_for('message', check = check, timeout = 8)
+                user_guess = await self.bot.wait_for('message', check = check, timeout = 8.5)
             except asyncio.TimeoutError:
                 await ctx.send(f"{self.emojis.cross} **You took too long to guess! It was '{guess.upper()}'**")
                 break
             else:
-                user_guess = user_guess.content.strip()
-                if user_guess.lower() == guess:
+                user_guess = user_guess.content.strip().lower()
+                if user_guess != 'hint': last_guess = user_guess
+
+                if user_guess == guess:
                     await ctx.send(f"{self.emojis.tick} **Your guess was correct! It was '{guess.upper()}'.**")
                     break
+                elif user_guess == 'hint':
+                    if used_hint:
+                        await ctx.send(f"{self.emojis.cross} **You've already used a hint!**")
+                        tries_left += 1
+                        continue
+                    hint = ''
+                    used_hint = True
+                    if last_guess:
+                        if rand == 0:  # Alphabet
+                            if last_guess not in alphabets: hint = "Try an actual english alphabet"
+                            elif alphabets.find(last_guess) > alphabets.find(guess): hint = f"It's before '{last_guess.upper()}'"
+                            elif alphabets.find(last_guess) < alphabets.find(guess): hint = f"It's after '{last_guess.upper()}'"
+                        else:
+                            if not last_guess.isdigit(): hint = "Try an actual number"
+                            elif int(last_guess) not in range(1, 11): hint = "Try an actual number between 1 - 10 inclusive."
+                            elif int(last_guess) > int(guess): hint = f"It's before '{last_guess}'"
+                            elif int(last_guess) < int(guess): hint = f"It's after '{last_guess}'"
+                    hint = hint or "I couldn't give you a hint."
+                    if tries_left > 1:
+                        await ctx.send(f"**Hint:** {hint} (You've lost a try. {tries_left} more {'try' if tries_left == 1 else 'tries'} left.)")
+                    else:
+                        await ctx.send(f"**Hint:** {hint}")
+                        tries_left += 1
+                    continue
                 else:
                     if tries_left > 1:
                         await ctx.send(f"{self.emojis.cross} **Your guess was wrong! Try again. You have {tries_left} more tries.**")
                         continue
                     elif tries_left == 1:
-                        await ctx.send(f"{self.emojis.cross} **Your guess was wrong! You have 1 more try!.**")
+                        await ctx.send(f"{self.emojis.cross} **Your guess was wrong! You have 1 more try!**")
                         continue
                     else:
                         await ctx.send(f"{self.emojis.cross} **Your guess was wrong! It was '{guess.upper()}'.**")
