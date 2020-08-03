@@ -1285,7 +1285,7 @@ class FunCog(commands.Cog, name = "Fun"):
             guess = random.choice(alphabets)
             hard = True
             integer = False
-            await ctx.send("I've an english alphabet in my mind. Guess it!")
+            await ctx.send("I've an english letter in my mind. Guess it!")
         else:  # 1 - 10 Integers.
             guess = str(random.randint(1, 10))
             hard = False
