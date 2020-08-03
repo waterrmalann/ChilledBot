@@ -18,7 +18,7 @@ class ModerationCog(commands.Cog, name = "Moderation"):
         self.bot_prefix = '.'
 
         # Cog Info
-        self.hidden = True
+        self.hidden = False
         self.name = "Moderation & Management"
         self.aliases = {'mod', 'moderator', 'moderation', 'manage', 'admin'}
         self.categories = ('user tools', 'server tools')
