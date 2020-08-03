@@ -235,7 +235,7 @@ class ModerationCog(commands.Cog, name = "Moderation"):
         color = color or discord.Color.default()
 
         if name == 'chilledBotMutedRole':
-
+            return await ctx.send('not yet amigo')
 
         new_role = await ctx.guild.create_role(name = name, color = color, hoist = hoisted, mentionable = allow_mentions)
 
