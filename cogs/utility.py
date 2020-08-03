@@ -19,7 +19,7 @@ from py_expression_eval import Parser
 # Color Conversion
 import colorsys
 # JSON Parser.
-from utils import default, formatting
+from utils import default, formatting, converters
 # DateTime Parser.
 from humanize import naturaldelta
 from datetime import datetime
@@ -29,22 +29,7 @@ import pytz
 import base64
 import typing
 
-
-class Color(commands.Converter):
-    """Returns the color integer from hex codes and nuances."""
-    async def convert(self, ctx, col):
-        if len(col) == 8 and col.startswith('0x'):
-            col = int(col, 16)
-        elif len(col) == 6 or col.startswith('#'):
-            if col.startswith('#'):
-                col = int(col[1:], 16)
-            else:
-                col = int(col, 16)
-        elif col.isdigit():
-            col = int(col)
-        else:
-            raise commands.BadArgument('invalid color')
-        return col
+from string import ascii_lowercase, ascii_uppercase, ascii_letters
 
 class UtilityCog(commands.Cog, name = "Utility"):
     """Utility Commands."""
@@ -108,7 +93,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
 
     @commands.command(brief = 'design', aliases = ["color"], usage = '[color (hex/int)]')
     @commands.cooldown(1, 2.5, BucketType.user)
-    async def colour(self, ctx, *, col: typing.Optional[Color] = None):
+    async def colour(self, ctx, *, col: typing.Optional[converters.Color] = None):
         """Returns information on a specific (or random) color."""
 
         col = col or random.randint(0, 16777215)
@@ -313,30 +298,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
 
         await ctx.send(embed = embed)
 
-    @commands.command(brief = 'useful', usage = "<url>")
-    async def request(self, ctx, url = None, debug : bool = False):
-        """Sends a request and returns data from an url."""
 
-        url = url or "http://shibe.online/api/cats"
-        start = time.perf_counter()
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                if debug: await ctx.send(embed = discord.Embed(description=f"**Debug:**\n```py\n{r}```"))
-                data = await r.json(content_type = None)
-        end = time.perf_counter()
-        duration = (end - start) * 1000
-        
-        embed = discord.Embed(
-            title = url,
-            color = self.colors.secondary,
-            description = f"{self.emojis.tick} Evaluated in {duration:.2f}ms.",
-            timestamp = datetime.utcnow()
-        )
-
-        embed.add_field(name = "Retrieved Data", value = f"```py\n{data}```", inline = False)
-        if isinstance(data, dict):
-            embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
-        await ctx.send(embed = embed)
 
     # Actually make these subcommands. (Also these are blocking)
     @commands.command(brief = 'useful', usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
@@ -459,17 +421,16 @@ class UtilityCog(commands.Cog, name = "Utility"):
 
         # User ID -> Base64 Encoding
         user_id = bytes(str(member.id), encoding = 'utf8')
-        b64 = base64.b64encode(user_id)
-        b64 = b64.decode()
+        b64 = base64.b64encode(user_id).decode()
         token_parts[0] = b64
 
         if confident:
             #return datetime.utcfromtimestamp(int.from_bytes(base64.b64decode(token_part + "=="), "big"))
-
-            epoch = int(member.created_at.timestamp())
-            discord_epoch = epoch - 1293840000
-
-        await ctx.send(f"__**Non MFA Token:**__ **`{b64}.######.###########################`**")
+            tstamp = int(member.created_at.timestamp() - 1293840000).to_bytes(6, 'big')
+            tb64 = base64.b64encode(tstamp).decode()
+            token_parts[1] = tb64
+        
+        await ctx.send(f"__**Non MFA Token:**__ **`{'.'.join(token_parts)}`**")
 
     @commands.command(name = 'play', brief = 'other', usage = '<lofi/white noise/fire>')
     @commands.cooldown(1, 10, BucketType.user)
@@ -477,8 +438,32 @@ class UtilityCog(commands.Cog, name = "Utility"):
         """Play lofi or noise for focus while studying/writing/working."""
 
         await ctx.send("Work-In-Progress...")
+
+    @commands.group(name = 'rot', brief = 'other', usage = '<rotate by (int)> <encode/decode> <text>')
+    @commands.cooldown(1, 3.5, BucketType.user)
+    async def rot(self, ctx, rot_by: int, option: str, *, text: str):
+        """Rotate letters by specified number (like Rot-13, Rot-12, etc...)"""
+
+        if rot_by < 1 or rot_by > 25:
+            raise commands.BadArgument('rotation can only be done with numbers between 1 and 25')
+
+        if option == 'encode':
+            rot_by = rot_by
+        elif option == 'decode':
+            rot_by = -rot_by
+        else:
+            raise commands.BadArgument('specify whether to encode or decode')
+
+        def rot(n):
+	        lookup = str.maketrans(
+                ascii_lowercase + ascii_uppercase,
+                ascii_lowercase[n:] + ascii_lowercase[:n] + ascii_uppercase[n:] + ascii_uppercase[:n]
+            )
+	        return lambda s: s.translate(lookup)
+        
+        await ctx.send(f"{rot(rot_by)(text)}")
     
-    @commands.group(name = 'base16', brief = 'other', usage = '<encode/decode> [text]')
+    @commands.group(name = 'base16', brief = 'other', usage = '<encode/decode> <text>')
     @commands.cooldown(1, 3.5, BucketType.user)
     async def base16(self, ctx):
         """Base16 Encode/Decode."""
@@ -506,7 +491,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         
         await ctx.send(f"```{text}```")
     
-    @commands.group(name = 'base32', brief = 'other', usage = '<encode/decode> [text]')
+    @commands.group(name = 'base32', brief = 'other', usage = '<encode/decode> <text>')
     @commands.cooldown(1, 3.5, BucketType.user)
     async def base32(self, ctx):
         """Base32 Encode/Decode."""
@@ -534,7 +519,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
         
         await ctx.send(f"```{text}```")
     
-    @commands.group(name = 'base64', brief = 'other', usage = '<encode/decode> [text]')
+    @commands.group(name = 'base64', brief = 'other', usage = '<encode/decode> <text>')
     @commands.cooldown(1, 3.5, BucketType.user)
     async def bbase64(self, ctx):
         """Base64 Encode/Decode."""
@@ -562,7 +547,7 @@ class UtilityCog(commands.Cog, name = "Utility"):
 
         await ctx.send(f"```{text}```")
     
-    @commands.group(name = 'base85', brief = 'other', usage = '<encode/decode> [text]')
+    @commands.group(name = 'base85', brief = 'other', usage = '<encode/decode> <text>')
     @commands.cooldown(1, 3.5, BucketType.user)
     async def base85(self, ctx):
         """Base85 Encode/Decode."""
