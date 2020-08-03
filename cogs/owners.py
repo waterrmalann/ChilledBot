@@ -8,12 +8,14 @@ import os
 import inspect
 # Asynchronous Package.
 import asyncio
+# Asynchronous Requests.
+import aiohttp
 # Time Value Manipulation.
 import time
 # DateTime Parser.
 from datetime import datetime
 # JSON Parser.
-from utils import default
+from utils import default, formatting
 import base64
 
 class OwnerCog(commands.Cog, name = "Owners"):
@@ -23,6 +25,7 @@ class OwnerCog(commands.Cog, name = "Owners"):
         self.config = default.get("config.json")
         self.emojis = default.get("emojis.json")
         self.colors = default.get("colors.json")
+        self.session = aiohttp.ClientSession()
 
         # Cog Info
         self.hidden = True
@@ -44,58 +47,88 @@ class OwnerCog(commands.Cog, name = "Owners"):
         """Prints text to the console."""
 
         print(content)
-        await ctx.send(f"{self.emojis.tick} **Successfully printed content to terminal!.**")
+        await ctx.send(f"{self.emojis.tick} **Successfully printed content to terminal.**")
     
-    @commands.command(name = 'load', hidden = True, usage = "<cogs.name>")
+    @commands.command(brief = 'useful', usage = "<url>")
     @commands.is_owner()
+    async def request(self, ctx, url = None, debug : bool = False):
+        """Sends a request and returns data from an url."""
+
+        url = url or "http://shibe.online/api/cats"
+        start = time.perf_counter()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                if debug: await ctx.send(embed = discord.Embed(description=f"**Debug:**\n```py\n{r}```"))
+                data = await r.json(content_type = None)
+        end = time.perf_counter()
+        duration = (end - start) * 1000
+        
+        embed = discord.Embed(
+            title = url,
+            color = self.colors.secondary,
+            description = f"{self.emojis.tick} Evaluated in {duration:.2f}ms.",
+            timestamp = datetime.utcnow()
+        )
+
+        embed.add_field(name = "Retrieved Data", value = f"```py\n{data}```", inline = False)
+        if isinstance(data, dict):
+            embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
+        await ctx.send(embed = embed)
+    
+    @commands.group(name = 'cogs', hidden = True, usage = '<load/reload/unload/list> [param]')
+    async def cogs(self, ctx):
+        """Manage bot cogs (modules)."""
+        
+        if not ctx.invoked_subcommand:
+            raise commands.BadArgument('Missing subcommand.')
+            
+    @cogs.command(name = 'load', aliases = ['enable'])
     async def cogs_load(self, ctx, *, cog: str):
         """Command to load cogs in real-time."""
 
-        if not cog.startswith('cogs.'):
-            cog = 'cogs.' + cog
+        if not cog.startswith('cogs.'): cog = 'cogs.' + cog
 
         try:
             self.bot.load_extension(cog)
         except Exception as ex:
-            await ctx.send(f"{self.emojis.cross} **Error loading {cog}** `[ex {type(ex).__name__} - {ex}]`")
+            await ctx.send(f"{self.emojis.cross} **Error loading `{cog}`** `[ex {type(ex).__name__} - {ex}]`")
         else:
-            await ctx.send(f"{self.emojis.tick} **Successfully loaded {cog}**")
+            await ctx.send(f"{self.emojis.tick} **Successfully loaded `{cog}`**")
     
-    @commands.command(name = 'unload', hidden = True, usage = "<cogs.name>")
-    @commands.is_owner()
+    @cogs.command(name = 'unload', aliases = ['disable'])
     async def cogs_unload(self, ctx, *, cog: str):
         """Command to unload cogs in real-time."""
 
-        if not cog.startswith('cogs.'):
-            cog = 'cogs.' + cog
+        if not cog.startswith('cogs.'): cog = 'cogs.' + cog
 
         try:
             self.bot.unload_extension(cog)
         except Exception as ex:
-            await ctx.send(f"{self.emojis.cross} **Error unloading {cog}** `[ex {type(ex).__name__} - {ex}]`")
+            await ctx.send(f"{self.emojis.cross} **Error unloading `{cog}`** `[ex {type(ex).__name__} - {ex}]`")
         else:
-            await ctx.send(f"{self.emojis.tick} **Successfully unloaded {cog}**")
-        
-    @commands.command(name = 'reload', hidden = True, usage = "<cogs.name/all>")
-    @commands.is_owner()
+            await ctx.send(f"{self.emojis.tick} **Successfully unloaded `{cog}`**")
+    
+    @cogs.command(name = 'reload', aliases = ['refresh', 'restart'])
     async def cogs_reload(self, ctx, *, cog: str):
         """Command to reload cogs in real-time."""
 
         if cog.lower() == 'all':
             
             progress = []
-            start = time.perf_counter()
+            exceptions_caught = []
             cog_count = len(self.config.cogs)
             cog_counter = 0
+            start = time.perf_counter()  # Start recording time.
             for cog in self.config.cogs:
                 try:
                     self.bot.reload_extension(cog)
                 except Exception as ex:
                     progress.append(f"{self.emojis.cross} | **`Couldn't Reload {cog}`**")
+                    exceptions_caught.append({'cog': cog, 'exception': ex})
                 else:
                     cog_counter += 1
                     progress.append(f"{self.emojis.tick} | **`Reloaded {cog}`**")
-            end = time.perf_counter()
+            end = time.perf_counter()  # Stop recording time.
             duration = (end - start) * 1000
 
             embed = discord.Embed(
@@ -103,6 +136,13 @@ class OwnerCog(commands.Cog, name = "Owners"):
                 description = '\n'.join(progress),
                 color = self.colors.primary
             )
+            if exceptions_caught:
+                for ex in exceptions_caught:
+                    embed.add_field(
+                        name = f"Exception Caught | {ex['cog']}",
+                        value = f"```{ex['exception']}```",
+                        inline = False
+                    )
             embed.set_footer(text = f"Reloaded in {duration:.2f}ms")
             embed.timestamp = datetime.utcnow()
             await ctx.send(embed = embed)
@@ -119,7 +159,7 @@ class OwnerCog(commands.Cog, name = "Owners"):
                 await ctx.send(f"{self.emojis.cross} **Error reloading {cog}** `[ex {type(ex).__name__} - {ex}]`")
             else:
                 await ctx.send(f"{self.emojis.tick} **Successfully reloaded {cog}**")
-    
+
     @commands.command(aliases = ['eval'], hidden = True, usage = "<code>")
     @commands.is_owner()
     async def ev(self, ctx, *, command):
@@ -203,7 +243,21 @@ class OwnerCog(commands.Cog, name = "Owners"):
         hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
-        await ctx.send(f"{days}d, {hours}h, {minutes}m, {seconds}s")
+
+        sentence = []
+
+        if days > 0:
+            sentence.append(f"{days} {'days' if days > 1 else 'day'}")
+        if hours > 0:
+            sentence.append(f"{hours} {'hours' if hours > 1 else 'hour'}")
+        if minutes > 0:
+            sentence.append(f"{minutes} {'minutes' if minutes > 1 else 'minute'}")
+        if seconds > 0:
+            sentence.append(f"{seconds} {'seconds' if seconds > 1 else 'second'}")
+
+        sent = f"I have been online for the last {formatting.join_words(sentence)}."
+
+        await ctx.send(sent)
 
 
 
