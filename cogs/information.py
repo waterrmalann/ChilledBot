@@ -12,7 +12,7 @@ from discord.ext.commands.cooldowns import BucketType
 from datetime import datetime
 from humanize import naturaldelta
 # JSON Parser & Text Formatter.
-from utils import default, formatting
+from utils import default, formatting, converters
 import typing
     
 class InformationCog(commands.Cog, name = "Information"):
@@ -101,7 +101,7 @@ class InformationCog(commands.Cog, name = "Information"):
 
         # The server's (voice/host?) region with their respective country flags.
         region = str(ctx.guild.region)
-        if region in {'us-central', 'us-east', 'us-south', 'us-west'}:region =  f"US {region[3:].capitalize()} :flag_us:"
+        if region in {'us-central', 'us-east', 'us-south', 'us-west'}: region =  f"US {region[3:].capitalize()} :flag_us:"
         elif region == 'europe': region = "Europe :flag_eu:"
         elif region == 'india': region = "India :flag_in:"
         elif region == 'russia': region = "Russia :flag_ru:"
@@ -254,85 +254,109 @@ class InformationCog(commands.Cog, name = "Information"):
         await ctx.send(embed = embed)
 
 
-    @commands.command(brief = 'user', aliases = ['whois'], usage = "[@user/id]", description = "put stuff here idk uh")
+    @commands.command(brief = 'user', aliases = ['whois'], usage = "[@user/id/token]", description = "put stuff here idk uh")
     @commands.guild_only()
     @commands.cooldown(1, 3, BucketType.user)
-    async def userinfo(self, ctx, user: discord.Member = None):
+    async def userinfo(self, ctx, user: converters.AdvancedMemberOrUser = None):
         """Returns information about an user (if specified) or the author."""
 
         # Return the author if an user is not specified.
         user = user or ctx.author
 
-        platforms = [] # Platforms the user is currently online on.
-        if user.desktop_status != discord.Status.offline: platforms.append("Desktop")
-        if user.mobile_status != discord.Status.offline: platforms.append("Mobile")
-        if user.web_status != discord.Status.offline: platforms.append("Web Client")
-        discord_client = f"({' | '.join(platforms)})" if platforms else ''
+        if type(user) is discord.User:
 
-        statuses = {
-            # Status: (Name, Color, Emoji)
-            # The name is to show the name of the status.
-            # The color is to color the embed line based on their status.
-            # The emoji is to show alongside the name.
-            'online': ("Online", self.colors.online, self.emojis.online),
-            'offline': ("Invisible" if user == ctx.author or user.voice else "Offline", self.colors.offline, self.emojis.offline),
-            'dnd': ("Do Not Disturb", self.colors.dnd, self.emojis.dnd),
-            'idle': ("Idle", self.colors.idle, self.emojis.idle)
-        }
+            user_values = []
+            user_values.append(f"**Mention:** {user.mention}")
+            user_values.append(f"**Registered at:** {default.datefr(user.created_at)}")
+            user_values.append(f"**Avatar URL:** [Click Me (512)]({user.avatar_url_as(size = 512)})")
+            
+            embed = discord.Embed(title = f"{user} (`{user.id}`)", timestamp = datetime.utcnow())
 
-        # Get the user's current status alongside it's color and emoji.
-        # If not found (ehrm?!) then it will return the offline status.
-        status = statuses.get(str(user.status), statuses['offline'])
+            embed.add_field(
+                name = "❯ Bot" if user.bot else "❯ Discord Staff" if user.system else "❯ User",
+                value = '\n'.join(user_values),
+                inline = False
+            )
 
-        # (We loop through the user roles in reverse order so that it's displayed as in the hierarchy.)
-        roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
+            embed.set_thumbnail(url = user.avatar_url)
+            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
 
-        user_values = []  # ❯ Bot / ❯ User / ❯ Discord Staff
-        if user.id in self.config.bot_owners: user_values.append(f"**I created this bot.**")
-        if user.id in self.config.bot_vips and user.id not in self.config.bot_owners: user_values.append(f"**I support this bot.**")
-        user_values.append(f"**Mention:** {user.mention}")
-        user_values.append(f"**Status:** {status[2]} {status[0]} {discord_client}")
-        if user.activity: user_values.append(f"**Activity:** {user.activity.type.name.capitalize()} {user.activity.name}")
-        user_values.append(f"**Registered at:** {default.datefr(user.created_at)}")
+            await ctx.send(embed = embed)
 
-        server_values = []  # ❯ Server️
-        if user == ctx.guild.owner: server_values.append(f"**\👑 Server Owner**")
-        elif user.guild_permissions.administrator: server_values.append(f"**\🛠️ Server Administrator**")
-        elif user.guild_permissions.ban_members: server_values.append("**️️\🛡️ Server Staff**")
-        #else: server_values.append("**Member**")
-        server_values.append(f"**Nickname:** {user.display_name}")
-        server_values.append(f"**Joined At:** {default.datefr(user.joined_at)}")
-        if user.top_role != ctx.guild.default_role: server_values.append(f"**Top Role:** {user.top_role.mention}")
+        elif type(user) is discord.Member:
 
-        embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1], timestamp = datetime.utcnow())
+            platforms = [] # Platforms the user is currently online on.
+            if user.desktop_status != discord.Status.offline: platforms.append("Desktop")
+            if user.mobile_status != discord.Status.offline: platforms.append("Mobile")
+            if user.web_status != discord.Status.offline: platforms.append("Web Client")
+            discord_client = f"({' | '.join(platforms)})" if platforms else ''
 
-        embed.add_field(
-            name = "❯ Bot" if user.bot else "❯ Discord Staff" if user.system else "❯ User",
-            value = '\n'.join(user_values),
-            inline = False
-        )
+            statuses = {
+                # Status: (Name, Color, Emoji)
+                # The name is to show the name of the status.
+                # The color is to color the embed line based on their status.
+                # The emoji is to show alongside the name.
+                'online': ("Online", self.colors.online, self.emojis.online),
+                'offline': ("Invisible" if user == ctx.author or user.voice else "Offline", self.colors.offline, self.emojis.offline),
+                'dnd': ("Do Not Disturb", self.colors.dnd, self.emojis.dnd),
+                'idle': ("Idle", self.colors.idle, self.emojis.idle)
+            }
 
-        embed.add_field(
-            name = "❯ Server",
-            value = '\n'.join(server_values),
-            inline = False
-        )
+            # Get the user's current status alongside it's color and emoji.
+            # If not found (ehrm?!) then it will return the offline status.
+            status = statuses.get(str(user.status), statuses['offline'])
 
-        if roles:
-            # If the user has roles, we show that.
-            embed.add_field(name = f"❯ Roles ({len(user.roles) - 1})", value = roles, inline = False)
-        else:
-            # else we show all the permissions they have in the guild.
+            # (We loop through the user roles in reverse order so that it's displayed as in the hierarchy.)
+            roles = ', '.join(i.mention for i in reversed(user.roles) if i != ctx.guild.default_role)
 
-            # to-do: maybe bold the key roles.
-            permissions = [formatting.casify(name) for name, value in user.guild_permissions]
-            perms = len(permissions)
-            embed.add_field(name = f"❯ Permissions ({perms})", value = ', '.join(permissions), inline = False)
+            user_values = []  # ❯ Bot / ❯ User / ❯ Discord Staff
+            if user.id in self.config.bot_owners: user_values.append(f"**I created this bot.**")
+            if user.id in self.config.bot_vips and user.id not in self.config.bot_owners: user_values.append(f"**I support this bot.**")
+            user_values.append(f"**Mention:** {user.mention}")
+            user_values.append(f"**Status:** {status[2]} {status[0]} {discord_client}")
+            if user.activity: user_values.append(f"**Activity:** {user.activity.type.name.capitalize()} {user.activity.name}")
+            user_values.append(f"**Registered at:** {default.datefr(user.created_at)}")
+            user_values.append(f"**Avatar URL:** [Click Me (512)]({user.avatar_url_as(size = 512)})")
 
-        embed.set_thumbnail(url = user.avatar_url)
-        embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+            server_values = []  # ❯ Server️
+            if user == ctx.guild.owner: server_values.append(f"**\👑 Server Owner**")
+            elif user.guild_permissions.administrator: server_values.append(f"**\🛠️ Server Administrator**")
+            elif user.guild_permissions.ban_members: server_values.append("**️️\🛡️ Server Staff**")
+            #else: server_values.append("**Member**")
+            server_values.append(f"**Nickname:** {user.display_name}")
+            server_values.append(f"**Joined At:** {default.datefr(user.joined_at)}")
+            if user.top_role != ctx.guild.default_role: server_values.append(f"**Top Role:** {user.top_role.mention}")
 
-        await ctx.send(embed = embed)
+            embed = discord.Embed(title = f"{user} (`{user.id}`)", color = status[1], timestamp = datetime.utcnow())
+
+            embed.add_field(
+                name = "❯ Bot" if user.bot else "❯ Discord Staff" if user.system else "❯ User",
+                value = '\n'.join(user_values),
+                inline = False
+            )
+
+            embed.add_field(
+                name = "❯ Server",
+                value = '\n'.join(server_values),
+                inline = False
+            )
+
+            if roles:
+                # If the user has roles, we show that.
+                embed.add_field(name = f"❯ Roles ({len(user.roles) - 1})", value = roles, inline = False)
+            else:
+                # else we show all the permissions they have in the guild.
+
+                # to-do: maybe bold the key roles.
+                permissions = [formatting.casify(name) for name, value in user.guild_permissions]
+                perms = len(permissions)
+                embed.add_field(name = f"❯ Permissions ({perms})", value = ', '.join(permissions), inline = False)
+
+            embed.set_thumbnail(url = user.avatar_url)
+            embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+            await ctx.send(embed = embed)
+        
     
     @commands.command(aliases = ['ri', 'rinfo'], brief = 'server', usage = '[role]')
     @commands.guild_only()
@@ -366,8 +390,36 @@ class InformationCog(commands.Cog, name = "Information"):
         embed.set_footer(text = f"Requested by {ctx.author}", icon_url = ctx.author.avatar_url)
         embed.set_thumbnail(url = "https://cdn.discordapp.com/attachments/726353729842053171/737663400032600194/role_at.png")
         await ctx.send(embed = embed)
+    
+    @commands.command(aliases = ['bi', 'binfo'], brief = 'user')
+    @commands.guild_only()
+    @commands.cooldown(1, 3, BucketType.user)
+    async def botinfo(self, ctx):
+        """Returns information about the bot."""
 
-    @commands.command(brief = 'server', usage = "[max uses] [temporary: yes/no]") # [max age (seconds)]
+        embed = discord.Embed(
+            title = f"{self.bot.user} (`{self.bot.user.id}`)",
+            description = "A simple utility-first, but also multi-purpose discord bot designed to assist productivity and provide entertainment. " \
+                "It also has all the server management tools you would need and allows extensive configuration capabilities to better suit your needs.",
+            color = self.colors.primary
+        )
+
+        links = []
+        links.append(f"» **[Invite Link (Recommended)](https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=2147483351&scope=bot)**")
+        links.append(f"» **[Invite Link (Administrator)](https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot)**")
+        links.append(f"» **[Invite Link (Custom)](https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=-1&scope=bot)**")
+        
+        embed.add_field(
+            name = "\🔗 Invite Me!",
+            value = '\n'.join(links),
+            inline = False
+        )
+
+        embed.set_footer(text = "Developed by Zeesmic#8023")
+
+        await ctx.send(embed = embed)
+
+    @commands.command(brief = 'server', usage = "[max uses (0 = unlimited)] [temporary: yes/no]") # [max age (seconds)]
     @commands.guild_only()
     @commands.bot_has_permissions(create_instant_invite = True)
     @commands.has_permissions(create_instant_invite = True)
@@ -380,7 +432,18 @@ class InformationCog(commands.Cog, name = "Information"):
             max_age = 0,
             temporary = temporary
         )
-        await ctx.send(f"**<{invite}>**")
+
+        embed = discord.Embed(
+            title = "Server Invite",
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
+        )
+        embed.add_field(name = "Invite", value = f"**<{invite}>**", inline = False)
+        embed.add_field(name = "Max Uses", value = str(max_uses), inline = True)
+        embed.add_field(name = "Temporary", value = "Yes" if temporary else "No", inline = True)
+        embed.set_footer(text = f"Created by {ctx.author}", icon_url = ctx.author.avatar_url)
+
+        await ctx.send(embed = embed)
 
     #role = discord.utils.get(ctx.guild.roles, name="Role") if role in ctx.author.roles:
 
