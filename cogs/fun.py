@@ -42,8 +42,6 @@ class FunCog(commands.Cog, name = "Fun"):
             self.roasts = [line for line in file.readlines() if line.strip()]
         with open("data/toasts.txt") as file:
             self.toasts = [line for line in file.readlines() if line.strip()]
-        with open('data/bored.txt') as file:
-            self.boredom_busters = [line for line in file.readlines() if line.strip()]
 
     #Usage: .{command.name} {command.usage}
     #embed.set_footer(text = command.help)
@@ -988,7 +986,7 @@ class FunCog(commands.Cog, name = "Fun"):
         embed.set_footer(text = f"r/AntiAntiJokes • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
     
-    @commands.command(brief = 'reddit', aliases = ['flower'])
+    @commands.command(brief = 'reddit')
     @commands.cooldown(1, 3.5, BucketType.user)
     async def flowers(self, ctx, sorting: str = 'any'):
         """Gives you flower pics."""
@@ -1170,8 +1168,8 @@ class FunCog(commands.Cog, name = "Fun"):
                 description = '\n'.join(f"{k}. {v}" for k, v in trivia_categories.items()),
                 color = self.colors.primary
             )
-            return await ctx.send(embed = embed)
-
+            await ctx.send(embed = embed)
+            return
         if triviacategory == 'difficulties':
 
             embed = discord.Embed(
@@ -1179,8 +1177,8 @@ class FunCog(commands.Cog, name = "Fun"):
                 description = "Easy\nMedium\nHard",
                 color = self.colors.primary
             )
-            return await ctx.send(embed = embed)
-
+            await ctx.send(embed = embed)
+            return
         if triviacategory == 'types':
 
             embed = discord.Embed(
@@ -1188,8 +1186,8 @@ class FunCog(commands.Cog, name = "Fun"):
                 description = "Multiple\nBoolean",
                 color = self.colors.primary
             )
-            return await ctx.send(embed = embed)
-
+            await ctx.send(embed = embed)
+            return
         if triviacategory == 'help':
 
             embed = discord.Embed(
@@ -1205,7 +1203,8 @@ class FunCog(commands.Cog, name = "Fun"):
                     "`.trivia any easy` will work, it gives an easy question from 'any' randomly picked category.*",
                 color = self.colors.primary
             )
-            return await ctx.send(embed = embed)
+            await ctx.send(embed = embed)
+            return
 
         # Manual Category Modifiers
         if triviacategory.isdigit():
@@ -1286,7 +1285,7 @@ class FunCog(commands.Cog, name = "Fun"):
             guess = random.choice(alphabets)
             hard = True
             integer = False
-            await ctx.send("I've an english letter (from a-z) in my mind. Guess it!")
+            await ctx.send("I've an english letter in my mind. Guess it!")
         else:  # 1 - 10 Integers.
             guess = str(random.randint(1, 10))
             hard = False
@@ -1323,7 +1322,7 @@ class FunCog(commands.Cog, name = "Fun"):
                     used_hint = True
                     if last_guess:
                         if rand == 0:  # Alphabet
-                            if last_guess not in alphabets: hint = "Try an actual english letter from a-z"
+                            if last_guess not in alphabets: hint = "Try an actual english alphabet"
                             elif alphabets.find(last_guess) > alphabets.find(guess): hint = f"It's before '{last_guess.upper()}'"
                             elif alphabets.find(last_guess) < alphabets.find(guess): hint = f"It's after '{last_guess.upper()}'"
                         else:
@@ -1387,12 +1386,12 @@ class FunCog(commands.Cog, name = "Fun"):
     async def bored(self, ctx):
         """Bored? Try this command."""
 
-        #async with self.session.get('http://www.boredapi.com/api/activity/') as r:
-        #    res = await r.json()
+        async with self.session.get('http://www.boredapi.com/api/activity/') as r:
+            res = await r.json()
 
         embed = discord.Embed(
             title = "Bored?",
-            description = random.choice(self.boredom_busters),
+            description = res['activity'],
             color = self.colors.primary,
             timestamp = datetime.utcnow()
         )
