@@ -10,7 +10,7 @@ import time
 # DateTime Parser.
 from datetime import datetime
 # JSON Parser.
-from utils import default
+from utils import default, formatting
 # File Line Counter.
 from line_counter import count_lines
 import random
@@ -171,7 +171,7 @@ async def on_command_error(ctx, error):
     """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command_error"""
     if hasattr(ctx.command, 'on_error'): return
     
-    ignored = (commands.CommandNotFound)
+    ignored = (commands.CommandNotFound, commands.MissingPermissions)
     input_errors = (commands.MissingRequiredArgument, commands.BadArgument)
     error = getattr(error, 'original', error)
     
@@ -195,7 +195,11 @@ async def on_command_error(ctx, error):
             description = '\n'.join(description_values),
             color = colors.primary
         )
-        embed.set_footer(text = f"{ctx.command.cog.name}/{ctx.command.brief.title()}")
+
+        if ctx.command.parent:
+            embed.set_footer(text = f"{ctx.command.cog.name}/{ctx.command.parent.brief.title()}/{ctx.command.parent.name}")
+        else:
+            embed.set_footer(text = f"{ctx.command.cog.name}/{ctx.command.brief.title()}")
 
         return await ctx.send(embed = embed)
 
@@ -211,6 +215,10 @@ async def on_command_error(ctx, error):
     # Not Authorized
     elif isinstance(error, commands.NotOwner):
         return await ctx.send(f"{emojis.cross} **You are not authorized to use this command.** `[ex AuthError]`")
+    
+    elif isinstance(error, commands.BotMissingPermissions):
+        permissions = [f"`{formatting.casify(i)}`" for i in error.missing_perms]
+        return await ctx.send(f"{emojis.cross} **I miss the following {'permissions' if len(error.missing_perms) > 1 else 'permission'} required to run this command:** {formatting.join_words(permissions)}")
     
     # NSFW Channel Required
     elif isinstance(error, commands.NSFWChannelRequired):
