@@ -44,6 +44,8 @@ class FunCog(commands.Cog, name = "Fun"):
             self.toasts = [line for line in file.readlines() if line.strip()]
         with open('data/bored.txt') as file:
             self.boredom_busters = [line for line in file.readlines() if line.strip()]
+        
+        self.bored_people = {}
 
     #Usage: .{command.name} {command.usage}
     #embed.set_footer(text = command.help)
@@ -1390,9 +1392,19 @@ class FunCog(commands.Cog, name = "Fun"):
         #async with self.session.get('http://www.boredapi.com/api/activity/') as r:
         #    res = await r.json()
 
+        if ctx.author.id in self.bored_people:
+            if len(self.bored_people[ctx.author.id]) < 3:
+                self.bored_people[ctx.author.id] = list(range(len(self.boredom_busters)))
+        else:
+            self.bored_people[ctx.author.id] = list(range(len(self.boredom_busters)))
+
+        random_item = random.choice(self.bored_people[ctx.author.id])
+        bored_item = self.boredom_busters[random_item]
+        self.bored_people[ctx.author.id].pop(random_item)
+
         embed = discord.Embed(
             title = "Bored?",
-            description = random.choice(self.boredom_busters),
+            description = bored_item,
             color = self.colors.primary,
             timestamp = datetime.utcnow()
         )
