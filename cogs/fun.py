@@ -1398,7 +1398,7 @@ class FunCog(commands.Cog, name = "Fun"):
         else:
             self.bored_people[ctx.author.id] = list(range(len(self.boredom_busters)))
 
-        random_item = random.choice(self.bored_people[ctx.author.id])
+        random_item = random.randint(0, len(self.bored_people[ctx.author.id]) - 1)
         bored_item = self.boredom_busters[random_item]
         self.bored_people[ctx.author.id].pop(random_item)
 
