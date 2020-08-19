@@ -206,7 +206,7 @@ class FunCog(commands.Cog, name = "Fun"):
     async def fancy(self, ctx, *, text: str):
         """Gives your text back in a cool-looking unicode font."""
 
-        await ctx.send(random.choice(fonts)(text))
+        await ctx.send(random.choice(list(fonts.values))(text))
     
     @commands.command(brief = 'text', usage = '<text>')
     @commands.cooldown(1, 3, BucketType.user)
