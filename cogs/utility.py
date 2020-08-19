@@ -298,8 +298,6 @@ class UtilityCog(commands.Cog, name = "Utility"):
 
         await ctx.send(embed = embed)
 
-
-
     # Actually make these subcommands. (Also these are blocking)
     @commands.command(brief = 'useful', usage = '<search/summary/random> [query]', aliases = ["wikipedia"])
     @commands.cooldown(1, 3, BucketType.user)

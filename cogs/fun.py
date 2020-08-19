@@ -18,8 +18,9 @@ import urllib.parse
 import html
 # DateTime Parser.
 from datetime import datetime
-# JSON Parser.
+# JSON Parser / Custom Fonts.
 from utils import default
+from utils.fonts import fonts
 
 class FunCog(commands.Cog, name = "Fun"):
     """Entertainment & Miscellaneous Commands."""
@@ -199,6 +200,13 @@ class FunCog(commands.Cog, name = "Fun"):
             return await ctx.send(f"{self.emojis.cross} **There's nothing to output!**")
         
         await ctx.send(out)
+    
+    @commands.command(brief = 'text', usage = "<text>")
+    @commands.cooldown(1, 2.5, BucketType.user)
+    async def fancy(self, ctx, *, text: str):
+        """Gives your text back in a cool-looking unicode font."""
+
+        await ctx.send(random.choice(fonts)(text))
     
     @commands.command(brief = 'text', usage = '<text>')
     @commands.cooldown(1, 3, BucketType.user)
