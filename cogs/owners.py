@@ -37,10 +37,28 @@ class OwnerCog(commands.Cog, name = "Owners"):
     async def botstats(self, ctx):
         """Get statistics on the bot."""
 
+        delta_uptime = datetime.utcnow() - self.bot.launch_time
+        hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+
+        sentence = []
+        if days > 0:
+            sentence.append(f"{days} {'days' if days > 1 else 'day'}")
+        if hours > 0:
+            sentence.append(f"{hours} {'hours' if hours > 1 else 'hour'}")
+        if minutes > 0:
+            sentence.append(f"{minutes} {'minutes' if minutes > 1 else 'minute'}")
+        if seconds > 0:
+            sentence.append(f"{seconds} {'seconds' if seconds > 1 else 'second'}")
+
+        uptime = formatting.join_words(sentence)
+
         embed = discord.Embed(title = "Bot Statistics", color = self.colors.primary)
+        embed.add_field(name = "Bot Uptime", value = uptime, inline = False)
+        embed.add_field(name = "Commands Ran (since Boot)", value = str(self.bot.command_counter), inline = True)
         await ctx.send(embed = embed)
 
-    
     @commands.command(name = 'print', hidden = True, usage = "<content>")
     @commands.is_owner()
     async def cout(self, ctx, *, content: str):
