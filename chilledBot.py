@@ -16,11 +16,11 @@ from line_counter import count_lines
 import random
 
 """
-   A simple utility-first discord bot written in Python using the Discord.py library.
+    A simple utility-first discord bot written in Python using the Discord.py library.
 
-   ChilledBot was designed to assist productivity with it's focus on utility features.
+    ChilledBot was designed to assist productivity with it's focus on utility features.
 
-   The bot is multi-purpose, so there's more useful features available such as server management and entertainment commands.
+    The bot is multi-purpose, so there's more useful features available such as server management and entertainment commands.
 
     Written by Alan Biju Varghese (alanthekiwi)
 """
@@ -41,28 +41,17 @@ def get_prefix(bot, message):
     # We also allow mentions while in guilds.
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
-## Cogs ##
-initial_extensions = [
-    'cogs.owners',
-    'cogs.utility',
-    'cogs.information',
-    'cogs.fun',
-    'cogs.moderation',
-    'cogs.config'
-]
-
-
-
 bot = commands.AutoShardedBot(
     command_prefix = get_prefix,
     description = "A simple, fun, and utility bot that can also do moderation.",
-    owner_ids = set(config.bot_owners)
+    owner_ids = set(config.bot_owners),
+    case_insensitive = True
 )
+
 bot.launch_time = datetime.utcnow()
 bot.remove_command('help')
 bot.command_counter = 0
 prefix = '.'
-
 
 # Startup Stuff
 os.system('clear')
@@ -154,21 +143,15 @@ async def on_guild_remove(guild):
     await bot.channel_guilds.send(embed = embed)
 
 @bot.event
-async def on_command(ctx):
-    """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command"""
-    
-    print(f"\n[CMD] {ctx.command.qualified_name} by {ctx.author} in {ctx.guild.name}")
-
-@bot.event
 async def on_command_completion(ctx):
     """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command_completion"""
 
-    print(f"[CMD] {ctx.command.qualified_name} Successful.")
     bot.command_counter += 1
 
 @bot.event
 async def on_command_error(ctx, error):
     """https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#discord.on_command_error"""
+
     if hasattr(ctx.command, 'on_error'): return
     
     ignored = (commands.CommandNotFound, commands.MissingPermissions)
