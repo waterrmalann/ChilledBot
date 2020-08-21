@@ -1,8 +1,8 @@
 import os
 
 def count_lines():
-    comments = coroutines = functions = classes = lines = filecount = 0
-    py = json = 0
+    comments, coroutines, functions, classes, lines, filecount = 0, 0, 0, 0, 0, 0
+    py, json = 0, 0
     for subdir, dirs, files in os.walk(os.getcwd()):
         for file in files:
             filecount += 1
