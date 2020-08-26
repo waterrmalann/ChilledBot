@@ -9,14 +9,15 @@ def count_lines():
             if file.endswith('.json'): json += 1
             if file.endswith('.py'):
                 py += 1
-                with open(os.path.join(subdir, file), encoding="utf8") as f:
+                with open(os.path.join(subdir, file), encoding = "utf8") as f:
                     for line in f.readlines():
+                        lines += 1
                         l = line.strip()
+                        if not l: continue
                         if l.startswith('class'): classes += 1
                         if l.startswith('def'): functions += 1
                         if l.startswith('async def'): coroutines += 1
                         if '#' in l: comments += 1
-                        lines += 1
     file_dict = {
         "files": {
             "count": filecount,
