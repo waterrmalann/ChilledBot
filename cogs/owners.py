@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 # Operating System Functions.
 import os
+from humanize import naturalsize, intcomma, naturaltime
 # Object Inspector.
 import inspect
 # Asynchronous Package.
@@ -17,6 +18,7 @@ from datetime import datetime
 # JSON Parser.
 from utils import default, formatting
 import base64
+import platform
 
 class OwnerCog(commands.Cog, name = "Owners"):
 
@@ -32,32 +34,6 @@ class OwnerCog(commands.Cog, name = "Owners"):
         self.name = "Developer"
         self.aliases = {'dev', 'owner', 'developer'}
         self.categories = ('bot', 'python', 'cogs')
-
-    @commands.command()
-    async def botstats(self, ctx):
-        """Get statistics on the bot."""
-
-        delta_uptime = datetime.utcnow() - self.bot.launch_time
-        hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
-        minutes, seconds = divmod(remainder, 60)
-        days, hours = divmod(hours, 24)
-
-        sentence = []
-        if days > 0:
-            sentence.append(f"{days} {'days' if days > 1 else 'day'}")
-        if hours > 0:
-            sentence.append(f"{hours} {'hours' if hours > 1 else 'hour'}")
-        if minutes > 0:
-            sentence.append(f"{minutes} {'minutes' if minutes > 1 else 'minute'}")
-        if seconds > 0:
-            sentence.append(f"{seconds} {'seconds' if seconds > 1 else 'second'}")
-
-        uptime = formatting.join_words(sentence)
-
-        embed = discord.Embed(title = "Bot Statistics", color = self.colors.primary)
-        embed.add_field(name = "Bot Uptime", value = uptime, inline = False)
-        embed.add_field(name = "Commands Ran (since Boot)", value = str(self.bot.command_counter), inline = True)
-        await ctx.send(embed = embed)
 
     @commands.command(name = 'print', hidden = True, usage = "<content>")
     @commands.is_owner()
@@ -93,12 +69,66 @@ class OwnerCog(commands.Cog, name = "Owners"):
             embed.add_field(name = "Keys", value = f"```py\n{', '.join(data.keys())}```", inline = False)
         await ctx.send(embed = embed)
     
+    @commands.group(name = 'exceptions', hidden = True, usage = '<list/show/remove>', brief = 'bot')
+    async def exceptions(self, ctx):
+        """Manage ignored exceptions caught by the bot."""
+
+        if not ctx.invoked_subcommand:
+            raise commands.BadArgument('missing subcommand')
+    
+    @exceptions.command(name = 'list', aliases = ['all'])
+    async def exceptions_list(self, ctx):
+        """List all exceptions ignored by the bot."""
+
+        if not self.bot.caught_exceptions:
+            return await ctx.send(f"{self.emojis.cross} **There are no caught exceptions.**")
+
+        all_errors = [f"{k} - {v['error'][0]} ({naturaltime(v['time'])})" for k, v in self.bot.caught_exceptions.items()]
+        await ctx.send(formatting.codeblock('\n'.join(all_errors)))
+    
+    @exceptions.command(name = 'show', aliases = ['info'])
+    async def exceptions_show(self, ctx, err_name: str):
+        """Show more information about a particular exception."""
+
+        if not err_name in self.bot.caught_exceptions:
+            return await ctx.send(f"{self.emojis.cross} **That exception does not exist!**")
+
+        err = self.bot.caught_exceptions[err_name]
+
+        invocation_data = []
+        invocation_data.append(f"Author: {err['author'][0]} ({err['author'][1]})")
+        invocation_data.append(f"Guild: {err['guild'][0]} ({err['guild'][1]})")
+        invocation_data.append(f"Channel: #{err['channel'][0]} ({err['channel'][1]})")
+        invocation_data.append(f"Guild Owner: {err['guild_owner'][0]} ({err['guild_owner'][1]})")
+
+        embed = discord.Embed(title = f"Exception `{err_name}`", color = self.colors.error, timestamp = err['time'])
+
+        embed.add_field(name = "Exception", value = f"`{err['error'][1]}`\n```k\n{err['error'][0]}```", inline = False)
+        embed.add_field(name = "Command", value = f"`{err['command'][0]}` from `{err['command'][1]}` cog.", inline = False)
+        embed.add_field(name = "Invocation", value = formatting.codeblock('\n'.join(invocation_data)), inline = False)
+        embed.add_field(name = f"Message ({err['message'][1]})", value = err['message'][0], inline = False)
+
+        await ctx.send(embed = embed)
+    
+    @exceptions.command(name = 'clear', aliases = ['delete', 'remove'])
+    async def exceptions_clear(self, ctx, err_name: str):
+
+        if err_name == 'all':
+            self.bot.caught_exceptions.clear()
+            await ctx.send(f"{self.emojis.tick} **All exceptions have been cleared.**")
+        elif err_name in self.bot.caught_exceptions:
+            self.bot.caught_exceptions.pop(err_name)
+            await ctx.send(f"{self.emojis.tick} **Exception `{err_name}` has been successfully removed.**")
+        else:
+            raise commands.BadArgument('invalid exception id')
+
+
     @commands.group(name = 'cogs', hidden = True, usage = '<load/reload/unload/list> [param]')
     async def cogs(self, ctx):
         """Manage bot cogs (modules)."""
         
         if not ctx.invoked_subcommand:
-            raise commands.BadArgument('Missing subcommand.')
+            raise commands.BadArgument('missing subcommand')
             
     @cogs.command(name = 'load', aliases = ['enable'])
     async def cogs_load(self, ctx, *, cog: str):
@@ -158,7 +188,7 @@ class OwnerCog(commands.Cog, name = "Owners"):
                 for ex in exceptions_caught:
                     embed.add_field(
                         name = f"Exception Caught | {ex['cog']}",
-                        value = f"```{ex['exception']}```",
+                        value = formatting.codeblock(ex['exception']),
                         inline = False
                     )
             embed.set_footer(text = f"Reloaded in {duration:.2f}ms")
@@ -230,9 +260,9 @@ class OwnerCog(commands.Cog, name = "Owners"):
         """Shuts down the bot"""
 
         print("[Disconnect] Bot Terminated")
-        msg = await ctx.send(':skull: **Terminating...**')
+        msg = await ctx.send('💀 **Terminating...**')
         await asyncio.sleep(1.5)
-        await msg.edit(content = ":skull_crossbones: **Terminated.**")
+        await msg.edit(content = "☠️ **Terminated.**")
         await self.bot.logout()
     
     @commands.command(aliases = ['bsetname'], usage = '<username>')
@@ -242,8 +272,7 @@ class OwnerCog(commands.Cog, name = "Owners"):
 
         await self.bot.user.edit(username = name)
         await ctx.send(f"{self.emojis.tick} **My username has successfully been set to \"{name}\".**")
-
-
+    
     @commands.command(aliases = ['bsetnickname'], usage = '<nickname>')
     @commands.is_owner()
     @commands.guild_only()
