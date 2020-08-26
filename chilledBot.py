@@ -214,8 +214,7 @@ async def on_command_error(ctx, error):
     else:
 
         # Last 3 Digits of Unix Timestamp + Random 3 Letters + First 2 Digits of Author Discrim
-        error_id = f"{str(round(time.time()))[7:]}{''.join(random.sample(string.ascii_letters, k=3))}{str(ctx.author.discriminator)[:2]}"
-        error_id = str(round(time.time()))[7:] + ''.join(random.sample(string.ascii_letters, k=3)) + ctx.author.discriminator[:2]
+        error_id = f"{str(round(time.time()))[-3:]}{''.join(random.sample(string.ascii_letters, k=3))}{ctx.author.discriminator[:2]}"
 
         bot.caught_exceptions[error_id] = {
             'error': (str(error), str(type(error))),
