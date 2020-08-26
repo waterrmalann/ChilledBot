@@ -14,6 +14,7 @@ from utils import default, formatting
 # File Line Counter.
 from line_counter import count_lines
 import random
+import string
 
 """
     A simple utility-first discord bot written in Python using the Discord.py library.
@@ -104,6 +105,8 @@ async def on_ready():
     bot.channel_cmdexceptions = bot.get_channel(config.channel_cmdexceptions)
     bot.channel_exceptions = bot.get_channel(config.channel_exceptions)
     bot.channel_guilds = bot.get_channel(config.channel_guilds)
+
+    bot.caught_exceptions = {}
 
     embed = discord.Embed(
         title = "[Ready] ChilledBot has started.",
@@ -210,6 +213,21 @@ async def on_command_error(ctx, error):
     # Unhandled
     else:
 
+        # Last 3 Digits of Unix Timestamp + Random 3 Letters + First 2 Digits of Author Discrim
+        error_id = f"{str(round(time.time()))[7:]}{''.join(random.sample(string.ascii_letters, k=3))}{str(ctx.author.discriminator)[:2]}"
+        error_id = str(round(time.time()))[7:] + ''.join(random.sample(string.ascii_letters, k=3)) + ctx.author.discriminator[:2]
+
+        bot.caught_exceptions[error_id] = {
+            'error': (str(error), str(type(error))),
+            'command': (ctx.command.qualified_name, ctx.command.cog_name),
+            'message': (ctx.message.content, ctx.message.id),
+            'channel': (ctx.channel.name, ctx.channel.id),
+            'author': (str(ctx.author), ctx.author.id),
+            'guild': (ctx.guild.name, ctx.guild.id),
+            'guild_owner': (str(ctx.guild.owner), ctx.guild.owner.id),
+            'time': datetime.now()
+        }
+
         desc_values = []
         desc_values.append("This command has raised an unexpected error. My developers have been notified of this issue!")
         desc_values.append(f"```\n{error}\n```")
@@ -225,38 +243,12 @@ async def on_command_error(ctx, error):
         await ctx.send(embed = embed)
 
         exception_embed = discord.Embed(
-            title = "⚠️ Unhandled Command Exception",
+            title = "\⚠️ Exception Caught",
+            description = f"A new exception has been caught and ignored.\n**Exception ID:** {error_id}",
             color = colors.error,
             timestamp = datetime.utcnow()
         )
-        exception_embed.add_field(
-            name = "Command",
-            value = f"{ctx.command.qualified_name} ({ctx.command.cog_name})",
-            inline = False
-        )
-        exception_embed.add_field(
-            name = "Error",
-            value = f"**{type(error)}**\n" \
-                f"```k\n{error}```" \
-                f"```k\n{error.__traceback__}```",
-            inline = False
-        )
-        exception_embed.add_field(
-            name = "Invoked by",
-            value = f"{ctx.author} (`{ctx.author.id}`)",
-            inline = False
-        )
-        exception_embed.add_field(
-            name = "Invoked in",
-            value = f"{ctx.guild} (`{ctx.guild.id}`)\n" \
-                f"#{ctx.channel} (`{ctx.channel.id}`)",
-            inline = False
-        )
-        exception_embed.add_field(
-            name = "Message Content",
-            value = ctx.message.content,
-            inline = False
-        )
+
         await bot.channel_cmdexceptions.send(embed = exception_embed)
 
     print('Ignoring exception in command {}:'.format(ctx.command), file = sys.stderr)
