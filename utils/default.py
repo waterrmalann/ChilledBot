@@ -1,4 +1,4 @@
-import json, collections
+import json
 from collections import namedtuple
 from humanize import naturaltime
 

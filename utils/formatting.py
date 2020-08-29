@@ -32,4 +32,3 @@ def codeblock(text: str, large: bool = True) -> str:
     """Wraps text in a discord codeblock (ie: ```x``` and `x`)"""
 
     return f"```{text}```" if large else f"`{text}`"
-
