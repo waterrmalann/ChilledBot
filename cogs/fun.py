@@ -184,7 +184,7 @@ class FunCog(commands.Cog, name = "Fun"):
         
         special = {
             '0': ':zero:', '1': ':one:', '2': ':two:', '3': ':three:', '4': ':four:', '5': ':five:', '6': ':six:', '7': ':seven:', '8': ':eight:', '9': ':nine:',
-            '!': '❕', '?': '❔', '>': '▶️', '<': '◀️'
+            '!': '❕', '?': '❔', '>': '▶️', '<': '◀️', '*': '*️⃣'
         }
 
         emojified = []
@@ -196,7 +196,7 @@ class FunCog(commands.Cog, name = "Fun"):
             else:
                 emojified.append('  ')
         out = ''.join(emojified)
-        if not out or out.isspace():
+        if not out.strip():
             return await ctx.send(f"{self.emojis.cross} **There's nothing to output!**")
         
         await ctx.send(out)

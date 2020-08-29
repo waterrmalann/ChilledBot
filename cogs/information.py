@@ -415,6 +415,7 @@ class InformationCog(commands.Cog, name = "Information"):
             inline = False
         )
 
+        embed.set_thumbnail(url = self.bot.user.avatar_url)
         embed.set_footer(text = "Developed by Zeesmic#8023")
 
         await ctx.send(embed = embed)

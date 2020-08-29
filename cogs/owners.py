@@ -86,7 +86,7 @@ class OwnerCog(commands.Cog, name = "Owners"):
         all_errors = [f"{k} - {v['error'][0]} ({naturaltime(v['time'])})" for k, v in self.bot.caught_exceptions.items()]
         await ctx.send(formatting.codeblock('\n'.join(all_errors)))
     
-    @exceptions.command(name = 'show', aliases = ['info'])
+    @exceptions.command(name = 'show', aliases = ['info'], usage = '<error id>')
     async def exceptions_show(self, ctx, err_name: str):
         """Show more information about a particular exception."""
 
@@ -110,7 +110,7 @@ class OwnerCog(commands.Cog, name = "Owners"):
 
         await ctx.send(embed = embed)
     
-    @exceptions.command(name = 'clear', aliases = ['delete', 'remove'])
+    @exceptions.command(name = 'clear', aliases = ['delete', 'remove'], usage = '<error id>')
     async def exceptions_clear(self, ctx, err_name: str):
 
         if err_name == 'all':
@@ -121,7 +121,6 @@ class OwnerCog(commands.Cog, name = "Owners"):
             await ctx.send(f"{self.emojis.tick} **Exception `{err_name}` has been successfully removed.**")
         else:
             raise commands.BadArgument('invalid exception id')
-
 
     @commands.group(name = 'cogs', hidden = True, usage = '<load/reload/unload/list> [param]')
     async def cogs(self, ctx):
