@@ -1,7 +1,4 @@
-import string
-
-# to-do: make it accept lists instead of strings, also numbers and symbols
-# ['abcdefghijklmnopqrstuvwyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '1234567890', '!@#$%^&*()']
+# sorry readability, not this time... i want efficiency
 class Font:
     """
         A class that makes managing psuedo-fonts a breeze.
@@ -17,26 +14,44 @@ class Font:
         sample -> '7he Qu!ck 8rown Fox Jump5 0ver 7he 1@2y Do9'
     """
 
-    def __init__(self, name: str, alphabets_lowercase: str, alphabets_uppercase: str, reference_alphabets: str = string.ascii_lowercase):
+    def __init__(self, name: str, lowercase: str = 'abcdefghijklmnopqrstuvwxyz', uppercase: str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', numbers: str = '0123456789', custom: dict = {}):
         self.name = name
-        self.alphabets_lowercase = alphabets_lowercase
-        self.alphabets_uppercase = alphabets_uppercase
-        self.english_alphabets = string.ascii_lowercase
-	
+        
+        # Custom unicode characters to translate to.
+        self.chars = (lowercase, uppercase, numbers, custom)
+
+        # Characters used as reference to translate from. (normal english alphabets as default)
+        # Change these using the set_reference() method if you want to add inverted font classes.
+        self.ref_chars = ['abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','0123456789']
+    
+    def set_reference(self, lowercase: str = 'abcdefghijklmnopqrstuvwxyz', uppercase: str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', numbers: str = '0123456789'):
+        self.lowercase = lowercase
+        self.ref_chars[0] = lowercase
+        self.ref_chars[1] = uppercase
+        self.ref_chars[2] = numbers
+    
     def __call__(self, text: str) -> str:
         return self.convert(text)
-	
+    
     def convert(self, raw_text: str) -> str:
-        converted_font = []
-        for i in raw_text:
-            indx = self.english_alphabets.find(i.lower())
-            if i.isupper():
-                converted_font.append(self.alphabets_uppercase[indx])
-            elif i.islower():
-                converted_font.append(self.alphabets_lowercase[indx])
+        t_converted = []
+        for char in raw_text:
+            if char in self.ref_chars[0]:  # if character is lowercase
+                t_converted.append(self.chars[0][self.ref_chars[0].find(char)])
+
+            elif char in self.ref_chars[1]:  # if char is lowercase
+                t_converted.append(self.chars[1][self.ref_chars[1].find(char)])
+
+            elif char in self.ref_chars[2]:  # if char is digit
+                t_converted.append(self.chars[2][self.ref_chars[2].find(char)])
+
+            elif char in self.chars[3]:  # if char is a custom defined one
+                t_converted.append(self.chars[3][char])
+            
             else:
-                converted_font.append(i)
-        return ''.join(converted_font)
+                t_converted.append(char)
+        
+        return ''.join(t_converted)
 
 fonts = {
     "Normal": Font('Normal', 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
