@@ -1,45 +1,59 @@
 # sorry readability, not this time... i want efficiency
 class Font:
     """
-        A class that makes managing psuedo-fonts a breeze.
+        A class that makes managing psuedo-fonts (that relies on unicode special characters) a breeze.
 
         "> Hey, Why can't you just use translate()"
         ">> Because fuck you that's why"
 
         Usage:
 
-        my_custom_font = Font('L33TSP34K', '@6cdef9h!jk1mnopqr5+uvwxy2', '48(D3FG#|JK1MN0PQR$7UVWXY2', 'abcdefghijklmnopqrstuvwxyz')
+        my_custom_font = Font('L33TSP34K', '@6cdef9h!jk1mnopqr5+uvwxy2', '48(D3FG#|JK1MN0PQR$7UVWXY2')
         sample = my_custom_font("The Quick Brown Fox Jumps Over The Lazy Dog")
 
         sample -> '7he Qu!ck 8rown Fox Jump5 0ver 7he 1@2y Do9'
     """
 
     def __init__(self, name: str, lowercase: str = 'abcdefghijklmnopqrstuvwxyz', uppercase: str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', numbers: str = '0123456789', custom: dict = {}):
+        # The name of the defined font style.
         self.name = name
         
         # Custom unicode characters to translate to.
         self.chars = (lowercase, uppercase, numbers, custom)
 
         # Characters used as reference to translate from. (normal english alphabets as default)
-        # Change these using the set_reference() method if you want to add inverted font classes.
+        # Change these using the set_reference() method if you want the base text to take in other characters.
         self.ref_chars = ['abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ','0123456789']
     
     def set_reference(self, lowercase: str = 'abcdefghijklmnopqrstuvwxyz', uppercase: str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', numbers: str = '0123456789'):
+        """Set custom reference characters. Useful if you want to take in custom base text."""
+
         self.lowercase = lowercase
         self.ref_chars[0] = lowercase
         self.ref_chars[1] = uppercase
         self.ref_chars[2] = numbers
     
-    def __call__(self, text: str) -> str:
-        return self.convert(text)
+    def __call__(self, text: str, inversion: bool = False) -> str:
+        return self.convert(text) if not inversion else self.inverted_convert(text)
+    
+    def __repr__(self) -> str:
+        return f"Psuedo-Font: {self.name} ({self.convert('The Quick Brown Fox Jumps Over The Lazy Dog')}"
+    
+    def __str__(self) -> str:
+        return self.convert(self.name)
+    
+    def __len__(self) -> str:
+        return len(self.chars[0])  # len(Font) = length of lowercase characters
     
     def convert(self, raw_text: str) -> str:
+        """Convert text (based on reference characters) to styled text (based on defined characters)"""
+
         t_converted = []
         for char in raw_text:
             if char in self.ref_chars[0]:  # if character is lowercase
                 t_converted.append(self.chars[0][self.ref_chars[0].find(char)])
 
-            elif char in self.ref_chars[1]:  # if char is lowercase
+            elif char in self.ref_chars[1]:  # if char is uppercase
                 t_converted.append(self.chars[1][self.ref_chars[1].find(char)])
 
             elif char in self.ref_chars[2]:  # if char is digit
@@ -52,7 +66,30 @@ class Font:
                 t_converted.append(char)
         
         return ''.join(t_converted)
+    
+    def inverted_convert(self, raw_text: str) -> str:
+        """Convert styled text (based on defined characters) to text (based on reference characters)"""
 
+        t_converted = []
+        for char in raw_text:
+            if char in self.chars[0]:  # if character is lowercase
+                t_converted.append(self.ref_chars[0][self.chars[0].find(char)])
+
+            elif char in self.chars[1]:  # if char is uppercase
+                t_converted.append(self.ref_chars[1][self.chars[1].find(char)])
+            
+            elif char in self.chars[2]:  # if char is digit
+                t_converted.append(self.ref_chars[2][self.chars[2].find(char)])
+            
+            elif char in self.chars[3].values():  # if char is a custom defined one
+                t_converted.append(list(self.chars[3].keys())[list(self.chars[3].values()).index(char)])
+            
+            else:
+                t_converted.append(char)
+        
+        return ''.join(t_converted)
+
+# some pre-defined fonts using the class
 fonts = {
     "Normal": Font('Normal', 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
     "Circled": Font('Circled', 'ⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ', 'ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏ'),
