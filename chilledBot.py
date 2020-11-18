@@ -23,7 +23,7 @@ import string
 
     The bot is multi-purpose, so there's more useful features available such as server management and entertainment commands.
 
-    Written by Alan Biju Varghese (alanthekiwi)
+    Written by Alan.
 """
 
 config = default.get("config.json")
@@ -42,11 +42,17 @@ def get_prefix(bot, message):
     # We also allow mentions while in guilds.
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
+intents = discord.Intents.all()
+intents.webhooks = False
+intents.integrations = False
+intents.invites = False
+intents.typing = False
 bot = commands.AutoShardedBot(
     command_prefix = get_prefix,
     description = "A simple, fun, and utility bot that can also do moderation.",
     owner_ids = set(config.bot_owners),
-    case_insensitive = True
+    case_insensitive = True,
+    intents = intents
 )
 
 bot.launch_time = datetime.utcnow()
