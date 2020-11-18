@@ -169,10 +169,10 @@ class FunCog(commands.Cog, name = "Fun"):
     
     @commands.command(brief = 'text', usage = '<sentence>')
     @commands.cooldown(1, 3, BucketType.user)
-    async def reverseorder(self, ctx, *, text: str):
+    async def reverseorder(self, ctx, *text: str):
         """Reverse the order of the given text."""
 
-        await ctx.send(' '.join(text.split(' ')[::-1]))
+        await ctx.send(' '.join(text[::-1]))
     
     # Why did I make this?
     @commands.command(brief = 'text', usage = "<text>")
@@ -233,6 +233,21 @@ class FunCog(commands.Cog, name = "Fun"):
             return await ctx.send(f"{self.emojis.cross} **There's nothing to output!**")
 
         await ctx.send(out)
+    
+    @commands.command(brief = 'text', usage = '<text>')
+    @commands.cooldown(1, 3, BucketType.user)
+    async def piglatin(self, ctx, *text: str):
+        """Convert text to pig latin."""
+
+        out = ' '.join(wrd[1:] + wrd[0] + 'ay' if wrd.isalpha() else wrd for wrd in text)
+
+        if len(out) > 1999:
+            return await ctx.send(f"{self.emojis.cross} **Output exceeds 2000 characters!**")
+        if not out:
+            return await ctx.send(f"{self.emojis.cross} **There's nothing to output!**")
+        
+        await ctx.send(out)
+
 
     @commands.command(brief = 'text', usage = '<word>')
     @commands.cooldown(1, 3, BucketType.user)
@@ -650,7 +665,7 @@ class FunCog(commands.Cog, name = "Fun"):
     async def bootlegmeme(self, ctx, sorting: str = 'any'):
         """Gives you a bootleg meme."""
 
-        sorts = ('new', 'hot', 'rising', 'top', 'best')
+        sorts = ('new', 'hot', 'rising', 'best')
         sorting = sorting.lower().strip()
         if sorting != 'controversial' and sorting not in sorts: sorting = random.choice(sorts)
 
@@ -660,6 +675,7 @@ class FunCog(commands.Cog, name = "Fun"):
         async with self.session.get(url) as r:
             post = await r.json()
             posts = [post for post in post["data"]["children"] if post["data"]["url"].endswith(allowed_formats)]
+            if not posts: await ctx.send(f"{self.emojis.cross} **I couldn't find anything for you, maybe try again with a different filter.**")
             post = posts[random.randint(0, len(posts) - 1)]["data"]
 
             title = post["title"]
