@@ -67,7 +67,7 @@ print(r"  / ____/ /_  (_) / /__  ____/ /  / __ )____  / /_")
 print(r" / /   / __ \/ / / / _ \/ __  /  / __  / __ \/ __/")
 print(r"/ /___/ / / / / / /  __/ /_/ /  / /_/ / /_/ / /_  ")
 print(r"\____/_/ /_/_/_/_/\___/\__,_/  /_____/\____/\__/  ")
-print("\n", "Version: 1.0.0 | Closed Beta | By Zeesmic#8023", "\n")
+print("\n", "Version: 1.0.1 | Closed Beta | By Zeesmic#8023", "\n")
 
 # Loading all the command/event extensions.
 for extension in config.cogs:

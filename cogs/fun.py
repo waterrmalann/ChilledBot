@@ -51,7 +51,6 @@ class FunCog(commands.Cog, name = "Fun"):
     #Usage: .{command.name} {command.usage}
     #embed.set_footer(text = command.help)
 
-
     @commands.command(name = '8ball', brief = 'random', aliases = ['eightball', 'eight-ball', '8-ball'], usage = '<question>')
     @commands.cooldown(1, 2.5, BucketType.user)
     async def eightball(self, ctx, *, question: str):
@@ -1162,6 +1161,37 @@ class FunCog(commands.Cog, name = "Fun"):
         if image.endswith(allowed_formats): embed.set_image(url = image)
         embed.set_footer(text = f"{subreddit}/{sorting} • ⬆️ {upvotes} • 💬 {comments}")
         await ctx.send(embed = embed)
+
+    @commands.command(brief = 'misc', aliases = ['wyr', 'rather'])
+    @commands.cooldown(1, 2.5, BucketType.user)
+    async def wouldyourather(self, ctx):
+        """Get a would you rather question."""
+
+        async with self.session.get('http://either.io/questions/next/1/') as resp:
+            result = await resp.json(content_type = None)
+            result = result['questions'][0]
+
+        option1, option2 = result['option_1'].capitalize(), result['option_2'].capitalize()
+        option1_total, option2_total = int(result['option1_total']), int(result['option2_total'])
+        option_total, comments = option1_total + option2_total, result['comment_total']
+        title, desc, url = result['title'], result['moreinfo'], result['short_url']
+
+        embed = discord.Embed(
+            title = title,
+            url = url,
+            color = self.colors.primary,
+            timestamp = datetime.utcnow()
+        )
+        embed.add_field(
+            name = 'Would You Rather',
+            value = f"\🔴 {option1} ({(option1_total / option_total * 100):.1f}%)\n\🔵 {option2} ({(option2_total / option_total * 100):.1f}%)",
+            inline = False
+        )
+        if desc: embed.add_field(name = "More Info", value = desc, inline = False)
+        embed.set_footer(text = f"either.io • 💬 {comments}")
+        sent_embed = await ctx.send(embed = embed)
+        await sent_embed.add_reaction("🔴")
+        await sent_embed.add_reaction("🔵")
 
     @commands.command(brief = 'misc', usage = "[category] [difficulty] [type]")
     @commands.cooldown(1, 3, BucketType.user)
