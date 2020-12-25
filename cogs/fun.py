@@ -1198,7 +1198,7 @@ class FunCog(commands.Cog, name = "Fun"):
     @comands.cooldown(1, 2.5, BucketType.user)
     async def tot(self, ctx):
         """Get a this or that question."""
-    
+
         response = random.choice(self.tot)
         title = ''
         if ':' in response:
@@ -1207,14 +1207,14 @@ class FunCog(commands.Cog, name = "Fun"):
             t_o_t = split[1].strip()
         else:
             t_o_t = response
-        
+
         t_o_t = f"🔴 {t_o_t.replace('or', '*OR*')} 🔵"
 
         if title:
-		    message = f"**{title}**\n{t_o_t}"
-	    else:
-		    message = t_o_t
-        
+            message = f"**{title}**\n{t_o_t}"
+        else:
+            message = t_o_t
+
         embed = discord.Embed(
             color = self.colors.primary,
             timestamp = datetime.utcnow(),
