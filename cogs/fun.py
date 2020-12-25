@@ -39,12 +39,13 @@ class FunCog(commands.Cog, name = "Fun"):
         self.aliases = {'fun', 'misc', 'fun/misc', 'entertainment'}
         self.categories = ('random', 'animals', 'reddit', 'text', 'misc')
 
-        with open("data/roasts.txt") as file:
-            self.roasts = [line for line in file.readlines() if line.strip()]
-        with open("data/toasts.txt") as file:
-            self.toasts = [line for line in file.readlines() if line.strip()]
-        with open('data/bored.txt') as file:
-            self.boredom_busters = [line for line in file.readlines() if line.strip()]
+        self.roasts = default.file_to_list('data/roasts.txt')
+        self.toasts = default.file_to_list('data/toasts.txt')
+        self.boredom_busters = default.file_to_list('data/bored.txt')
+        self.truths = default.file_to_list('data/truths.txt')
+        self.dares = default.file_to_list('data/dares.txt')
+        self.tot = default.file_to_list('data/tot.txt')
+        self.nhie = default.file_to_list('data/nhie.txt')
         
         self.bored_people = {}
 
@@ -1192,6 +1193,67 @@ class FunCog(commands.Cog, name = "Fun"):
         sent_embed = await ctx.send(embed = embed)
         await sent_embed.add_reaction("🔴")
         await sent_embed.add_reaction("🔵")
+    
+    @commands.comamnd(brief = 'tot', aliases = ['thisorthat'])
+    @comands.cooldown(1, 2.5, BucketType.user)
+    async def tot(self, ctx):
+        """Get a this or that question."""
+    
+        response = random.choice(self.tot)
+        title = ''
+        if ':' in response:
+            split = response.split(':')
+            title = split[0]
+            t_o_t = split[1].strip()
+        else:
+            t_o_t = response
+        
+        t_o_t = f"🔴 {t_o_t.replace('or', '*OR*')} 🔵"
+
+        if title:
+		    message = f"**{title}**\n{t_o_t}"
+	    else:
+		    message = t_o_t
+        
+        embed = discord.Embed(
+            color = self.colors.primary,
+            timestamp = datetime.utcnow(),
+            description = message
+        )
+
+        sent_embed = await ctx.send(embed = embed)
+        await sent_embed.add_reaction("🔴")
+        await sent_embed.add_reaction("🔵")
+
+    @commands.command(brief = 'misc', aliases = ['td', 'tod'], usage = '<truth/dare/random>')
+    @commands.cooldown(1, 2.5, BucketType.user)
+    async def tod(self, ctx, qtype: str = 'random'):
+        """Get a truth or dare question."""
+
+        choices = ('truth', 'dare')
+
+        if qtype not in choices: qtype = random.choice(choices)
+
+        embed = discord.Embed(color = self.colors.primary, timestamp = datetime.utcnow())
+
+        if qtype == 'truth':
+            embed.add_field(name = "Truth", value = random.choice(self.truths), inline = False)
+            embed.set_footer(text = f"Question for {ctx.author}.", icon_url = ctx.author.avatar_url)
+        else:
+            embed.add_field(name = "Dare", value = random.choice(self.dares), inline = False)
+            embed.set_footer(text = f"Dare for {ctx.author}.", icon_url = ctx.author.avatar_url)
+        
+        await ctx.send(embed = embed)
+    
+    @commands.command(brief = 'misc', aliases = ['ever', 'neverhaveiever', 'nhie'])
+    @commands.cooldown(1, 2.5, BucketType.user)
+    async def never(self, ctx):
+        """Get a never have I ever question."""
+
+        embed = discord.Embed(color = self.colors.primary, timestamp = datetime())
+        embed.add_field(name = "Never Have I Ever", value = random.choice(self.nhie).capitalize(), inline = False)
+        embed.set_footer(text = f"Question for {ctx.author}.", icon_url = ctx.author.avatar_url)
+        await ctx.send(embed = embed)
 
     @commands.command(brief = 'misc', usage = "[category] [difficulty] [type]")
     @commands.cooldown(1, 3, BucketType.user)
