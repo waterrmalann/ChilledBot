@@ -1194,9 +1194,9 @@ class FunCog(commands.Cog, name = "Fun"):
         await sent_embed.add_reaction("🔴")
         await sent_embed.add_reaction("🔵")
     
-    @commands.comamnd(brief = 'tot', aliases = ['thisorthat'])
-    @comands.cooldown(1, 2.5, BucketType.user)
-    async def tot(self, ctx):
+    @commands.command(name = 'tot', brief = 'misc', aliases = ['thisorthat'])
+    @commands.cooldown(1, 2.5, BucketType.user)
+    async def _thisorthat(self, ctx):
         """Get a this or that question."""
 
         response = random.choice(self.tot)
@@ -1225,9 +1225,9 @@ class FunCog(commands.Cog, name = "Fun"):
         await sent_embed.add_reaction("🔴")
         await sent_embed.add_reaction("🔵")
 
-    @commands.command(brief = 'misc', aliases = ['td', 'tod'], usage = '<truth/dare/random>')
+    @commands.command(name = 'tod', brief = 'misc', aliases = ['td'], usage = '<truth/dare/random>')
     @commands.cooldown(1, 2.5, BucketType.user)
-    async def tod(self, ctx, qtype: str = 'random'):
+    async def _tod(self, ctx, qtype: str = 'random'):
         """Get a truth or dare question."""
 
         choices = ('truth', 'dare')
@@ -1250,7 +1250,7 @@ class FunCog(commands.Cog, name = "Fun"):
     async def never(self, ctx):
         """Get a never have I ever question."""
 
-        embed = discord.Embed(color = self.colors.primary, timestamp = datetime())
+        embed = discord.Embed(color = self.colors.primary, timestamp = datetime.utcnow())
         embed.add_field(name = "Never Have I Ever", value = random.choice(self.nhie).capitalize(), inline = False)
         embed.set_footer(text = f"Question for {ctx.author}.", icon_url = ctx.author.avatar_url)
         await ctx.send(embed = embed)
