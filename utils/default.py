@@ -20,4 +20,9 @@ def int_suffix(i: int) -> str:
     """Returns the ordinal representation of the given number."""
     return str(i) + {1: "st", 2: "nd", 3: "rd"}.get(i % 10 * (i % 100 not in {11, 12, 13}), "th")
 
+def file_to_list(filename: str) -> list:
+    """Parses a newline delimited text file into a list of strings."""
+    with open(filename) as f:
+        return [l.strip() for l in f.readlines() if l.strip()]
+
 #RedditPost = namedtuple('RedditPost', 'author title text url nsfw comments upvotes link')
